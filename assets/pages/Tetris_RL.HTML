@@ -1,0 +1,1375 @@
+<html>
+<head>
+ <TITle>Tetris by RL</TITle> 
+ <link rel="icon" type="image/x-icon" href="https://www.favicon.cc/logo3d/736540.png">
+ <meta charset="utf-8">
+</head>
+<style> 
+  h2 {
+  margin-right: 0%;
+  }
+
+  table  {
+  table-layout: fixed;
+  width: 32%;
+  border-collapse: collapse;
+  border: 2px solid rgb(36, 132, 228);
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin:0 auto;
+  margin-left:20%;
+}
+
+ table.nextt  {
+  table-layout: fixed;
+  width: 12%;
+  border-collapse: collapse;
+  border: 2px solid rgb(36, 132, 228);
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: 5%;
+}
+
+ button {width: 100px;
+padding: 32px;
+font-size: 30px;
+}
+
+
+th, td {
+  padding: 5%;
+  background-color:#ddf0f6c8
+}
+
+td.nexttd{
+  padding:9.5%;
+}
+
+button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: rgb(255, 255, 255);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  width: 100px;
+ }
+</style>
+
+
+<body>
+
+<p>
+  <table border="1" style="right:20%">
+
+    <tr>
+      <td id="btn10"></td>
+      <td id="btn11"></td>
+      <td id="btn12"></td>
+      <td id="btn13"></td>
+      <td id="btn14"></td>
+      <td id="btn15"></td>
+      <td id="btn16"></td>
+      <td id="btn17"></td>
+      <td id="btn18"></td>
+      <td id="btn19"></td>
+
+    </tr>
+    
+    <tr>
+      <td id="btn20"></td>
+      <td id="btn21"></td>
+      <td id="btn22"></td>
+      <td id="btn23"></td>
+      <td id="btn24"></td>
+      <td id="btn25"></td>
+      <td id="btn26"></td>
+      <td id="btn27"></td>
+      <td id="btn28"></td>
+      <td id="btn29"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn30"></td>
+      <td id="btn31"></td>
+      <td id="btn32"></td>
+      <td id="btn33"></td>
+      <td id="btn34"></td>
+      <td id="btn35"></td>
+      <td id="btn36"></td>
+      <td id="btn37"></td>
+      <td id="btn38"></td>
+      <td id="btn39"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn40"></td>
+      <td id="btn41"></td>
+      <td id="btn42"></td>
+      <td id="btn43"></td>
+      <td id="btn44"></td>
+      <td id="btn45"></td>
+      <td id="btn46"></td>
+      <td id="btn47"></td>
+      <td id="btn48"></td>
+      <td id="btn49"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn50"></td>
+      <td id="btn51"></td>
+      <td id="btn52"></td>
+      <td id="btn53"></td>
+      <td id="btn54"></td>
+      <td id="btn55"></td>
+      <td id="btn56"></td>
+      <td id="btn57"></td>
+      <td id="btn58"></td>
+      <td id="btn59"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn60"></td>
+      <td id="btn61"></td>
+      <td id="btn62"></td>
+      <td id="btn63"></td>
+      <td id="btn64"></td>
+      <td id="btn65"></td>
+      <td id="btn66"></td>
+      <td id="btn67"></td>
+      <td id="btn68"></td>
+      <td id="btn69"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn70"></td>
+      <td id="btn71"></td>
+      <td id="btn72"></td>
+      <td id="btn73"></td>
+      <td id="btn74"></td>
+      <td id="btn75"></td>
+      <td id="btn76"></td>
+      <td id="btn77"></td>
+      <td id="btn78"></td>
+      <td id="btn79"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn80"></td>
+      <td id="btn81"></td>
+      <td id="btn82"></td>
+      <td id="btn83"></td>
+      <td id="btn84"></td>
+      <td id="btn85"></td>
+      <td id="btn86"></td>
+      <td id="btn87"></td>
+      <td id="btn88"></td>
+      <td id="btn89"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn90"></td>
+      <td id="btn91"></td>
+      <td id="btn92"></td>
+      <td id="btn93"></td>
+      <td id="btn94"></td>
+      <td id="btn95"></td>
+      <td id="btn96"></td>
+      <td id="btn97"></td>
+      <td id="btn98"></td>
+      <td id="btn99"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn100"></td>
+      <td id="btn101"></td>
+      <td id="btn102"></td>
+      <td id="btn103"></td>
+      <td id="btn104"></td>
+      <td id="btn105"></td>
+      <td id="btn106"></td>
+      <td id="btn107"></td>
+      <td id="btn108"></td>
+      <td id="btn109"></td>
+    </tr>
+    
+    <tr>
+      <td id="btn110"></td>
+      <td id="btn111"></td>
+      <td id="btn112"></td>
+      <td id="btn113"></td>
+      <td id="btn114"></td>
+      <td id="btn115"></td>
+      <td id="btn116"></td>
+      <td id="btn117"></td>
+      <td id="btn118"></td>
+      <td id="btn119"></td>
+    </tr>
+    <tr>
+      <td id="btn120"></td>
+      <td id="btn121"></td>
+      <td id="btn122"></td>
+      <td id="btn123"></td>
+      <td id="btn124"></td>
+      <td id="btn125"></td>
+      <td id="btn126"></td>
+      <td id="btn127"></td>
+      <td id="btn128"></td>
+      <td id="btn129"></td>
+    </tr>
+
+    <tr>
+      <td id="btn130"></td>
+      <td id="btn131"></td>
+      <td id="btn132"></td>
+      <td id="btn133"></td>
+      <td id="btn134"></td>
+      <td id="btn135"></td>
+      <td id="btn136"></td>
+      <td id="btn137"></td>
+      <td id="btn138"></td>
+      <td id="btn139"></td>
+    </tr>
+
+    <tr>
+      <td id="btn140"></td>
+      <td id="btn141"></td>
+      <td id="btn142"></td>
+      <td id="btn143"></td>
+      <td id="btn144"></td>
+      <td id="btn145"></td>
+      <td id="btn146"></td>
+      <td id="btn147"></td>
+      <td id="btn148"></td>
+      <td id="btn149"></td>
+    </tr>
+
+    <tr>
+      <td id="btn150"></td>
+      <td id="btn151"></td>
+      <td id="btn152"></td>
+      <td id="btn153"></td>
+      <td id="btn154"></td>
+      <td id="btn155"></td>
+      <td id="btn156"></td>
+      <td id="btn157"></td>
+      <td id="btn158"></td>
+      <td id="btn159"></td>
+    </tr>
+    
+    </table>
+</p>
+
+<div style="margin-right: 20%;">
+<P>
+  <h2>Next Brick:</h2>
+  <table class="nextt" border="1"  >
+    <tr>
+      <td class="nexttd" id="nexttype10"></td>
+      <td class="nexttd" id="nexttype11"></td>
+      <td class="nexttd" id="nexttype12"></td>
+      <td class="nexttd" id="nexttype13"></td>
+      <td class="nexttd" id="nexttype14"></td>
+    </tr>
+    
+    <tr>
+      <td class="nexttd" id="nexttype20"></td>
+      <td class="nexttd" id="nexttype21"></td>
+      <td class="nexttd" id="nexttype22"></td>
+      <td class="nexttd" id="nexttype23"></td>
+      <td class="nexttd" id="nexttype24"></td>
+    </tr>
+    
+    <tr>
+      <td class="nexttd" id="nexttype30"></td>
+      <td class="nexttd" id="nexttype31"></td>
+      <td class="nexttd" id="nexttype32"></td>
+      <td class="nexttd" id="nexttype33"></td>
+      <td class="nexttd" id="nexttype34"></td>
+    </tr>
+
+    
+  </table>
+</P>
+
+
+
+</div>
+
+
+<div style="margin-left: 60%;">
+  <h1 style= "color: rgb(62, 10, 193);">Tetris  RL</h1>
+
+  <p>
+    <button style="margin-left:105px;" onclick="rotate()">▲</button><BR><BR>
+    <button onclick="left()">◀</button>
+    <button onclick="drop()">▼</button>
+    <button onclick="right()">▶</button>
+    <!-- <button onclick="TEST()">TEST</button> -->
+  
+  </p>
+
+<p>
+ <button id="start" style= "background-color: crimson; color: rgb(245, 221, 7);width:160px" onclick="start()">Start Game!</button>
+<button  id="pause" style= "margin-left:20px; display:  none; background-color: crimson; color: rgb(245, 221, 7);" onclick="pause()">Pause</button>
+</p>
+
+  
+
+
+
+<H1>Score:  <span id="score">0</span>
+</H1>
+
+<h3> Level:  <span id="level">1</span></h3>
+<h3>
+  Highest Score Record：<span id="highscore">0</span>
+</h3>
+
+<ul>How to play:  
+  <li>Use  <b>Arrow keys(keyboard or button)</b> to control bricks.</li>
+  <li><b>Space key</b> to drop down immediately.</li>
+  <li>Form a compelte row to clear the row.</li>
+  <li>Speed of brick will increase as level does.</li>
+  <li>Gain extra bonus points by <b>clearing multiple lines</b> with one brick and clear all the cubes.</li>
+</ul> 
+<p id="info"> </p>
+</div>
+
+
+
+</body>
+
+<script>
+
+
+  const newx=[[1,2,2,2],[1,1,2,2],[1,1,1,1],[2,1,1,1],[1,1,1,2],[2,2,1,1],[2,2,1,1]]
+  const newy=[[5,4,5,6],[5,4,5,4],[3,4,5,6],[4,4,5,6],[6,4,5,6],[6,5,5,4],[4,5,5,6]]
+
+  const newxnext=[[1,2,2,2],[1,1,2,2],[1,1,1,1],[2,1,1,1],[1,1,1,2],[2,2,1,1],[2,2,1,1]]
+  const newynext=[[2,1,2,3],[2,1,2,1],[0,1,2,3],[1,1,2,3],[3,1,2,3],[3,2,2,1],[1,2,2,3]]
+
+  var redx, typeid, nexttypeid, redy, posture=0, temp_redx,temp_redy,int, level,highscore=0//声明
+  var fixx=[]
+  var fixy=[]
+  var score=0
+
+  var legal = true, newbrick = false
+  var landing = true, fix=false
+
+ document.onkeydown=function(e){
+  var keynum=window.event ? e.keyCode :e.which;
+  if(keynum==37){
+    left()
+  }
+  if(keynum==38){
+    rotate()
+  }
+  if(keynum==39){
+    right()
+  }
+  if(keynum==40){
+    drop()
+    }
+  if(keynum==16){
+    fix=false
+   while(fix==false){
+    drop()
+   }
+  }
+
+
+
+ }
+
+ function rotatelegal(x,y){
+  temp=true
+
+  for (let i = 0; i < y.length; i++)
+  { if(y[i]>9 ||y[i]<0){ temp = false;break; }}
+
+  if(  Math.max.apply(null, x)>15){temp = false;}
+  else if (temp && Math.min.apply(null, x)<1){ 
+
+  diff=1-Math.min.apply(null, x)
+
+  temp_redx= temp_redx.map(num => parseInt(num) + diff) 
+  }
+
+  
+  p=0
+
+  rotatecollision=false
+
+  while (p<x.length){
+    if (fixx.includes(x[p])){
+      if(fixy.includes(y[p])){
+        //预检查
+        rotatecollision=true;
+        break;
+        }
+      }
+      p++
+    }
+  
+    if (rotatecollision==true){
+      k=0
+      while(k<fixx.length){
+        kk=0
+        while(kk<x.length){
+          if(x[kk]==fixx[k] && y[kk]==fixy[k]){
+            temp=false;kk=99;k=99;
+          }
+          kk++
+        }
+        k++
+      }
+
+    }
+
+  
+  
+
+
+  return temp
+}
+
+function rotatemove(){
+  if (rotatelegal(temp_redx,temp_redy)){
+    allnormal(true)
+    redx=temp_redx
+    redy=temp_redy
+
+    allred(redx,redy)
+    if (posture==3){posture=0}
+    else{posture++}
+  }
+}
+
+  function rotate(){
+    switch (typeid)
+    {case 0:
+      switch(posture){
+        case 0:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]
+        rotatemove()
+
+        break;
+        case 1:
+       temp_redx=[]
+       temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]
+
+        rotatemove()
+        break;
+
+        case 2:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]-1
+        temp_redy[3]=redy[2]
+        rotatemove()
+
+        break;
+
+        case 3:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]
+
+        temp_redy[0]=redy[2]
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]-1
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+
+
+        break;
+      }
+      break;
+      case 1:
+      //SQUARE DO NOTHING
+      break;
+      case 2://long line
+      switch (posture%2==0){
+      case true:
+
+      temp_redx=[]
+      temp_redy=[]
+      temp_redx[0]=redx[2]+2
+      temp_redx[2]=redx[2]
+      temp_redx[1]=redx[2]+1
+      temp_redx[3]=redx[2]-1
+
+      temp_redy[0]=redy[2]
+      temp_redy[2]=redy[2]
+      temp_redy[1]=redy[2]
+      temp_redy[3]=redy[2]
+
+      rotatemove()
+      break;
+      case false:
+      temp_redx=[]
+      temp_redy=[]
+      const red2x=redx[2], red2y=redy[2]
+      temp_redx[0]=red2x
+      temp_redx[2]=red2x
+      temp_redx[1]=red2x
+      temp_redx[3]=red2x
+
+      temp_redy[0]=red2y-2
+      temp_redy[2]=red2y
+      temp_redy[1]=red2y-1
+      temp_redy[3]=red2y+1
+
+
+
+      if (rotatelegal(temp_redx,temp_redy)){
+           rotatemove()  
+      }else{
+        temp_redy2=[]
+        temp_redy2[0]=red2y-1
+        temp_redy2[2]=red2y+1
+        temp_redy2[1]=red2y
+        temp_redy2[3]=red2y+2
+
+        if (rotatelegal(temp_redx,temp_redy2)){
+          allnormal(true)
+          redx=temp_redx
+          redy=temp_redy2
+          allred(redx,redy)
+          if (posture==3){posture=0}
+          else{posture++}
+        }
+
+      }
+      break;
+      }
+      break;
+
+      case 3://___|
+      switch (posture){
+        case 0:
+
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]+1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+
+
+        break;
+        case 1:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]-1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+
+        break;
+
+        case 2:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]-1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]
+
+        rotatemove()
+
+        break;
+
+        case 3:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]-1
+
+        rotatemove()
+        break;
+      }
+      break;
+
+      case 4://|___
+      switch (posture){
+        case 0:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]+1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]-1
+
+        rotatemove()
+
+        break;
+        case 1:
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]-1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]-1
+
+        rotatemove()
+
+        break;
+
+        case 2:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]-1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]+1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]
+
+        rotatemove()
+        break;
+
+        case 3:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+        break;
+      }
+
+      break;
+
+      case 5://z shape
+      switch (posture%2==0){
+        case true:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]-1
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]+1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]+1
+        temp_redy[3]=redy[2]
+
+        rotatemove()
+
+        break;
+        case false:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]+1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]-1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+        break;
+  
+  
+        }
+  
+      break;
+      case 6://reverse Z
+      switch (posture%2==0){
+        case true:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]-1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]+1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]+1
+
+        rotatemove()
+        break;
+        case false:
+
+   temp_redx=[]
+  temp_redy=[]
+        temp_redx[0]=redx[2]
+        temp_redx[2]=redx[2]
+        temp_redx[1]=redx[2]+1
+        temp_redx[3]=redx[2]+1
+
+        temp_redy[0]=redy[2]+1
+        temp_redy[2]=redy[2]
+        temp_redy[1]=redy[2]
+        temp_redy[3]=redy[2]-1
+
+        rotatemove()
+        break;
+  
+  
+        }
+      break;
+
+
+    }
+
+
+
+  }
+
+function pause(){
+
+  alert(" Game Pause!  Press OK when you are ready to continue")
+}
+
+  function start(){
+    pbtn = document.getElementById("pause");
+    pbtn.style.display = "inline-block";
+    if(document.getElementById("start").innerHTML=="Start Game!"){
+      typeid=Math.floor(Math.random() * newx.length);
+      //typeid=1
+      //nexttypeid=1     
+      nexttypeid=Math.floor(Math.random() * newx.length);
+      var newxx=JSON.parse(JSON.stringify(newx));
+      var newyy=JSON.parse(JSON.stringify(newy));
+      redx=newxx[typeid]
+      redy=newyy[typeid]
+      allred(redx,redy)
+
+      var newxx2=JSON.parse(JSON.stringify(newxnext));
+      var newyy2=JSON.parse(JSON.stringify(newynext));
+      nextredx=newxx2[nexttypeid]
+      nextredy=newyy2[nexttypeid]
+      nextallred(nextredx,nextredy);
+      int=window.setInterval("drop()",1000);
+      //document.getElementById("start").disabled = true;
+      document.getElementById("start").innerHTML="Restart"
+    }
+    else{
+      if(!confirm("Really want to re-start the game?"))return;
+      nextallnormal()
+      score=0
+      legal=true
+      level=1
+      document.getElementById("score").innerHTML=score
+      document.getElementById("level").innerHTML=level
+        allnormal(true)
+
+        iii=0
+        while (iii<fixx.length){
+        changenormal(fixx[iii],fixy[iii]);
+        iii+=1;
+        }
+        fixx=[]
+        fixy=[]
+        redx=[]
+        redy=[]
+
+        typeid=Math.floor(Math.random() * newx.length);
+        //typeid=2 
+        nexttypeid=Math.floor(Math.random() * newx.length);
+        var newxx=JSON.parse(JSON.stringify(newx));
+        var newyy=JSON.parse(JSON.stringify(newy));
+        redx=newxx[typeid]
+        redy=newyy[typeid]
+        allred(redx,redy)
+
+        var newxx2=JSON.parse(JSON.stringify(newxnext));
+        var newyy2=JSON.parse(JSON.stringify(newynext));
+        nextredx=newxx2[nexttypeid]
+        nextredy=newyy2[nexttypeid]
+        nextallred(nextredx,nextredy);
+        window.clearInterval(int);
+        int=window.setInterval("drop()",1000);
+
+    }
+
+   }
+   
+  function changered(i,j){
+    btnname="btn"+i+j
+    //document.getElementById(btnname).style.backgroundColor="red"
+    document.getElementById(btnname).style.backgroundImage="linear-gradient(-20deg, #fc6076 0%, #ff9a44 100%)"
+  }
+
+  function changeyellow(i,j){
+    btnname="btn"+i+j;
+    //document.getElementById(btnname).style.backgroundColor= "#fffb22e7";
+    document.getElementById(btnname).style.backgroundImage = "linear-gradient(120deg, #68df1dc8 0%, #e6fb00 100%)";
+  }
+
+  function allyellow(x,y){
+    i=0
+    while (i<x.length && legal){
+      changeyellow(x[i], y[i])
+      i+=1
+    }
+  }
+
+
+  function allred(x,y){
+    i=0
+    while (i<x.length && legal){
+      changered(x[i], y[i])
+      i+=1
+    }
+  }
+
+  function changenormal(i,j){
+    btnname="btn"+i+j
+    document.getElementById(btnname).style.backgroundColor="#ddf0f6c8"
+    document.getElementById(btnname).style.backgroundImage="none"
+
+  }
+
+  function allnormal(check){
+    i=0
+    while (i<redx.length && check){
+    changenormal(redx[i],redy[i]);
+    i+=1;
+   }
+  }
+
+  function checkinfix(x,y){
+   i=0
+   temp = false
+   while (i<fixx.length){
+    if (x==fixx[i]){
+      if (y==fixy[i])
+      {
+        temp=true;
+       break;}
+    }
+    i+=1
+   }
+   return temp
+  }
+
+  function checklanding(){
+
+    landing = true
+    if (checkbottom()){
+      ii=0
+
+      while (ii<redx.length){
+        t=redx[ii]+1
+        if (checkinfix(t,redy[ii])){
+        landing=false;
+        break;}
+        ii+=1;
+      }
+    }
+    else {landing=false}
+
+
+  }
+
+function generatenew(){
+
+  function speed(tscore){
+    if (tscore>800){
+      level=7
+      return 200
+    } else if(tscore>520) {
+      level=6
+      return 300
+    } else if (tscore>350){
+      level=5
+      return 500
+    } else if (tscore>270){
+      level=4
+      return 600
+    }else if (tscore>160){
+      level=3
+      return 750
+    } else if (tscore>80){
+      level=2
+      return 900}
+    else {
+      level=1
+      return 1000}
+  }
+  
+  typeid = JSON.parse(JSON.stringify(nexttypeid))
+  newxx=JSON.parse(JSON.stringify(newx));
+  newyy=JSON.parse(JSON.stringify(newy));
+  redx=newxx[typeid]
+  redy=newyy[typeid]
+
+
+  if (Math.min.apply(null, fixx)<3){
+    t=0
+    while(t<fixx.length){
+      k=0
+      while(k<redx.length){
+
+        if(fixx[t]==redx[k] && fixy[t]==redy[k]){
+
+          window.clearInterval(int)
+          t=99
+          k=99
+          legal=false
+          message='GAME OVER!! Your score is: ' + score
+          if (score>highscore){message=message +" \n You have made a new record!";
+          highscore=score;
+          document.getElementById("highscore").innerHTML=highscore}
+          alert(message)
+          break;
+        }
+
+        k++
+      }
+
+    t++
+    }
+  
+  }
+  else{
+  allnormal(true);
+  allred(redx,redy);
+  newbrick= true
+  nextallnormal();
+  //nexttypeid=2
+  nexttypeid=Math.floor(Math.random() * newx.length);
+  var newxx2=JSON.parse(JSON.stringify(newxnext));
+  var newyy2=JSON.parse(JSON.stringify(newynext));
+  nextredx=newxx2[nexttypeid]
+  nextredy=newyy2[nexttypeid]
+  nextallred(nextredx,nextredy);
+
+
+
+  posture=0;
+  window.clearInterval(int)
+  int=window.setInterval("drop()",speed(score))
+  x=document.getElementById("level")
+  x.innerHTML=level
+
+
+
+  }
+
+
+}
+
+function checkbottom(){
+  temp = true
+  if (Math.max.apply(null, redx)>14){
+    temp = false
+   }
+  return temp
+}
+
+function pushfix(x,y){
+  i=0
+  while (i<x.length){
+   fixx.push(x[i])
+   fixy.push(y[i])
+   i+=1
+  }
+}
+
+
+function drop(){
+ if(legal){
+  if (newbrick){
+    newbrick=false
+   }
+   else{
+    checklanding()
+    if (landing == false || checkbottom() == false){
+     //if (checkbottom() == false){
+      fix=true
+      allyellow(redx,redy);
+      pushfix(redx,redy);
+      checkclear()
+      generatenew();
+     }
+     else{
+      allnormal(true);
+      i=0
+      while (i<redx.length && legal){
+        redx[i]=redx[i]+1;
+        changered(redx[i],redy[i]);
+        i+=1;}//while
+     }//else
+  
+    }//else
+ }
+  
+}//drop
+
+function checkclear(){
+  var a = fixx;
+  //var a = [2,4,1,2,2,2,2,4,4,4,9,4,4,5,2];
+  function f(a) {
+    var obj = {};
+    for (let i = 0; i < a.length; i++) {
+        var t = a[i];
+        if (obj.hasOwnProperty(t)){  //判断t属性是否为对象obj中的属性；
+            obj[t] = obj[t]+1;
+        }else{obj[t] = 1; }
+    }
+    return obj;
+   }
+
+
+  var array = Object.keys(f(a))
+  .map(function(key) {
+      return f(a)[key];
+  });
+
+
+ maxnum=Math.max.apply(null, array)
+
+
+ var complete =[]
+
+
+ function getKeyByValue(object, value) {
+
+  for (var prop in object) {
+      if (object.hasOwnProperty(prop)) {
+          if (object[prop] === value)
+           {
+            complete.push(prop);}
+      }
+  }
+}
+
+
+
+
+ if (maxnum==10){
+  getKeyByValue(f(a),10)
+
+  fixxcopy=JSON.parse(JSON.stringify(fixx));
+  fixycopy=JSON.parse(JSON.stringify(fixy));
+
+  if (complete.length>1){
+  complete.sort(function(a, b){return b-a})
+ }
+
+
+ n=0
+
+while(n<complete.length){
+
+    d=0
+    tempfixx=[]
+    tempfixy=[]
+
+    while(d<fixxcopy.length){
+      if(fixxcopy[d]!=complete[n]){
+
+        if (fixxcopy[d]<complete[n]){
+
+          tempfixx.push(fixxcopy[d]+1)
+          tempfixy.push(fixycopy[d])
+        }
+        else if (fixxcopy[d]>complete[n]){
+          tempfixx.push(fixxcopy[d])
+          tempfixy.push(fixycopy[d])
+        }
+      }  
+      d+=1;
+
+    }
+  complete= complete.map(num => parseInt(parseInt(num) + 1) )
+  fixxcopy=tempfixx
+  fixycopy=tempfixy
+
+
+  n+=1;
+ }
+  
+
+  d=0
+  while (d<fixx.length){
+    changenormal(fixx[d],fixy[d])
+    d+=1;
+   }
+ 
+  allyellow(fixxcopy,fixycopy)
+  fixx=tempfixx
+  fixy=tempfixy
+ }
+ var clearinfo
+ function hide(){
+  document.getElementById("info").innerHTML=""
+}
+switch(complete.length){
+case 1:
+  score=score+complete.length*10;
+  break;
+case 2:
+  score=score+complete.length*15;
+  break;
+case 3:
+  score=score+complete.length*24;
+  document.getElementById("info").innerHTML+="  Great! + 72 pts! "
+  clearinfo=self.setTimeout(hide,2000)
+  break;
+case 4:
+  score=score+complete.length*32;
+  document.getElementById("info").innerHTML+="  Excellent! + 128 pts! "
+  clearinfo=self.setTimeout(hide,2000)
+  break;
+}
+
+
+
+  if(score!=0 ){
+    if ( fixx.length==0){
+   score+=50
+      function hide(){
+        document.getElementById("info").innerHTML=""
+      }
+     document.getElementById("info").innerHTML+="  ALL CLEAR! Get extra 50 pts!  "
+      var clearinfo=self.setTimeout(hide,2000)
+
+    }
+
+  }
+
+ document.getElementById("score").innerHTML=score
+
+}
+
+
+
+   
+
+  function left(){
+    i=0
+    leftlegal = true
+    
+    while (i<redx.length){
+      if (redy[i]-1<0)
+      {leftlegal=false; break;}
+      else {i+=1}
+    }
+
+    if (leftlegal==true){
+      i=0
+      m=0
+      countd=0
+
+      while (m<redx.length){
+
+        i=0;
+        while (i<fixx.length){
+            if(fixx[i]==redx[m]){
+             if(fixy[i]==(redy[m]-1)){
+              leftlegal=false;
+              alert("cannot go left due to collision")
+              m=9999;
+              break;
+             } 
+            }
+        i+=1
+        }
+        m+=1
+      }
+    }
+    
+     allnormal(leftlegal);
+
+      i=0
+      while (i<redx.length && legal && leftlegal){
+        changered(redx[i],redy[i]-1)
+        redy[i]=redy[i]-1;
+        i+=1
+        }
+  }
+
+
+  function right(){
+    i=0
+    rightlegal = true
+    while (i<redx.length && rightlegal){
+      if (redy[i]+1>9)
+      {rightlegal=false; break;}
+      else {i+=1}
+    }
+
+    if (rightlegal==true){
+      i=0
+      m=0
+      countd=0
+
+      while (m<redx.length){
+        i=0;
+        while (i<fixx.length){
+
+
+
+
+            if(fixx[i]==redx[m]){
+             if(fixy[i]==(redy[m]+1)){
+              rightlegal=false;
+              alert("cannot go right due to collision")
+              m=9999;
+              break;             } 
+            }
+        i+=1
+        }
+        m+=1
+      }
+    }
+
+
+     allnormal(rightlegal);
+
+      i=0
+      while (i<redx.length && legal && rightlegal){
+        changered(redx[i],redy[i]+1)
+        redy[i]=redy[i]+1;
+        i+=1
+        }
+  }
+
+  function nextallnormal(){
+
+    function nextchangenormal(x,y){
+      btnname="nexttype"+x+y
+      document.getElementById(btnname).style.backgroundColor="#ddf0f6c8"
+      document.getElementById(btnname).style.backgroundImage="none"
+    }
+
+    i=0
+    while (i<5){
+      j=1
+      while (j<4){
+        nextchangenormal(j,i)
+        j++;
+      }
+      
+    i+=1;
+   }
+  }
+
+  function nextallred(xx,yy){
+    i=0
+    while (i<xx.length && legal){
+      nextchangered(xx[i], yy[i])
+      i+=1
+    }  }
+
+
+    function nextchangered(i,j){
+      btnname="nexttype"+i+j
+      //document.getElementById(btnname).style.backgroundColor="rgb(27, 66, 185)"
+      document.getElementById(btnname).style.backgroundImage="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    }
+
+
+
+
+
+    function TEST(){
+      fixx=[]
+      fixy=[]
+      score=10
+      //checkclear()
+
+    }
+</script>
+
+</html>

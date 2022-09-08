@@ -1,0 +1,217 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Robin- webmap demo</title>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="icon" type="image/x-icon" href="http://vectips.com/wp-content/uploads/2017/07/project-preview-large-1.png"> 
+   <title>ArcGIS API for JavaScript Tutorials: Change the basemap layer</title>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  
+  <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.24/"></script>
+
+  <script>
+    const YOUR_API_KEY = "AAPK25bc5b77803d441685137e4b56db8373vrGnsfGxdmrJPB15B32fJ2dFZTKw8T12YQUNI5kemiaQAfPI9fY0TNJSOGd2aiEI"
+    const apiKey = YOUR_API_KEY;
+
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/widgets/BasemapToggle",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/Expand",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Search",
+      "esri/Graphic","esri/rest/route","esri/rest/support/RouteParameters","esri/rest/support/FeatureSet",
+      "esri/widgets/LayerList",
+    ], function(esriConfig, Map, MapView, BasemapToggle, BasemapGallery,Expand,FeatureLayer,Search,Graphic, route, RouteParameters,FeatureSet,LayerList) {
+
+      esriConfig.apiKey = YOUR_API_KEY;
+
+      const map = new Map({
+        basemap: "arcgis-topographic"
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [149.065, -35.239],
+        zoom: 11
+      });
+
+      const basemapGallery = new BasemapGallery({
+        view: view,
+        container: document.createElement("div"),
+        source: {
+          query: {
+            title: '"World Basemaps for Developers" AND owner:esri'
+          }
+        },
+      });
+
+      const bgExpand = new Expand({
+        view: view,
+        content: basemapGallery
+      });
+
+      basemapGallery.watch("activeBasemap", () => {
+        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+
+        if (mobileSize) {
+          bgExpand.collapse();
+        }
+      });
+
+      // Add the expand instance to the ui
+
+      view.ui.add(bgExpand, "top-right");
+
+
+      const popupBridgeford = {
+        "title": "Road bridge or ford",
+        "content": "<b>Name:</b> {NAME}<br>"+
+        "<b>Purpose:</b> {PURPOSE}<br>"+
+        "<b>Crossingstructure:</b> {CROSSINGSTRUCTURE}<br>"+
+        "<b>Feature type:</b> {FEATURETYPE}<br>"+
+        "<b>Attribute source:</b> {ATTRIBUTESOURCE} m"
+      }
+
+      const popupRoad = {
+        "title": "Road information",
+        "content": "<b>Name:</b> {NAME}<br>"+
+        "<b>Class:</b> {CLASS}<br>"+
+        "<b>st_length(shape):</b> {st_length(shape)}"
+
+        //(result.attributes.length*1.60934).toFixed(2)
+      }
+
+
+      const RoadbridgefordLayer = new FeatureLayer({
+
+       url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/8",
+
+       outFields: ["NAME","PURPOSE","CROSSINGSTRUCTURE","FEATURETYPE","ATTRIBUTESOURCE"],
+       popupTemplate: popupBridgeford
+      });
+
+
+      const RoadnetworkLayer = new FeatureLayer({
+
+         url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/15",
+        outFields: ["NAME","CLASS","st_length(shape)"],
+        popupTemplate: popupRoad
+       });
+
+      map.add(RoadnetworkLayer)
+      map.add(RoadbridgefordLayer)
+
+      const searchWidget = new Search({
+        view: view
+      });
+
+      view.ui.add(searchWidget, {
+        position: "top-right",
+        index: 5
+      });
+    
+      const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+
+
+      function addGraphic(type, point) {
+          const graphic = new Graphic({
+            symbol: {
+              type: "simple-marker",
+              color: (type === "origin") ? "white" : "black",
+              size: "10px"
+            },
+            geometry: point
+          });
+          view.graphics.add(graphic);
+        }
+  
+      view.on("click", function(event){
+  
+          if (view.graphics.length === 0) {
+            addGraphic("origin", event.mapPoint);
+          } else if (view.graphics.length === 1) {
+            addGraphic("destination", event.mapPoint);
+            getRoute(); 
+          } else {
+            view.graphics.removeAll();
+            addGraphic("origin",event.mapPoint);
+          }
+    
+        });
+    
+        function getRoute() {
+          const routeParams = new RouteParameters({
+            stops: new FeatureSet({
+              features: view.graphics.toArray()
+            }),
+            returnDirections: true
+          });
+    
+          route.solve(routeUrl, routeParams)
+          .then(function(data) {
+            data.routeResults.forEach(function(result) {
+              result.route.symbol = {
+                type: "simple-line",
+                color: [5, 150, 255],
+                width: 3
+              };
+              view.graphics.add(result.route);
+            });
+            if (data.routeResults.length > 0) {
+              const directions = document.createElement("ol");
+              directions.id="directions"
+              directions.hidden=false
+              directions.classList = "esri-widget esri-widget--panel esri-directions__scroller";
+              directions.style.marginTop = "0";
+              directions.style.padding = "15px 15px 15px 30px";
+              const features = data.routeResults[0].directions.features;
+              const delbtn = document.createElement("button");
+              delbtn.innerHTML="Close"
+              delbtn.onclick = function(){document.getElementById("directions").hidden=true};
+              directions.appendChild(delbtn);
+              const routetitle = document.createElement("a");
+              routetitle.innerHTML="<br>Route:<br>"
+              directions.appendChild(routetitle);
+              features.forEach(function(result,i){
+                  const direction = document.createElement("li");
+                  direction.innerHTML = result.attributes.text + " (" + (result.attributes.length*1.60934).toFixed(2) + " km)";
+
+                  directions.appendChild(direction);
+                });
+                view.ui.empty("bottom-left");
+                view.ui.add(directions, "bottom-left");
+            }
+          })
+        }
+      
+        
+        view.when(() => {
+          const layerList = new LayerList({
+            view: view
+          });
+
+          // Add widget to the top right corner of the view
+      view.ui.add(layerList, "top-right");
+          });
+
+
+
+    });
+  </script>
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
