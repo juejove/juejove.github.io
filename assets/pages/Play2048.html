@@ -1,0 +1,891 @@
+<html>
+    <head>
+   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+   <title>2048 - Robin L</title>
+   <meta charset="utf-8">
+   <link rel="icon" type="image/x-icon" href="https://play2048.co/favicon.ico"> 
+   <link href="https://fonts.googleapis.com/css?family=Charmonman|Engagement|Baloo+Bhai|Ubuntu:700|Niconne&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Merienda" rel="stylesheet">
+    <style>
+        .content .text{
+            margin-left: 40px;
+            font-size: 95px;
+          text-align: center;
+         height:15vh;
+            -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+          color: #fcedd8;
+          background: #d52e3f;
+             font-family: 'Niconne', cursive;
+          font-weight: 700;
+        text-shadow: 5px 5px 0px #eb452b, 
+                    10px 10px 0px #efa032, 
+                    15px 15px 0px #46b59b, 
+                    20px 20px 0px #017e7f, 
+                    25px 25px 0px #052939, 
+                    30px 30px 0px #c11a2b, 
+                    35px 35px 0px #c11a2b, 
+                    40px 40px 0px #ed4262, 
+                    45px 45px 0px #c11a2b;
+  }
+  
+  p{
+      text-align: center;
+      font-family: "Helvetica";
+      font-size:0.8rem;
+  }
+  
+
+    </style>
+    
+    <style>
+        .Loosewindow .loosetext {
+            font-family: 'Merienda', cursive;
+            font-size: 85px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            color: #fff;
+            text-shadow: 
+                0 0 10px #0ebeff,
+                0 0 20px #0ebeff,
+                0 0 50px #0ebeff,
+                0 0 100px #0ebeff,
+                0 0 200px #0ebeff
+        }
+        .Loosewindow .content{
+            text-align: center;
+        }
+
+    .Congradulation{
+        cursor:move;
+        display: none;
+        position: fixed;
+        opacity: 100%;
+        top: 15%;
+        left: 25%;
+        width: 700px;
+        height: 450px;
+        box-shadow: 0px 0px 30px darkblue;
+        background:#d52e3f    }
+
+
+        .Loosewindow{
+            cursor:move;
+            display: none;
+            position: fixed;
+            opacity: 100%;
+            top: 15%;
+            left: 25%;
+            width: 700px;
+            height: 450px;
+            box-shadow: 0px 0px 30px darkblue;
+            background:#443f3f    }
+
+
+    .close {
+        font-size: 25px;
+        text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0;
+        color: crimson;
+        top: -10px;
+        right: -10px;
+        position: relative;
+       border-radius: 25px;
+       float: right;
+    }
+
+    .title{
+        cursor:move;
+        opacity: 100%;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        text-align: center;
+        font-size: 20px;
+        height: 30px;
+        background-color: rgb(232, 231, 164);
+    }
+    .content{
+        margin-left: 20px;
+    }
+
+    .menu span{
+        cursor: pointer;
+        margin-left: 4%;
+        background-color: #ffffff;
+    }
+
+#bgcolor {
+    display: inline-block;
+    position: absolute;
+    left: 33%;
+    background-color: rgb(154, 144, 131);
+    width: 450px;
+    height: 450px;
+    border-radius: 10px;
+
+}
+.graybg{
+    display: none;
+    background-color: rgb(99, 88, 88);
+    position: absolute;
+    opacity: 60%;
+    top:0%;
+    left:0%;
+    height: 100%;
+    width: 100%;
+}
+    #brickContainer {
+        position: relative;
+        left: 10px;
+        top: 8px;
+    }
+
+#brickContainer span{
+    position: static;
+margin:4px 4px 4px 4px;
+display: inline-block;
+background-color: rgb(251, 241, 191);
+width: 100px;
+height: 100px;
+border-radius: 7px;
+text-align: center;
+}
+
+#brickContainer span.n0{
+    background-color: rgb(205, 203, 199);
+    }
+
+#brickContainer span.n2{
+    background-color: rgb(245, 241, 233);
+    }
+
+ #brickContainer span.n4{
+     background-color: rgb(245, 233, 211);
+     }
+
+#brickContainer span.n8{
+        background-color: rgb(251, 246, 150);
+        }
+ #brickContainer span.n16{
+      background-color: rgb(240, 113, 55);
+    }
+    #brickContainer span.n32{
+        background-color: rgb(212, 58, 41);
+      }
+      #brickContainer span.n64{
+        background-color: rgb(231, 39, 21);
+      }
+      #brickContainer span.n128{
+        background-color: rgb(253, 198, 71);
+      }
+      #brickContainer span.n256{
+        background-color: rgb(235, 141, 28);
+      }
+      #brickContainer span.n512{
+        background-color: rgb(216, 138, 12);
+      }
+      #brickContainer span.n1024{
+        background-color: rgb(220, 79, 13);
+      }
+      #brickContainer span.n2048{
+        background-color: rgb(228, 57, 23);
+      }
+      #brickContainer span.n4096{
+        background-color: rgb(51, 11, 3);
+      }
+      #brickContainer span.n8192{
+        background-color: rgb(234, 19, 11);
+      }
+
+
+
+
+#brickContainer b{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-align: center;
+    font-size: 70px;
+    color: dimgrey;
+
+    }
+    
+    .btnrow{
+        position: absolute;
+        bottom: 20px;
+    }
+    .content button{
+        
+      margin-left: 150px;
+    }
+    .brickrow span{
+        text-align: center;
+        vertical-align: middle;
+    }
+    #restartBtn {
+
+        width: 150px;
+        position: absolute;
+        right: 40px;
+        top:50px;
+        font-size: 18px;
+    }
+
+    div.score{
+        width: 300px;
+        height: 100px;
+      
+        position: absolute;
+        left: 2%;
+    }
+    
+    div.score .scorebox{
+        width: 140px;
+        height: 80px;
+        background-color: #818789;
+        position: absolute;
+        text-align: center;
+        border-radius: 15px;
+    }
+
+    div.score span.des{
+        font-size: 15px;
+        color: rgb(211, 245, 245);
+    }
+
+    div.score span.num{
+
+        padding-left: 5px;
+        font-size: 28px;
+        color: white;
+    }
+
+
+    div.score .highscorebox{
+        width: 140px;
+        height: 80px;
+        background-color:  #818789;
+        border-radius: 15px;
+        position: absolute;
+        right: 0;
+        text-align: center;
+    }
+
+    .gameinfo{
+        position: absolute;
+        bottom:10%;left:35%;
+        width:500px;
+        font-family: 'DynaPuff';
+        font-size: 20px;
+
+    }
+    a {
+        outline: none;
+        text-decoration: none;
+        padding: 2px 1px 0;
+      }
+      
+      a:link {
+        color: #265301;
+      }
+      
+      a:visited {
+        color: #437A16;
+      }
+      
+      a:focus {
+        border-bottom: 1px solid;
+        background: #BAE498;
+      }
+      
+      a:hover {
+        border-bottom: 1px solid;
+        background: #CDFEAA;
+      }
+      
+      a:active {
+        background: #265301;
+        color: #CDFEAA;
+      }
+
+</style>
+<link href="https://fonts.googleapis.com/css?family=DynaPuff" rel="stylesheet">
+<link rel="stylesheet" href="../css/button.css">
+
+</head>
+
+
+
+<body>
+    <div class="gameinfo" >
+
+<li>HOW TO PLAY: <br> Use your arrow keys to move the tiles. Tiles with the same number merge into one when they touch. Add them up to reach 2048!</li>
+<li>Developed by <a href="https://juejove.github.io/" target="_blank">Robin Lin</a> </li>
+
+
+    </div>
+
+<button class="large blue button" id="restartBtn" onclick="restart()">restart</button>
+
+<div class="score">
+    <div class="scorebox">
+        <span class="des">SCORE</span><br>
+        <span class="num" id="score">0</span>
+    </div>
+    <div class="highscorebox">
+        <span class="des">BEST</span> <br>
+        <span class="num" id="highscore">0</span>
+    </div>
+
+</div>
+
+
+<div id="bgcolor">
+<div id="brickContainer">
+</div>
+
+
+</div>
+
+
+<div class="graybg"></div>
+<div class="Congradulation" >    
+    <div class="title">
+        Surprise
+        <button class="close"  onclick="closewindow()">✖</button>
+
+    </div>
+    <div class="content">
+    <span class="text">
+        Congradulations! You made it!
+    </span> 
+        <br>
+        <div class="btnrow">
+            <button class="large white button" onclick="closewindow()">Keep going</button>
+            <button class="large white button" onclick="closewindow();restart();">Restart</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="Loosewindow" >    
+    <div class="title">
+        information
+        <button class="close"  onclick="closewindow()">✖</button>
+
+    </div>
+    <div class="content">
+    <span class="loosetext">
+     Can't move! <br>Try next time!
+    </span> 
+        <br>
+        <div class="btnrow">
+            <button class="large white button" onclick="closewindow()">Close</button>
+            <button class="large white button" onclick="closewindow();restart();">Restart</button>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+
+
+<script>
+    var score=0;bestscore=0;
+    //create elements
+    for (i=0;i<4;i++){
+       var temprow=document.createElement("div")
+       temprow.className="brickrow"
+        for (k=0;k<4;k++){
+
+       var tempspan=document.createElement("span")
+        
+       var tempnum=document.createElement("b")
+        tempnum.id="R"+i+"C"+k;
+        tempspan.id="BR"+i+"C"+k;
+
+        tempspan.appendChild(tempnum)
+        temprow.appendChild(tempspan)
+        
+        }
+        document.getElementById("brickContainer").appendChild(temprow);
+    }
+
+</script>
+
+
+<script>
+   
+    
+    var  matrix =new Array(4)
+
+    var completeflag=false;
+    const newnum=[2,4]
+    const diret=["left","right","up","down"]
+    
+
+function initialize(){
+        for (let i=0;i<4;i++){
+        let row=new Array(4).fill(0)
+         matrix[i]=row;
+        }
+
+        completeflag=false;
+
+     var initRecordx=[];var initRecordy=[]
+     score=0;
+    let t=Math.floor(Math.random() *newnum.length);
+
+    for (let i=0;i<2;i++){
+        
+        function tt(){
+            
+            var foundIni=false;
+            while(foundIni==false){
+                foundIni=true
+            let t1=Math.floor(Math.random() *4);
+            let t2=Math.floor(Math.random() *4);
+
+                for (let i=0;i<initRecordx.length;i++){
+                    if(initRecordx[i]==t1 && initRecordy[i]==t2){
+                        foundIni=false;break;
+                    }
+                }
+
+                if(foundIni==true){
+                    initRecordx.push(t1);
+                    initRecordy.push(t2);
+                    return [t1,t2]
+                }
+            }//
+                
+      
+       
+
+        }
+
+
+        let pick=tt()
+        matrix[pick[0]][pick[1]] = newnum[t]
+    }
+
+    showMatrix()
+
+    console.log("Initial random matrix:",matrix)
+}
+
+    initialize()
+
+    function showMatrix(){
+            for (i=0;i<4;i++){
+        for (k=0;k<4;k++){
+        let idname="R"+i+"C"+k;
+          document.getElementById(idname).innerHTML=matrix[i][k]
+          document.getElementById(idname).style=csschange(matrix[i][k])
+          document.getElementById("B"+idname).className="n"+matrix[i][k]
+        }
+    }
+
+    document.getElementById("score").innerHTML=score
+    document.getElementById("highscore").innerHTML=bestscore
+    }
+    
+
+
+
+function restart(){
+    if(score>bestscore){bestscore=score;}
+    initialize()
+ 
+}
+
+   function SingleCheckequal(mat,mat2){
+    for (let i=0;i<mat.length;i++)
+    {        if(mat[i]!== mat2[i]){
+            return false
+        }
+    }
+    return true;
+}
+
+
+    function checkequal(mat,mat2){
+        for (let i=0;i<mat.length;i++)
+        {
+            if(!SingleCheckequal(mat[i],mat2[i])){
+                return false
+            }
+        }
+        return true;
+    }
+
+
+
+   function csschange(num){
+    if (num>999){
+        return   "font-size:30px;color:white;"
+    }
+    else if (num>99){
+        return   "font-size:45px;color:white;"
+    }
+    else if (num>10){
+        return   "font-size:60px;color:white;"
+    }
+    else if(num>9){
+        return   "font-size:60px;color:dimgrey"
+    }
+    else if(num>0){
+        return   "font-size:70px;color:dimgrey"
+    }
+    else if(num==0){
+        return   "display:none;"
+    }
+    //else{return   "left:10px;font-size:70px;color:dimgrey"}
+
+}
+ //squeeze zero to end in array
+    function bubble(arrow,mat){
+        if(!mat.includes(0)){
+            return mat
+        }
+        if (arrow=="left"){
+            var temp=[]
+            for(i=0;i<4;i++){
+               if(mat[i]!=0){temp.push(mat[i]) }
+            }
+        
+        let zeros=new Array(4-temp.length).fill(0)
+        return temp.concat(zeros);
+        }
+        if (arrow=="right"){
+             var temp=[]
+            for(i=0;i<4;i++){
+             if(mat[i]!=0){temp.push(mat[i]) }
+            }
+            let zeros=new Array(4-temp.length).fill(0)
+            return zeros.concat(temp);
+        }
+    }
+ //merge same values and squeeze array
+    function merge(arrow,mat,calc){
+      
+        if (arrow=="left"){
+           mat= bubble(arrow,mat)
+        for (i=0;i<3;i++){
+            if(mat[i]==mat[i+1]){
+                mat[i]=mat[i]*2;
+                mat[i+1]=0;
+                if (calc){score+=mat[i]}
+                
+            }
+        }
+        return bubble(arrow,mat)
+        }
+
+        if (arrow=="right"){
+            mat= bubble(arrow,mat)
+         for (i=2;i>-1;i--){
+             if(mat[i]==mat[i+1]){
+                 mat[i+1]=mat[i]*2;
+                 mat[i]=0;
+                if (calc){score+=mat[i]}
+             }
+         }
+         return bubble(arrow,mat)
+         }
+
+
+
+    }
+
+    function move(arrow,mat){
+
+
+       if(checkdirect(arrow,mat))
+        {
+            var newmat
+            newmat=testmove(arrow,mat,true)
+            matrix=newmat;
+            addnewnum(matrix);
+            showMatrix()
+            if (prechecks(matrix)==false){
+                overint=self.setTimeout(gameover,1200)
+            }
+            
+            
+        }
+      
+    
+    }
+
+    function gameover(){
+        
+        
+        if (score>bestscore){
+            bestscore=score;
+        }
+        showMatrix()
+        loosewindow();
+
+    }
+
+    function testmove(arrow,mat,calc){
+
+        var newmat=  new Array(4)
+
+
+        if (arrow=="left"||arrow=="right"){
+            for (let i=0;i<mat.length;i++){
+                newmat[i]=merge(arrow,mat[i],calc)
+            } 
+        }
+
+        else if (arrow=="up"){
+        var trans=transpose(mat)
+
+        for (let i=0;i<mat.length;i++){
+            newmat[i]=merge("left",trans[i],calc)
+        } 
+        newmat=transpose(newmat)
+        }
+        
+
+        else if (arrow=="down"){
+            var trans=transpose(mat)
+    
+            for (let i=0;i<mat.length;i++){
+                newmat[i]=merge("right",trans[i],calc)
+            } 
+            newmat=transpose(newmat)
+        }
+
+        return newmat
+    }
+
+
+    function transpose(matrixx){
+        var transmat=[]
+        for (let l=0;l<matrixx[0].length;l++){
+            transmat[l]=[];
+        }
+
+        for (i=0;i<matrixx.length;i++){
+            for (k=0;k<matrixx.length;k++){
+                transmat[i][k]=matrixx[k][i]
+            }}
+
+            return transmat
+    }
+
+    //get a new number after move
+    function addnewnum(mat){
+
+        var zerolisty=[]
+        var zerolistx=[]
+        for (i=0;i<4;i++){   
+        for (k=0;k<4;k++){
+            if(mat[i][k]==0){
+                zerolistx.push(k);
+                zerolisty.push(i);
+            }
+        }}
+        let t=Math.floor(Math.random() *zerolistx.length);
+        let t2=Math.floor(Math.random() *newnum.length);
+        matrix[zerolisty[t]][zerolistx[t]]=newnum[t2];
+    }
+
+    //precheck if matrix is possible to move; if possible, return true
+    function prechecks(mat){
+        for (let i=0;i<mat.length;i++){
+            if (mat[i].includes(2048) && completeflag==false){
+                completeflag=true;
+                winwindow()
+                return true;
+            }  
+         }
+
+
+        var flag=false
+        for (let i=0;i<mat.length;i++){
+          if (mat[i].includes(0)){
+            return true
+          }  
+        }
+        for (let i=0;i<4;i++){
+         let matcopy=JSON.parse(JSON.stringify(mat));
+         let movedmat=testmove(diret[i],matcopy)
+           if(!checkequal(mat,movedmat) ){
+            return true;break;
+           }
+
+         }
+  
+         return flag
+    }
+    
+    //precheck a certain diretion possible to move
+    function checkdirect(arrow,mat){
+         let matcopy=JSON.parse(JSON.stringify(mat));
+         let movedmat=testmove(arrow,matcopy)
+        if(!checkequal(mat,movedmat) ){
+         return true;
+        }
+        else{ 
+         return false
+        }
+
+
+    }
+
+
+    document.onkeydown=function(e){
+        var keynum=window.event ? e.keyCode :e.which;
+        if(keynum==37){
+            move("left",matrix)
+        }
+        else if(keynum==38){
+            move("up",matrix)
+        }
+        else  if(keynum==39){
+            move("right",matrix)
+        }
+        else if(keynum==40){
+            move("down",matrix)
+          }
+       }
+      
+    
+
+
+
+
+
+</script>
+
+
+<script>
+    
+    var cong=document.querySelector('.Congradulation');
+    var loose=document.querySelector('.Loosewindow');
+    var gray=document.querySelector('.graybg');
+
+    function winwindow(){
+     cong.style.display="block";
+     gray.style.display="block";
+    }
+ 
+    function loosewindow(){
+        loose.style.display="block";
+        gray.style.display="block";
+       }
+     
+    function closewindow(){
+         cong.style.display="none";
+         loose.style.display="none";
+         gray.style.display="none";
+    }
+ 
+ 
+    cong.addEventListener("mousedown",function(e){
+
+         var x=e.pageX -cong.offsetLeft;
+         var y=e.pageY -cong.offsetTop;
+
+     function follow(e){
+             cong.style.left=e.pageX-x
+             cong.style.top=e.pageY-y }
+         
+     cong.addEventListener("mousemove",follow)
+ 
+     cong.addEventListener("mouseup",function(){
+        cong.removeEventListener("mousemove",follow)
+      })
+        // alert(x);
+     })
+ 
+     loose.addEventListener("mousedown",function(e){
+
+         var x=e.pageX -loose.offsetLeft;
+         var y=e.pageY -loose.offsetTop;
+
+     function follow2(e){
+             loose.style.left=e.pageX-x
+             loose.style.top=e.pageY-y }
+         
+     loose.addEventListener("mousemove",follow2)
+ 
+     loose.addEventListener("mouseup",function(){
+        loose.removeEventListener("mousemove",follow2)
+      })
+        // alert(x);
+     })
+ 
+
+
+ 
+</script>
+
+
+<script>
+    document.addEventListener('touchstart', handleTouchStart, false);        
+    document.addEventListener('touchmove', handleTouchMove, false);
+    
+    var xDown = null;                                                        
+    var yDown = null;
+    
+    function getTouches(evt) {
+      return evt.touches ||             // browser API
+             evt.originalEvent.touches; // jQuery
+    }                                                     
+                                                                             
+    function handleTouchStart(evt) {
+        const firstTouch = getTouches(evt)[0];                                      
+        xDown = firstTouch.clientX;                                      
+        yDown = firstTouch.clientY;                                      
+    };                                                
+                                                                             
+    function handleTouchMove(evt) {
+        if ( ! xDown || ! yDown ) {
+            return;
+        }
+    
+        var xUp = evt.touches[0].clientX;                                    
+        var yUp = evt.touches[0].clientY;
+    
+        var xDiff = xDown - xUp;
+        var yDiff = yDown - yUp;
+                                                                             
+        if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+            if ( xDiff > 0 ) {
+               /* left swipe */
+    
+               move("left",matrix)
+            } else {
+             /* right swipe */ 
+             move("right",matrix)
+            }                       
+        } else {
+            if ( yDiff > 0 ) {
+                /* up swipe */
+                move("up",matrix)
+            } else { 
+
+              /* down swipe */ 
+              move("down",matrix)
+            }                                                                 
+        }
+        /* reset values */
+        xDown = null;
+        yDown = null;                                             
+    };
+
+</script>
+
+</html>
