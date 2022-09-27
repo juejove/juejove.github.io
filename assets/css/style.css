@@ -479,17 +479,21 @@ h1, h2, h3, h4, h5, h6{
 	}
 }
 
-a.recent-work .title{
-	position: absolute;
-	top: 30px;
-	right: auto;
+div.col-sm-4 a{
+	text-align: center;
+}
 
-  font-size: 30px;
+div.col-sm-4 a b{
+	width: 200px;
+ margin: 15px auto 200px;
+
+
+  font-size: 32px;
   font-weight: 700;
   background-image: -webkit-linear-gradient(top,yellow,red);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
--webkit-text-stroke: 1px rgb(255, 255, 255);
+	-webkit-text-stroke: 1px rgb(255, 255, 255);
 }
 
 #photoslider{
