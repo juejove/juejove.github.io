@@ -413,7 +413,7 @@ text-align: center;
 
 
 <script>
-    var score=0;bestscore=0;
+    var score=0;
     //create elements
     for (i=0;i<4;i++){
        var temprow=document.createElement("div")
@@ -445,7 +445,14 @@ text-align: center;
     const newnum=[2,2,2,2,2,2,4]
 
     const diret=["left","right","up","down"]
-    
+    var bestscore
+   if(localStorage.getItem("best2048")) {
+    document.getElementById("highscore").innerHTML=localStorage.getItem("best2048")
+    bestscore=parseInt(localStorage.getItem("best2048")) 
+   }
+   else{
+    bestscore=0
+   }
 
 function initialize(){
         for (let i=0;i<4;i++){
@@ -511,13 +518,16 @@ function initialize(){
 
     document.getElementById("score").innerHTML=score
     document.getElementById("highscore").innerHTML=bestscore
+
     }
     
 
 
 
 function restart(){
-    if(score>bestscore){bestscore=score;}
+    if(score>bestscore){bestscore=score;
+    localStorage.setItem("best2048",bestscore)
+    }
     initialize()
  
 }
@@ -646,6 +656,7 @@ function restart(){
         
         if (score>bestscore){
             bestscore=score;
+            localStorage.setItem("best2048",bestscore)
         }
         showMatrix()
         loosewindow();
@@ -794,6 +805,7 @@ function restart(){
     var gray=document.querySelector('.graybg');
 
     function winwindow(){
+
      cong.style.display="block";
      gray.style.display="block";
     }
