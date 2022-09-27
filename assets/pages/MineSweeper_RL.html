@@ -531,7 +531,7 @@ div.instruction
           matrix[i][k]=sum;
         }
       }}
-      console.log(matrix)
+
 
 function initialize( rate ){
   var remain=Math.floor(col*row*rate);var originRemain=Math.floor(col*row*rate);
@@ -846,7 +846,6 @@ function getname(){
                 }// for loop
 
                 if (currentminecount==thisdom.getAttribute('value') && unknownNeibList.length>0){
-                  console.log(unknownNeibList,"going through neibour list") 
                  for (let k=0;k<unknownNeibList.length;k++){
                   touchUnknown(unknownNeibList[k])
                  }
@@ -943,7 +942,6 @@ function getname(){
         
         vm.vsafecube--;
         congra();
-        console.log("success get into touch 0 surrongding:",ele)
         for (let i=0;i<offsetx.length;i++){
    
         let newx=parseInt(ele.getAttribute('xPos'))+offsetx[i]
@@ -953,9 +951,7 @@ function getname(){
        if (document.querySelector(selectq)){
           let nei1=document.querySelector(selectq)
           if (nei1.className.includes('unknown') ){
-          console.log("deal with a unknown and existing block:",selectq,offsetx[i],offsety[i])
           if (nei1.getAttribute('value')==0 ){
-            console.log("found blank neibour when touching a blank",nei1)
           nei1.className='blank';
           neiList.push(nei1)
           vm.vsafecube--;
