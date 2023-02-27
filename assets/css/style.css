@@ -63,6 +63,9 @@ a:hover {
 	color: #4290ae;	
 }
 
+div.col-sm-4.blog-post h2{
+font-size: 28px;
+}
 
 h1, h2, h3, h4, h5, h6{		
 	margin: 0 0 15px 0;	
@@ -374,7 +377,7 @@ h1, h2, h3, h4, h5, h6{
     margin-bottom: 15px;
 }
 #testimonials .testimonial {
-	padding: 25px;
+	padding: 15px;
 }
 
 
@@ -504,4 +507,21 @@ div.col-sm-4 a b{
 	font-size: 50px;
 	background-color: #2B3E51;
 	left: 10%;
+}
+
+
+.testimonial img{
+	width: 190px;
+	height: 190px;
+
+}
+
+.contactInfo{
+	font-size: 25px;
+}
+
+.blog img{
+	width: 360px;
+	height: 216px;
+
 }
