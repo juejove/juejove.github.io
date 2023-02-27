@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript: Hello, World!</title>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="../js/jquery.js"></script>
+    <link rel="stylesheet" href="../css/button.css">
+
+    <style>
+        body{
+            background-color: rgb(95, 152, 98);
+            cursor: default;
+        }
+        #board{
+            background-image: url('../images/reversri/bg.jpg');
+            background-size: 140% 100%;
+            position: absolute;
+            margin: auto;
+            left: 0;
+            right: 0;
+            width: 46em;
+            height: 46em;
+        }
+        #squareScope{
+            position: absolute;
+
+            left: 1em;
+            top: 1em;
+            width: 45em;
+            height: 45em;
+        }
+
+
+        #console{
+            position: absolute;
+            left:40px;
+            top: 80px;
+            width: 15em;
+            height: 25em;
+        }
+
+        #title{
+            font-size: 3em;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }
+        .modeInfo{
+            font-size: 2em;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            color: rgb(20, 49, 4);
+        }
+        .aiInfo{
+            font-size: 1.5em;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            color: rgb(130, 4, 4);
+        }
+
+        .square{
+            border-width: 2px;
+            border-color: black;
+            border-style: outset;
+            position: relative;
+            display:inline-block;
+            margin-left: 1.8px;
+            margin-right: 1.8px;
+            margin-top: 0px;
+
+            width: 5em;
+            height:5em;
+        }
+        .type1{
+            background-image: url('../images/reversri/mi-brami-Round-Black-Crystal-Button.svg');
+            size: 100%;
+        }
+        .type2{
+            background-image: url('../images/reversri/Steren-Glossy-circle.svg');
+            size: 92% 92%;
+        }
+        .type3{
+            background-image: url('../images/reversri/nlyl-blue-circle.svg');
+            background-size: 45%;
+            background-repeat:no-repeat;
+            background-position: center;
+
+        }
+        .type4{
+            background-image: url('../images/reversri/roystonlodge-Simple-Glossy-Circle-Button-Red.svg');
+            background-size: 40%;
+            background-repeat:no-repeat;
+            background-position: center;
+
+        }
+        .question{
+            cursor: pointer;
+        }
+        a{
+            color: rgb(0, 72, 21);
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+
+
+
+<script type="text/babel" >
+    const { useState } = React
+
+    var cubeInitial=[
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0]
+    ]
+
+
+    var cubeInitial1=[
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,3,0,0,0],
+    [0,0,0,1,2,3,0,0],
+    [0,0,3,2,1,0,0,0],
+    [0,0,0,3,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0]
+    ]
+
+
+
+
+    var cubeInitial4=[
+    [3,0,0,0,0,0,0,0],
+    [1,2,2,3,0,0,0,0],
+    [0,2,2,2,3,0,0,0],
+    [3,2,2,1,2,3,0,0],
+    [1,0,4,2,2,3,0,0],
+    [0,0,0,4,3,2,0,0],
+    [0,0,0,0,0,0,2,0],
+    [0,0,0,0,0,0,0,1]
+    ]
+
+
+    var cubeInitial6=[
+    [3,0,0,0,0,0,0,0],
+    [1,3,3,3,3,3,0,0],
+    [0,3,2,2,2,3,0,0],
+    [3,2,2,1,2,3,0,0],
+    [1,3,2,2,2,3,0,0],
+    [0,3,3,4,3,3,0,0],
+    [0,0,0,0,0,0,2,0],
+    [0,0,0,0,0,0,0,1]
+    ]
+    var cubeInitial19=[
+    [1,2,1,2,1,1,1,1],
+    [1,2,2,2,2,2,1,1],
+    [1,2,2,2,2,2,1,1],
+    [2,2,2,1,2,2,1,1],
+    [1,2,2,2,2,2,1,1],
+    [1,2,2,3,3,3,1,2],
+    [2,2,2,2,2,2,2,2],
+    [2,2,2,2,2,2,3,1]
+    ]
+
+    var cubeInitial16=[
+    [2,1,0,0,0,0,0,0],
+    [1,0,0,0,0,0,0,0],
+    [2,1,0,0,0,0,0,0],
+    [3,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0]
+    ]
+
+    const weightmap=
+    [[500,-35,10,5,5,10,-25,500],
+    [-35,-45,1,1,1,1,-45,-25],
+    [10,1,3,2,2,3,1,10],
+    [5,1,2,1,1,2,1,5],
+    [5,1,2,1,1,2,1,5],
+    [10,1,3,2,2,3,1,10],
+    [-25,-45,1,1,1,1,-45,-35],
+    [500,-25,10,5,5,10,-35,500]]
+
+
+
+   // var gamearray=cubeInitial.slice()
+
+
+   function reverseColor(color){
+    if (color==1) return 2
+    else if (color==2) return 1
+   }
+
+
+    function Blog() {
+        const [gamemode, setGamemode] = useState('2 PLAYERS (FACE TO FACE)');
+        const [gamearray, setGamearray] = useState(cubeInitial.slice());
+        const [sideinfo, setSideinfo] = useState();
+        const [aiinfo, setAiinfo] = useState('');
+        const [started, setStarted] = useState('visible'); 
+        const neighborx=[-1,-1,-1,0,0,1,1,1], neighbory=[-1,0,1,-1,1,-1,0,1]
+
+        const restartfunc=()=>{
+            setGamearray(cubeInitial.slice())
+            setSideinfo("")
+            setStarted('visible')
+            setAiinfo('')
+            
+        }
+
+
+        const start=()=>{
+            let initialcopy=JSON.stringify(cubeInitial1)
+            console.log(initialcopy)
+           setGamearray(JSON.parse(initialcopy))
+           setSideinfo("BLACK'S TURN")
+           setStarted('hidden')
+        }
+
+
+
+        const switchmode=()=>{
+            let temp=gamemode=='2 PLAYERS (FACE TO FACE)'?'COMPETE WITH AI':'2 PLAYERS (FACE TO FACE)'
+            setGamemode(temp)
+        }
+
+
+        function Cube(props) {
+            
+
+
+            function scanning(color,x,y,change){
+            var totalcheck=false
+            //scan left-up
+            if(x>1 && y>1 && gamearray[x-1][y-1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+
+                for (let i=2;i<Math.min(x,y)+1;i++){
+                    if (gamearray[x-i][y-i]>2 || gamearray[x-i][y-i]==0) break
+                    else if (gamearray[x-i][y-i]==color) {
+                        console.log("FOUND SAME COLOR l u",x-i,y-i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x-i][y-i]!=color  && gamearray[x-i][y-i]<3 && gamearray[x-i][y-i]>0) gamearray[x-i][y-i]=color
+                    }
+                }
+            }
+            //scan right-down
+            if(x<6 && y<6 && gamearray[x+1][y+1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                
+                for (let i=2;i<8-Math.max(x,y);i++){
+                    if (gamearray[x+i][y+i]>2 || gamearray[x+i][y+i]==0) break
+                    else if (gamearray[x+i][y+i]==color) {
+                        console.log("FOUND SAME COLOR ↘",x+i,y+i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x+i][y+i]!=color  && gamearray[x+1][y+i]<3 && gamearray[x+1][y+i]>0) gamearray[x+i][y+i]=color
+                    }
+                }
+            }
+
+            //scan right-up
+            if(x>1 && y<6 && gamearray[x-1][y+1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                
+                for (let i=2;i<Math.min(8-y,x+1);i++){
+                    if (gamearray[x-i][y+i]>2 || gamearray[x-i][y+i]==0) break
+                    else if (gamearray[x-i][y+i]==color) {
+                        console.log("FOUND SAME COLOR r u",x-i,y+i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x-i][y+i]!=color  && gamearray[x-i][y+i]<3 && gamearray[x-i][y+i]>0)  gamearray[x-i][y+i]=color
+                    }
+                }
+            }
+
+            //scan left-down
+            if(x<6 && y>1 && gamearray[x+1][y-1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                
+                for (let i=2;i<Math.min(y+1,8-x);i++){
+                    if (gamearray[x+i][y-i]>2 || gamearray[x+i][y-i]==0) break
+                    else if (gamearray[x+i][y-i]==color) {
+                        console.log("FOUND SAME COLOR ↙",x+i,y-i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x+i][y-i]!=color && gamearray[x+i][y-i]<3 && gamearray[x+i][y-i]>0)   gamearray[x+i][y-i]=color
+                    }
+                }
+            }
+
+            //scan up
+            if (x>1 && gamearray[x-1][y]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                for (let i=2;i<x+1;i++){
+                    if (gamearray[x-i][y]>2 || gamearray[x-i][y]==0) break
+                    else if (gamearray[x-i][y]==color) {
+                        console.log("FOUND SAME COLOR ↑ ",x-i,y,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x-i][y]!=color  && gamearray[x-i][y]<3   && gamearray[x-i][y]>0) gamearray[x-i][y]=color
+                    }
+                }
+            }
+
+
+            //scan down
+            if (x<6 && gamearray[x+1][y]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                for (let i=2;i<8-x;i++){
+                    if (gamearray[x+i][y]>2 || gamearray[x+i][y]==0) break
+                    else if (gamearray[x+i][y]==color) {
+                        console.log("FOUND SAME COLOR ↓ ",x+i,y,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x+i][y]!=color  && gamearray[x+i][y]<3  && gamearray[x+i][y]>0) gamearray[x+i][y]=color
+                    }
+                }
+            }
+
+
+            //scan left
+            if (y>1 && gamearray[x][y-1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                for (let i=2;i<y+1;i++){
+                    if (gamearray[x][y-i]>2 || gamearray[x][y-i]==0) break
+                    else if (gamearray[x][y-i]==color) {
+                        console.log("FOUND SAME COLOR ←",x,y-i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x][y-i]!=color && gamearray[x][y-i]<3  && gamearray[x][y-i]>0  ) gamearray[x][y-i]=color
+                    }
+                }
+            }
+            //scan right
+            if (y<6 && gamearray[x][y+1]==reverseColor(color)){
+                let check=false
+                var recordi=0
+                for (let i=2;i<8-y;i++){
+                    if (gamearray[x][y+i]>2 || gamearray[x][y+i]==0) break
+                    else if (gamearray[x][y+i]==color) {
+                        console.log("FOUND SAME COLOR → ",x,y+i,i);
+                        recordi=i; check=true;totalcheck=true; break;}
+                }
+                if (check && change){
+                    for (let i=1;i<recordi;i++){
+                      if   (gamearray[x][y+i]!=color && gamearray[x][y+i]<3 && gamearray[x][y+i]>0) gamearray[x][y+i]=color
+                    }
+                }
+            }
+
+            return totalcheck
+            }
+
+
+            function evaluateNext(color){
+
+                sideinfo=="BLACK'S TURN"?setSideinfo("WHITE'S TURN") :setSideinfo("BLACK'S TURN") 
+                
+                let gamearraycopy=gamearray.slice()
+                var pass=true, completed=true, count1=0,count2=0,bigvalue=[-1,-1,-999]
+                for (let i = 0; i < 8; i++) {
+                    for (let p = 0; p < 8; p++) {// for each cube
+                    if (gamearraycopy[i][p]==1) count1++
+                    else if(gamearraycopy[i][p]==2) count2++
+
+                    else if (gamearraycopy[i][p]!=1 && gamearraycopy[i][p]!=2){// only for uncertain ones
+                        gamearraycopy[i][p]=0
+                        completed=false
+                    
+                       for (let m=0;m<8;m++){// 遍历八个邻居，缩小范围至邻接格子
+                        if (i+neighborx[m]<8 && i+neighborx[m]>-1 && p+neighbory[m]<8 && p+neighbory[m]>-1){
+                            if (gamearraycopy[i+neighborx[m]][p+neighbory[m]]==(color==2?1:2)){
+                                if( scanning(color,i,p,false))//只对找到有邻居的块做scann
+                                {
+                                    if (weightmap[i][p]>bigvalue[2]) bigvalue=[i,p,weightmap[i][p]]
+                                    //gamearraycopy[i][p]=color+2
+                                    if (pass==true) pass=false
+                                }
+                                break;
+                                }
+                            }
+                       }
+                    }    
+                    }
+                }
+                
+                if (!pass){
+                gamearraycopy[bigvalue[0]][bigvalue[1]]=color
+                scanning(color,bigvalue[0],bigvalue[1],true)
+    
+                setGamearray(gamearraycopy)
+
+                }
+
+
+                else if (count1==0 ){
+                    alert('GAME OVER! WHITE WINS!')
+                }
+                else if (count2==0){
+                    alert('GAME OVER! BLACK WINS!')
+                }
+                else if (pass) {
+                    if (completed){
+                        let winner
+                        if (count1>count2) winner='BLACK WINS!!'
+                        else if (count1==count2)  winner='TIE GAME'
+                        else if (count1<count2) winner='WHITE WINS!!'
+                        
+                        setSideinfo("")
+                        let gamecompleteinfo="GAME OVER! BLACK:"+ count1+  ' | WHITE:' + count2+'        '+ winner
+                        
+                        alert(gamecompleteinfo)
+                    }
+                    
+                    else{ color==2? alert("NO PLACE TO PUT DOWN! BLACK GETS ANOTHER TURN"):alert("NO PLACE TO PUT DOWN! WHITE GETS ANOTHER TURN")
+
+                    detectnext(reverseColor(color))
+                    
+                    }
+
+                }
+               
+                detectnext(1)
+                 color==2?setSideinfo("BLACK'S TURN") :setSideinfo("WHITE'S TURN" ) 
+            }
+
+
+
+            function detectnext(color){
+
+             //   if (sameside==false){
+                sideinfo=="BLACK'S TURN"?setSideinfo("WHITE'S TURN") :setSideinfo("BLACK'S TURN") 
+           //  } 
+
+
+                let gamearraycopy=gamearray.slice()
+                var pass=true, completed=true, count1=0,count2=0
+                for (let i = 0; i < 8; i++) {
+                    for (let p = 0; p < 8; p++) {// for each cube
+                    if (gamearraycopy[i][p]==1) count1++
+                    else if(gamearraycopy[i][p]==2) count2++
+
+                    else if (gamearraycopy[i][p]!=1 && gamearraycopy[i][p]!=2){// only for uncertain ones
+                        gamearraycopy[i][p]=0
+                        completed=false
+                    
+                       for (let m=0;m<8;m++){// 遍历八个邻居，缩小范围至邻接格子
+                        if (i+neighborx[m]<8 && i+neighborx[m]>-1 && p+neighbory[m]<8 && p+neighbory[m]>-1){
+                            if (gamearraycopy[i+neighborx[m]][p+neighbory[m]]==(color==2?1:2)){
+                                if( scanning(color,i,p,false))//只对找到有邻居的块做scann
+                                {
+                                    gamearraycopy[i][p]=color+2
+                                    if (pass==true) pass=false
+                                }
+                                 
+                                
+                                break;
+                                }
+                            }
+                       }
+                    }    
+                    }
+                }
+                setGamearray(gamearraycopy)
+                if (count1==0 ){
+                    alert('GAME OVER! WHITE WINS!')
+                    setAiinfo('GAME OVER! WHITE WINS!')
+                }
+                else if (count2==0){
+                    alert('GAME OVER! BLACK WINS!')
+                    setAiinfo('GAME OVER! WHITE WINS!')
+
+                }
+                else if (pass) {
+                    if (completed){
+                        let winner
+                        if (count1>count2) winner='BLACK WINS!!'
+                        else if (count1==count2)  winner='TIE GAME'
+                        else if (count1<count2) winner='WHITE WINS!!'
+                        
+                        setSideinfo("")
+                        let gamecompleteinfo="GAME OVER! BLACK:"+ count1+  'WHITE:' + count2+'        '+ winner
+                        
+                        alert(gamecompleteinfo)
+                        setAiinfo(gamecompleteinfo)
+                    
+                    }
+                    else{ color==2? alert("NO PLACE TO PUT DOWN! BLACK GETS ANOTHER TURN"):alert("NO PLACE TO PUT DOWN! WHITE GETS ANOTHER TURN")
+
+                    detectnext(reverseColor(color))
+                    color==2?setSideinfo("BLACK'S TURN") :setSideinfo("WHITE'S TURN" ) 
+                    }
+
+                }
+
+                
+
+                    
+
+            }
+            
+
+        const cubeFuc=(type)=>{
+
+            if(gamemode=='2 PLAYERS (FACE TO FACE)'){
+                if (type==3){
+                    let gamearraycopy=gamearray.slice()
+    
+    
+    
+                    gamearraycopy[props.x][props.y]=1
+    
+                    scanning(1,props.x,props.y,true)
+    
+    
+                    setGamearray(gamearraycopy)
+                    detectnext(2)
+    
+    
+    
+                   // console.log(props.x,props.y,props.content)
+                   }
+                   else if(type==4){
+                    let gamearraycopy=gamearray.slice()
+    
+                    gamearraycopy[props.x][props.y]=2
+                    scanning(2,props.x,props.y,true)
+    
+                    setGamearray(gamearraycopy)
+                    detectnext(1)
+    
+    
+                   }
+    
+
+            }
+
+            else if (gamemode=='COMPETE WITH AI'){
+                if (type==3){
+                    let gamearraycopy=gamearray.slice()
+    
+    
+    
+                    gamearraycopy[props.x][props.y]=1
+    
+                    scanning(1,props.x,props.y,true)
+
+                    for (let i = 0; i < gamearraycopy.length; i++) {
+                        for (let p = 0; p < gamearraycopy[i].length; p++) {
+                            if (gamearraycopy[i][p]>2){
+                                gamearraycopy[i][p]=0
+                            }
+                        }
+                    }
+    
+                    setGamearray(gamearraycopy)
+                    sideinfo=="BLACK'S TURN"?setSideinfo("WHITE'S TURN") :setSideinfo("BLACK'S TURN") 
+                    setAiinfo('AI thinking...')
+
+                    setTimeout(thinking, 500);
+                   function thinking(){
+
+                    evaluateNext(2)
+                    setAiinfo('')
+
+                    } 
+    
+    
+    
+                   // console.log(props.x,props.y,props.content)
+                   }
+
+
+            }
+
+
+        }
+
+            return(
+                <div class={'square type'+props.content} onClick={()=>cubeFuc(props.content)} x={props.x} y={props.y}></div>
+            )
+            
+        }
+
+
+        function createCube(matrix){
+            const cubearray=[];
+
+            for (let i = 0; i < matrix.length; i++) {
+                for (let p = 0; p < matrix[i].length; p++) {
+                cubearray.push(<Cube content={matrix[i][p]} x={i} y={p}  />);
+                }
+                
+                cubearray.push(<div></div>)
+            }
+
+
+            return cubearray
+        }
+
+        const instruction="Instructions: Place your piece on an empty square so that one (or more) of the opponent's pieces are between yours horizontally, vertically or diagonally, your opponents' pieces are captured and become yours.If you can't capture anywhere, then you lose a turn. When there is no empty space, the total amount of pieces are counted for each player and who owns more pieces win the game."
+        var blogIni=[]
+        blogIni.push(   
+            <>
+            <div id='console'>
+               <span id='title'>Reversi </span> <img class='question' onClick={()=>alert(instruction)} style={ {width:'30px' ,height: '30px'}}src="../images/reversri/mono-gnome-question.svg" alt=""/>
+                <br/> <br/>
+                <div style={{position:'relative',margin:'auto',left:0,right:0,width:'10em'}}>
+                 <div class='button large  red'  onClick={()=>restartfunc() } >RESTART</div> <br/><br/>
+                 <div class='button large  red' onClick={()=>start() } style={{visibility:started}}>START</div><br/><br/>
+                 <div class='button large  red' onClick={()=>switchmode() }  style={{visibility:started}}> SWITCH MODE</div>
+                </div>
+                <br/><br/><br/>
+                CURRENT GAME MODE: 
+                <br/>
+                <span class='modeInfo' >{gamemode} </span>
+                
+                <br/><br/>
+                <span class='modeInfo'>{sideinfo} </span>
+                <br/><br/>
+                <span class='aiInfo'>{aiinfo} </span>
+                <br/>
+                <br/>by <a href="https://juejove.github.io/" target="_blank" rel="noopener noreferrer">Robin Lin</a> 
+            </div>
+        <div id='board'>
+            <div id='squareScope'> 
+            { createCube(gamearray)} 
+        </div>
+        </div>
+        </>
+        
+        )
+        return (blogIni)
+        }
+        
+    
+
+
+    ReactDOM.render(
+    <Blog />, document.getElementById('root'))
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
+
