@@ -47,29 +47,26 @@
 		<nav>
 			<ul class="nav nav-pills nav-stacked">
 				<li>
-					<a href="#wrapper"><i class="fa fa-home"></i> Home</a>
+					<a href="#"><i class="fa fa-home"></i> Home</a>
 				</li>
 				<li>
-					<a href="#portfolio"><i class="fa fa-bookmark"></i> Latest Works</a>
+					<a href="#recent"><i class="fa fa-bookmark"></i> Latest Works</a>
 				</li>
 				<li>
-					<a href="#services"><i class="fa fa-tasks"></i> Skills</a>
+					<a href="#finding"><i class="fa fa-wordpress"></i> New Findings</a>
 				</li>
 				<li>
-					<a href="#blog"><i class="fa fa-wordpress"></i> New Findings</a>
+					<a href="#resume" target=""><i class="fa fa-heart"></i> Resume </a>
 				</li>
 				<li>
-					<a href="#parallax"><i class="fa fa-heart"></i> Resume</a>
-				</li>
-				<li>
-					<a href="#testimonials"><i class="fa fa-thumbs-up"></i> Education</a>
+					<a href="#education"><i class="fa fa-thumbs-up"></i> Education</a>
 				</li>
 				<li>
 					<a href="#contact"><i class="fa fa-phone-square"></i> Contact</a>
 				</li>
 			</ul>
 		</nav>
-		<div class="social">
+		<!-- <div class="social">
 			<h2>Stay Connected</h2>
 			<ul>
 				<li><a href="https://www.facebook.com/robin.lin.71697/" target="_blank"><i
@@ -78,7 +75,8 @@
 				<li><a href=""><i class="fa fa-tumblr-square fa-3x"></i></a></li>
 				<li><a href=""><i class="fa fa-google-plus-square fa-3x"></i></a></li>
 			</ul>
-		</div>
+		</div> -->
+
 	</div><!-- #drawer-right -->
 
 	<div id="wrapper">
@@ -95,7 +93,7 @@
 				</section>
 				<section class="center">
 					<div class="slogan">
-						You live in this, and dwell in lovers' eyes
+						Welcome to Robin LIN space
 					</div>
 					<div class="secondary-slogan">
 						Robin Lin Front-end Collections
@@ -104,10 +102,12 @@
 
 			</div>
 		</div><!-- header -->
-		<div class="content-block" id="blog">
-			<div class="container">
-				<header class="block-heading cleafix">
-					<a href="#" class="btn btn-o btn-lg pull-right">View All</a>
+
+
+		<div class="content-block" >
+			<div class="container" >
+				<header class="block-heading cleafix" id="recent" >
+					<a href="#" class="btn btn-o btn-lg pull-right">Top</a>
 					<h1>My latest Works</h1>
 					<p> Take a look at some of my recent projects</p>
 				</header>
@@ -157,7 +157,7 @@
 							<a href="./assets/pages/Play2048.html" target="_blank">
 								<h2>2048</h2>
 							</a>
-							<p>2048 is a popular single-player game. It’s a type of “sliding block puzzle”. The object of the game is to combine the numbers displayed on the tiles until you reach 2048.
+							<p>2048 is a popular single-player game. It's a type of “sliding block puzzle”. The object of the game is to combine the numbers displayed on the tiles until you reach 2048.
 							</p>
 
 						</div>
@@ -196,8 +196,11 @@
 							</a>
 						</div>
 						<div class="col-sm-4">
-							<a href="#" class="recent-work" target="_blank"
-								style="background-image:url(assets/images/six_1-320x240.jpg); background-size:cover">
+							<a href="./assets/pages/Reversi.HTML" class="recent-work" target="_blank"
+								style="background-image:url(assets/images/reversri/Reversi\ OG\ Image.png); background-size:cover">
+								<div>
+									<b class="title">Reversi</b>
+								</div>
 								<span class="btn btn-o-white">Jump In!</span>
 							</a>
 						</div>
@@ -218,17 +221,18 @@
 							<a href="./assets/pages/Sheep Tile.html" target="_blank">
 								<h2>Sheep Tile</h2>
 							</a>
-							<p>A React game: Collect three same type tile blocks into your temporary collection strip and they dissapear. Too easy! Don't overload your collection stripe and that's it.
+							<p>A React popular puzzle game: Collect three same type tile blocks into your temporary collection strip and they dissapear. Too easy! Don't overload your collection stripe and that's it.
 								And you get two chances to remove some tiles from your strip as well. A marvelous fireworks🎆(Canvas) is awaiting you!
 							</p>
 
 						</div>
 						<div class="col-sm-4 blog-post">
-							<a href="#">
-								<h2>Tetris</h2>
+							<a href='./assets/pages/Reversi.HTML' target="_blank">
+								<h2>Reversi</h2>
 							</a>
-							<p>In at accumsan risus. Nam id volutpat ante. Etiam vel mi mattis, vulputate nunc nec,
-								sodales nibh. Etiam nulla magna, gravida eget ultricies sit amet, hendrerit in lorem.
+							<p>	Reversi (also known as Othello) is a pretty simple game. It consists of a 8x8 square board, 
+								and pieces with one black and one white side. the aim of the game is to get more of your pieces on the board than the opponent's pieces.
+								Developed via React with AI option to compete with player.
 							</p>
 
 						</div>
@@ -257,10 +261,9 @@
 						<div class="col-md-4">
 							<div class="service">
 								<i class="fa fa-heart-o"></i>
-								<h2>3D Modeling</h2>
-								<p>In at accumsan risus. Nam id volutpat ante. Etiam vel mi mattis, vulputate nunc nec,
-									sodales nibh. Etiam nulla magna, gravida eget ultricies sit amet, hendrerit in
-									lorem.</p>
+								<h2>Photogrammetry & 3D Modeling</h2>
+								<p>Photogrammetry is the art and science of extracting 3D information from photographs. 
+								The process involves taking overlapping photographs of an object, structure, or space and converting them into 2D or 3D digital models.</p>
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -279,8 +282,8 @@
 
 		<div class="content-block" id="portfolio">
 			<div class="container">
-				<header class="block-heading cleafix">
-					<a href="#" class="btn btn-o btn-lg pull-right">View All</a>
+				<header class="block-heading cleafix" id="finding" name="finding">
+					<a href="#" class="btn btn-o btn-lg pull-right">Top</a>
 					<h1>New Findings</h1>
 					<p>Keep up with the latest happenings.</p>
 				</header>
@@ -327,7 +330,7 @@
 								<h2>DRY out React Code into Presentational Components</h2>
 							</a>
 							<div class="date">16 Jun, 2017</div>
-							<p>Don’t Repeat Yourself (DRY) is a programming principle which states that every logic or piece of knowledge in your code should be represented by only one abstraction. 
+							<p>Don't Repeat Yourself (DRY) is a programming principle which states that every logic or piece of knowledge in your code should be represented by only one abstraction. 
 								With that in mind, changing a given element should not affect the unrelated parts of the application.
 								
 							</p>
@@ -345,10 +348,10 @@
 
 
 
-		<div class="content-block parallax" id="parallax">
-			<div class="container text-center">
+		<div class="content-block parallax"  id="parallax">
+			<div class="container text-center" id="resume">
 				<h1>
-					Currently live in Canberra, ACT in Australia. Actively looking for local & remote front-end web
+					Actively looking for local & remote front-end web
 					developer & GIS opportunies.
 
 				</h1>
@@ -358,7 +361,7 @@
 		</div><!-- #parallax -->
 
 		<div class="content-block" id="testimonials">
-			<div class="container">
+			<div class="container" id="education">
 				<header class="block-heading cleafix">
 					<h1>Education</h1>
 					<p>My education experience </p>
@@ -379,11 +382,8 @@
 							<div class="testimonial">
 								<img src="assets/images/unimelb.png"> <br />
 								<strong>The University of Melbourne</strong><br />
-								<span>CEO, Apple Inc</span>
-								<p>In at accumsan risus. Nam id volutpat ante. Etiam vel mi mattis, vulputate nunc nec,
-									sodales nibh. Etiam nulla magna, gravida eget ultricies sit amet, hendrerit in
-									lorem.</p>
-
+								<strong>Master of Engineering (Spatial) </strong><br/>
+								<p>The University of Melbourne is a public research university located in Melbourne, Australia. Founded in 1853, it is Australia's second oldest university and the oldest in Victoria.</p>
 							</div>
 						</div>
 
