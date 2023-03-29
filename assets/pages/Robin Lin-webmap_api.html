@@ -1,217 +1,663 @@
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Robin- webmap demo</title>
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-  <link rel="icon" type="image/x-icon" href="http://vectips.com/wp-content/uploads/2017/07/project-preview-large-1.png"> 
-   <title>ArcGIS API for JavaScript Tutorials: Change the basemap layer</title>
+    <link rel="icon" type="image/x-icon" href="data:image/png;base64,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">  <title>ArcGIS API for JavaScript Tutorials: Change the basemap layer</title>
+ 
+  <link rel="stylesheet" href="../css/layui/css/layui.css">
+
+
+  <!-- Leaflet CDN -->
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+  integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+  crossorigin=""/>
+  
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+  integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+  crossorigin=""></script>
+<!-- Leaflet->ESRI -->
+<script src="https://unpkg.com/esri-leaflet@^3.0.8/dist/esri-leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet-vector@3.1.3/dist/esri-leaflet-vector.js"></script>
+<!-- Leaflet->Load Leaflet MarkerCluster and Esri Leaflet Cluster from CDN -->
+<link rel="stylesheet" type="text/css"
+href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css"
+integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA=="
+crossorigin="">
+<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css"
+integrity="sha512-mQ77VzAakzdpWdgfL/lM1ksNy89uFgibRQANsNneSTMD/bj0Y/8+94XMwYhnbzx8eki2hrbPpDm0vD0CiT2lcg=="
+crossorigin="">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js"
+integrity="sha512-pWPELjRaw2ZdoT0PDi7iRpRlk1XX3rtnfejJ/HwskyojpHei+9hKpwdphC4yssNt4FM0TjMQOmMrk6ZYSn274w=="
+crossorigin=""></script>
+<script src="https://unpkg.com/esri-leaflet-cluster@3.0.0/dist/esri-leaflet-cluster.js"
+integrity="sha512-XFCzSxay1bEwLt/pTNuKEw11WbMGlWUqSLMGUtsle2Zbddt2C5uf18w0HeHbc0NP9BTFy1Mzhab7Bkr+nxp34g=="
+crossorigin=""></script>
+
+<script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/dist/Leaflet.GoogleMutant.js"></script>
+<script
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
+defer
+></script>
+
+
+
+  <!-- CDN for mapbox -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+   
+
+
+  <!-- CDN for Arcgis rest api -->
+<link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
+<script src="https://js.arcgis.com/4.24/"></script>
+
   <style>
-    html, body, #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
+    .mapcontainer{
+        background-color: rgb(222, 222, 222);
+        position:fixed;
+        width: 94%;
+        height: 75%;
+        min-height: 75%;
+        margin-left: 3%;
+        margin-right: 15px;
+        margin-top: 5px;
     }
+
+    #menu {
+        margin-top: 5px;
+        position: absolute;
+        background: #efefef;
+        margin-left: 3%;
+        margin-right: 15px;
+        padding: 10px;
+        font-family: 'Open Sans', sans-serif;
+        }
+    
   </style>
-  
-  <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
-  <script src="https://js.arcgis.com/4.24/"></script>
 
-  <script>
-    const YOUR_API_KEY = "AAPK25bc5b77803d441685137e4b56db8373vrGnsfGxdmrJPB15B32fJ2dFZTKw8T12YQUNI5kemiaQAfPI9fY0TNJSOGd2aiEI"
-    const apiKey = YOUR_API_KEY;
-
-    require([
-      "esri/config",
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/widgets/BasemapToggle",
-      "esri/widgets/BasemapGallery",
-      "esri/widgets/Expand",
-      "esri/layers/FeatureLayer",
-      "esri/widgets/Search",
-      "esri/Graphic","esri/rest/route","esri/rest/support/RouteParameters","esri/rest/support/FeatureSet",
-      "esri/widgets/LayerList",
-    ], function(esriConfig, Map, MapView, BasemapToggle, BasemapGallery,Expand,FeatureLayer,Search,Graphic, route, RouteParameters,FeatureSet,LayerList) {
-
-      esriConfig.apiKey = YOUR_API_KEY;
-
-      const map = new Map({
-        basemap: "arcgis-topographic"
-      });
-
-      const view = new MapView({
-        container: "viewDiv",
-        map: map,
-        center: [149.065, -35.239],
-        zoom: 11
-      });
-
-      const basemapGallery = new BasemapGallery({
-        view: view,
-        container: document.createElement("div"),
-        source: {
-          query: {
-            title: '"World Basemaps for Developers" AND owner:esri'
-          }
-        },
-      });
-
-      const bgExpand = new Expand({
-        view: view,
-        content: basemapGallery
-      });
-
-      basemapGallery.watch("activeBasemap", () => {
-        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
-
-        if (mobileSize) {
-          bgExpand.collapse();
-        }
-      });
-
-      // Add the expand instance to the ui
-
-      view.ui.add(bgExpand, "top-right");
-
-
-      const popupBridgeford = {
-        "title": "Road bridge or ford",
-        "content": "<b>Name:</b> {NAME}<br>"+
-        "<b>Purpose:</b> {PURPOSE}<br>"+
-        "<b>Crossingstructure:</b> {CROSSINGSTRUCTURE}<br>"+
-        "<b>Feature type:</b> {FEATURETYPE}<br>"+
-        "<b>Attribute source:</b> {ATTRIBUTESOURCE} m"
-      }
-
-      const popupRoad = {
-        "title": "Road information",
-        "content": "<b>Name:</b> {NAME}<br>"+
-        "<b>Class:</b> {CLASS}<br>"+
-        "<b>st_length(shape):</b> {st_length(shape)}"
-
-        //(result.attributes.length*1.60934).toFixed(2)
-      }
-
-
-      const RoadbridgefordLayer = new FeatureLayer({
-
-       url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/8",
-
-       outFields: ["NAME","PURPOSE","CROSSINGSTRUCTURE","FEATURETYPE","ATTRIBUTESOURCE"],
-       popupTemplate: popupBridgeford
-      });
-
-
-      const RoadnetworkLayer = new FeatureLayer({
-
-         url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/15",
-        outFields: ["NAME","CLASS","st_length(shape)"],
-        popupTemplate: popupRoad
-       });
-
-      map.add(RoadnetworkLayer)
-      map.add(RoadbridgefordLayer)
-
-      const searchWidget = new Search({
-        view: view
-      });
-
-      view.ui.add(searchWidget, {
-        position: "top-right",
-        index: 5
-      });
-    
-      const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
-
-
-      function addGraphic(type, point) {
-          const graphic = new Graphic({
-            symbol: {
-              type: "simple-marker",
-              color: (type === "origin") ? "white" : "black",
-              size: "10px"
-            },
-            geometry: point
-          });
-          view.graphics.add(graphic);
-        }
-  
-      view.on("click", function(event){
-  
-          if (view.graphics.length === 0) {
-            addGraphic("origin", event.mapPoint);
-          } else if (view.graphics.length === 1) {
-            addGraphic("destination", event.mapPoint);
-            getRoute(); 
-          } else {
-            view.graphics.removeAll();
-            addGraphic("origin",event.mapPoint);
-          }
-    
-        });
-    
-        function getRoute() {
-          const routeParams = new RouteParameters({
-            stops: new FeatureSet({
-              features: view.graphics.toArray()
-            }),
-            returnDirections: true
-          });
-    
-          route.solve(routeUrl, routeParams)
-          .then(function(data) {
-            data.routeResults.forEach(function(result) {
-              result.route.symbol = {
-                type: "simple-line",
-                color: [5, 150, 255],
-                width: 3
-              };
-              view.graphics.add(result.route);
-            });
-            if (data.routeResults.length > 0) {
-              const directions = document.createElement("ol");
-              directions.id="directions"
-              directions.hidden=false
-              directions.classList = "esri-widget esri-widget--panel esri-directions__scroller";
-              directions.style.marginTop = "0";
-              directions.style.padding = "15px 15px 15px 30px";
-              const features = data.routeResults[0].directions.features;
-              const delbtn = document.createElement("button");
-              delbtn.innerHTML="Close"
-              delbtn.onclick = function(){document.getElementById("directions").hidden=true};
-              directions.appendChild(delbtn);
-              const routetitle = document.createElement("a");
-              routetitle.innerHTML="<br>Route:<br>"
-              directions.appendChild(routetitle);
-              features.forEach(function(result,i){
-                  const direction = document.createElement("li");
-                  direction.innerHTML = result.attributes.text + " (" + (result.attributes.length*1.60934).toFixed(2) + " km)";
-
-                  directions.appendChild(direction);
-                });
-                view.ui.empty("bottom-left");
-                view.ui.add(directions, "bottom-left");
-            }
-          })
-        }
-      
-        
-        view.when(() => {
-          const layerList = new LayerList({
-            view: view
-          });
-
-          // Add widget to the top right corner of the view
-      view.ui.add(layerList, "top-right");
-          });
-
-
-
-    });
-  </script>
 </head>
 <body>
-  <div id="viewDiv"></div>
+
+
+<div class="layui-tab layui-tab-brief" lay-filter="demo">
+    <ul class="layui-tab-title">
+      <li class="layui-this">ArcGIS REST API</li>
+      <li>Mapbox API</li>
+      <li>Leaflet API </li>
+      <li>Leaflet-Google Map API</li>
+      <li>Google Map API</li>
+    </ul>
+    <div class="layui-tab-content">
+      <div class="layui-tab-item  layui-show ">
+        <div class="mapcontainer" id="viewDiv"></div>
+
+        <script>
+            const YOUR_API_KEY = "AAPK25bc5b77803d441685137e4b56db8373vrGnsfGxdmrJPB15B32fJ2dFZTKw8T12YQUNI5kemiaQAfPI9fY0TNJSOGd2aiEI"
+            const apiKey = YOUR_API_KEY;
+        
+            require([
+              "esri/config",
+              "esri/Map",
+              "esri/views/MapView",
+              "esri/widgets/BasemapToggle",
+              "esri/widgets/BasemapGallery",
+              "esri/widgets/Expand",
+              "esri/layers/FeatureLayer",
+              "esri/widgets/Search",
+              "esri/Graphic","esri/rest/route","esri/rest/support/RouteParameters","esri/rest/support/FeatureSet",
+              "esri/widgets/LayerList",
+            ], function(esriConfig, Map, MapView, BasemapToggle, BasemapGallery,Expand,FeatureLayer,Search,Graphic, route, RouteParameters,FeatureSet,LayerList) {
+        
+              esriConfig.apiKey = YOUR_API_KEY;
+        
+              const map = new Map({
+                basemap: "arcgis-topographic"
+              });
+        
+              const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [149.065, -35.239],
+                zoom: 11
+              });
+        
+              const basemapGallery = new BasemapGallery({
+                view: view,
+                container: document.createElement("div"),
+                source: {
+                  query: {
+                    title: '"World Basemaps for Developers" AND owner:esri'
+                  }
+                },
+              });
+        
+              const bgExpand = new Expand({
+                view: view,
+                content: basemapGallery
+              });
+        
+              basemapGallery.watch("activeBasemap", () => {
+                const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+        
+                if (mobileSize) {
+                  bgExpand.collapse();
+                }
+              });
+        
+              // Add the expand instance to the ui
+        
+              view.ui.add(bgExpand, "top-right");
+        
+        
+              const popupBridgeford = {
+                "title": "Road bridge or ford",
+                "content": "<b>Name:</b> {NAME}<br>"+
+                "<b>Purpose:</b> {PURPOSE}<br>"+
+                "<b>Crossingstructure:</b> {CROSSINGSTRUCTURE}<br>"+
+                "<b>Feature type:</b> {FEATURETYPE}<br>"+
+                "<b>Attribute source:</b> {ATTRIBUTESOURCE} m"
+              }
+        
+              const popupRoad = {
+                "title": "Road information",
+                "content": "<b>Name:</b> {NAME}<br>"+
+                "<b>Class:</b> {CLASS}<br>"+
+                "<b>st_length(shape):</b> {st_length(shape)}"
+        
+                //(result.attributes.length*1.60934).toFixed(2)
+              }
+        
+        
+              const RoadbridgefordLayer = new FeatureLayer({
+        
+               url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/8",
+        
+               outFields: ["NAME","PURPOSE","CROSSINGSTRUCTURE","FEATURETYPE","ATTRIBUTESOURCE"],
+               popupTemplate: popupBridgeford
+              });
+        
+        
+              const RoadnetworkLayer = new FeatureLayer({
+        
+                 url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/15",
+                outFields: ["NAME","CLASS","st_length(shape)"],
+                popupTemplate: popupRoad
+               });
+                 
+              map.add(RoadnetworkLayer)
+              map.add(RoadbridgefordLayer)
+        
+              const searchWidget = new Search({
+                view: view
+              });
+        
+              view.ui.add(searchWidget, {
+                position: "top-right",
+                index: 5
+              });
+            
+              const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+        
+        
+              function addGraphic(type, point) {
+                  const graphic = new Graphic({
+                    symbol: {
+                      type: "simple-marker",
+                      color: (type === "origin") ? "white" : "black",
+                      size: "10px"
+                    },
+                    geometry: point
+                  });
+                  view.graphics.add(graphic);
+                }
+          
+              view.on("click", function(event){
+          
+                  if (view.graphics.length === 0) {
+                    addGraphic("origin", event.mapPoint);
+                  } else if (view.graphics.length === 1) {
+                    addGraphic("destination", event.mapPoint);
+                    getRoute(); 
+                  } else {
+                    view.graphics.removeAll();
+                    addGraphic("origin",event.mapPoint);
+                  }
+            
+                });
+            
+                function getRoute() {
+                  const routeParams = new RouteParameters({
+                    stops: new FeatureSet({
+                      features: view.graphics.toArray()
+                    }),
+                    returnDirections: true
+                  });
+            
+                  route.solve(routeUrl, routeParams)
+                  .then(function(data) {
+                    data.routeResults.forEach(function(result) {
+                      result.route.symbol = {
+                        type: "simple-line",
+                        color: [5, 150, 255],
+                        width: 3
+                      };
+                      view.graphics.add(result.route);
+                    });
+                    if (data.routeResults.length > 0) {
+                      const directions = document.createElement("ol");
+                      directions.id="directions"
+                      directions.hidden=false
+                      directions.classList = "esri-widget esri-widget--panel esri-directions__scroller";
+                      directions.style.marginTop = "0";
+                      directions.style.padding = "15px 15px 15px 30px";
+                      const features = data.routeResults[0].directions.features;
+                      const delbtn = document.createElement("button");
+                      delbtn.innerHTML="Close"
+                      delbtn.onclick = function(){document.getElementById("directions").hidden=true};
+                      directions.appendChild(delbtn);
+                      const routetitle = document.createElement("a");
+                      routetitle.innerHTML="<br>Route:<br>"
+                      directions.appendChild(routetitle);
+                      features.forEach(function(result,i){
+                          const direction = document.createElement("li");
+                          direction.innerHTML = result.attributes.text + " (" + (result.attributes.length*1.60934).toFixed(2) + " km)";
+        
+                          directions.appendChild(direction);
+                        });
+                        view.ui.empty("bottom-left");
+                        view.ui.add(directions, "bottom-left");
+                    }
+                  })
+                }
+              
+                
+                view.when(() => {
+                  const layerList = new LayerList({
+                    view: view
+                  });
+        
+                  // Add widget to the top right corner of the view
+              view.ui.add(layerList, "top-right");
+                  });
+        
+        
+        
+            });
+          </script>
+
+
+
+      </div>
+
+
+      <!--TAB: Mapbox -->
+      <div class="layui-tab-item " > 
+
+
+
+    <div class="mapcontainer" id="mapbox"> </div>
+
+
+
+      
+      <div id="menu">
+        <input id="streets-v12" type="radio" name="rtoggle" value="streets" checked="checked">
+        <label for="streets-v12">streets</label>
+        <input id="satellite-streets-v12" type="radio" name="rtoggle" value="satellite" >
+        <label for="satellite-streets-v12">satellite </label>
+        <input id="light-v11" type="radio" name="rtoggle" value="light">
+        <label for="light-v11">light</label>
+        <input id="dark-v11" type="radio" name="rtoggle" value="dark">
+        <label for="dark-v11">dark</label>
+        <input id="outdoors-v12" type="radio" name="rtoggle" value="outdoors">
+        <label for="outdoors-v12">outdoors</label>
+    </div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoianVlam92ZSIsImEiOiJjbGZsNHg2d2kwMW0wM3FxZThibXpxYXg5In0.B_6nXX-mDBoV2a3vPdBUpA';
+        const map1 = new mapboxgl.Map({
+        container: 'mapbox', // container ID
+        // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+        style: 'mapbox://styles/mapbox/streets-v12', // style URL
+        center: [-107.8795, 38.9850], // starting position [lng, lat]
+        zoom: 15// starting zoom
+        });
+        
+       map1.addControl(
+            new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+            })
+       ); 
+        map1.addControl(new mapboxgl.NavigationControl());
+
+
+
+
+        const layerList = document.getElementById('menu');
+        const inputs = layerList.getElementsByTagName('input');
+        
+        for (const input of inputs) {
+        input.onclick = (layer) => {
+        const layerId = layer.target.id;
+        map1.setStyle('mapbox://styles/mapbox/' + layerId);
+
+        };}
+
+
+        </script>
+
+</div>
+        <!-- TAB: leaflet-Arcgis-cluster-->
+      <div class="layui-tab-item  ">
+
+        <div class="mapcontainer" id="leaflet-cluster"></div>
+
+        <script>
+
+            
+            const map2 = L.map("leaflet-cluster", {
+                minZoom: 2,
+                maxZoom:18,
+              }).setView([-35.239,149.065], 3);
+              
+              var showroad = L.esri.Vector.vectorBasemapLayer("ArcGIS:Streets", {apiKey: apiKey });
+              var showimage = L.esri.Vector.vectorBasemapLayer("ArcGIS:Imagery:Standard", {apiKey: apiKey });
+              var showocean = L.esri.Vector.vectorBasemapLayer("ArcGIS:Oceans", { apiKey: apiKey  });
+              var showdark= L.esri.Vector.vectorBasemapLayer("ArcGIS:DarkGray", { apiKey: apiKey  });
+      
+                baselayerlist={
+                 Imagery: showimage,
+                  Street_map: showroad,
+                  Oceans: showocean,
+                  Dark: showdark,
+                }
+                showimage.addTo(map2)
+      
+          L.control.layers(
+                      baselayerlist, null,            
+                  {
+                      collapsed: true,
+                  }
+              ).addTo(map2);
+
+              L.esri.Cluster.featureLayer({
+                url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/MapServer/0',
+                onEachFeature: forEachFeature,
+
+              }).addTo(map2);
+
+              function forEachFeature(feature, layer) {
+                console.log(feature.properties)
+                var popupContent = "<p> <b> Earthquake: " + feature.properties.name + 
+                    "</b></br> <ui> Date: "+ feature.properties.yyyymmdd +
+                    "</ui> </br> <ui> Magnitude: "+ feature.properties.magnitude +
+                    ",</ui></br> Death number:  "+ feature.properties.num_deaths +
+                    ", </ui></br> Injured number: "+ feature.properties.num_injured + "</p>";
+        
+                 layer.bindPopup(popupContent);
+            }
+             
+
+        </script>
+
+      </div>
+
+
+      <!--TAB: leaflet google api tab -->
+      <div class="layui-tab-item">
+   
+        <div class="mapcontainer" id="leaflet-google"></div>
+
+        <script type="text/javascript" src="../js/suburb-10-qld.js"></script>
+        <script>
+            const map4 = L.map("leaflet-google", {
+                minZoom: 2,
+                maxZoom:24
+              }).setView([-24.9,152.4], 7);
+      
+              var roadMutant = L.gridLayer.googleMutant({
+                  maxZoom: 24,
+                  type: "roadmap",
+              })
+              .addTo(map4);
+
+            //  const geojson = L.geoJson(QLDsub).addTo(map4);
+
+              function getColor(d) {
+                return d > 7 ? '#b2df8a' :
+                       d > 6  ? '#BD0026' :
+                       d > 5  ? '#ffffb3' :
+                       d > 4  ? '#FC4E2A' :
+                       d > 3   ? '#8dd3c7' :
+                       d > 2   ? '#FEB24C' :
+                       d > 1   ? '#beaed4' :
+                                  '#FFEDA0';
+            }
+
+            function style(feature) {
+              return {
+                  fillColor: getColor(Math.random()*8),
+                  weight: 1,
+                  opacity: 1,
+                  color: 'white',
+                  dashArray: '1',
+                  fillOpacity: 0.7
+              };
+          }
+
+          
+
+
+
+          function highlightFeature(e) {
+            var layer = e.target;
+        
+            layer.setStyle({
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
+        
+            layer.bringToFront();
+
+            var popupContent = e.target.properties.qld_loca_2;
+            layer.bindPopup(popupContent);
+        }
+
+        function resetHighlight(e) {
+          geojson.resetStyle(e.target);
+      }
+
+      function zoomToFeature(e) {
+        map4.fitBounds(e.target.getBounds());
+    }
+
+    function addPopup(feature, layer) {
+      var popupContent = feature.properties.qld_loca_2;
+      layer.bindPopup(popupContent);
+  
+      layer.on('mouseover', function (e) {
+          this.openPopup(e.latlng);
+      });
+      layer.on('mouseout', function (e) {
+          this.closePopup();
+      });
+  }
+
+
+    function onEachFeature(feature, layer) {
+      layer.on({
+          mouseover: highlightFeature,
+          mouseout: resetHighlight,
+          click: zoomToFeature
+      });
+  }
+  
+    var geojson = L.geoJson(QLDsub, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map4);
+
+        </script>
+      </div>
+
+
+      <!--TAB:  google api tab -->
+      <div class="layui-tab-item">
+        <div class="mapcontainer">
+            <iframe
+            width=100%
+            height=100%
+            frameborder="0" style="border:0"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps/embed/v1/view?key=AIzaSyAFlHCKI9riQr7VQGn0_gZq-HsBpTkAq_o&center=-33.8569,151.2152&zoom=18&maptype=satellite"
+            allowfullscreen>
+          </iframe>
+
+
+        </div>
+
+    
+    </div>
+
+
+    </div>
+  </div>
+
+    
+  <script src="https://cdn.staticfile.org/layui/2.7.6/layui.js"></script>
+  <script>
+
+
+
+  layui.use(function(){
+    // 得到需要的内置组件
+    var layer = layui.layer; //弹层
+    var laypage = layui.laypage; //分页
+    var laydate = layui.laydate; //日期
+    var table = layui.table; //表格
+    var carousel = layui.carousel; //轮播
+    var upload = layui.upload; //上传
+    var element = layui.element; //元素操作
+    var slider = layui.slider; //滑块
+    var dropdown = layui.dropdown; //下拉菜单
+
+    
+    // Tab 切换
+    element.on('tab(demo)', function(data){
+
+        if (data.index==1){
+            document.getElementById('mapDescription').innerHTML=data.index
+            var tab1 = document.getElementById("mapbox");
+            tab1.style.display = "block";
+            map1.resize()
+
+
+        }
+
+     if (data.index==2){
+        document.getElementById('mapDescription').innerHTML=data.index
+        var tab2 = document.getElementById("leaflet-cluster");
+
+
+	    tab2.style.display = "block";
+        map2.invalidateSize(); // Uncomment this line and re-run to get correct behaviour.
+
+      //document.getElementById('mapDescription').innerHTML='MAP story number:'+data.index
+ 
+     }
+
+    
+     else if (data.index==3){
+        document.getElementById('mapDescription').innerHTML=data.index
+        var tab4 = document.getElementById("leaflet-google");
+
+
+	    tab4.style.display = "block";
+        map4.invalidateSize(); // Uncomment this line and re-run to get correct behaviour.
+
+
+
+     }
+
+
+
+
+
+    
+    });
+    
+
+
+
+    // 分页
+    laypage.render({
+      elem: 'pageDemo' //分页容器的id
+      ,count: 1000 //数据总数
+      ,limit: 10 //每页显示的数据条数
+      ,skin: '#1E9FFF' //自定义选中色值
+      //,layout: ['prev', 'page', 'next', 'count', 'limit', 'refresh', 'skip'] //自定义排版
+      ,jump: function(obj, first){
+        if(!first){
+          layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+        }
+      }
+    });
+    
+    // MAPQUEST
+    upload.render({
+      elem: '#uploadDemo'
+      ,url: '' //此处配置你自己的上传接口即可
+      ,done: function(res){
+        layer.msg('上传成功');
+        layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
+        console.log(res)
+      }
+      ,before: function(){
+        layer.msg('上传中', {icon: 16, time: 0});
+      }
+    });
+    
+    // 滑块
+    var sliderInst = slider.render({
+      elem: '#sliderDemo'
+      ,input: true //输入框
+    });
+    
+    // 底部信息
+    var footerTpl = lay('#footer')[0].innerHTML;
+    lay('#footer').html(layui.laytpl(footerTpl).render({}))
+    .removeClass('layui-hide');
+  });
+</script>
+<div class="layui-container" style="position:fixed;bottom:5px;">
+
+    <blockquote class="layui-elem-quote" style="margin-top: 5px;">
+      <div class="layui-text">
+        <ul>
+          <li id="mapDescription">layui 是一套开源的 Web UI（界面）组件库。这是一个极其简洁的演示页面</li>
+          <li>By: <a href="https://juejove.github.io/" target="_blank" >Robin Lin</a> </li>
+        </ul>
+      </div>
+    </blockquote>
+
+
+  </div>
+  
+  
+
+
+<script src="../css/layui/layui.js"></script>
+
+
+
+
 </body>
 </html>
