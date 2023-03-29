@@ -91,7 +91,6 @@ defer
       <li>Mapbox API</li>
       <li>Leaflet API </li>
       <li>Leaflet-Google Map API</li>
-      <li>Google Map API</li>
     </ul>
     <div class="layui-tab-content">
       <div class="layui-tab-item  layui-show ">
@@ -547,7 +546,7 @@ defer
     element.on('tab(demo)', function(data){
 
         if (data.index==1){
-            document.getElementById('mapDescription').innerHTML=data.index
+            document.getElementById('mapDescription').innerHTML="Mapbox webmap api"
             var tab1 = document.getElementById("mapbox");
             tab1.style.display = "block";
             map1.resize()
@@ -556,7 +555,7 @@ defer
         }
 
      if (data.index==2){
-        document.getElementById('mapDescription').innerHTML=data.index
+        document.getElementById('mapDescription').innerHTML="Leaflet showing the world-wide earthquake events in cluster since 1970. Popups declare the details"
         var tab2 = document.getElementById("leaflet-cluster");
 
 
@@ -569,61 +568,16 @@ defer
 
     
      else if (data.index==3){
-        document.getElementById('mapDescription').innerHTML=data.index
+        document.getElementById('mapDescription').innerHTML="Leaflet using Google map as basemap"
         var tab4 = document.getElementById("leaflet-google");
 
 
 	    tab4.style.display = "block";
         map4.invalidateSize(); // Uncomment this line and re-run to get correct behaviour.
-
-
-
      }
 
-
-
-
-
-    
     });
-    
-
-
-
-    // 分页
-    laypage.render({
-      elem: 'pageDemo' //分页容器的id
-      ,count: 1000 //数据总数
-      ,limit: 10 //每页显示的数据条数
-      ,skin: '#1E9FFF' //自定义选中色值
-      //,layout: ['prev', 'page', 'next', 'count', 'limit', 'refresh', 'skip'] //自定义排版
-      ,jump: function(obj, first){
-        if(!first){
-          layer.msg('第'+ obj.curr +'页', {offset: 'b'});
-        }
-      }
-    });
-    
-    // MAPQUEST
-    upload.render({
-      elem: '#uploadDemo'
-      ,url: '' //此处配置你自己的上传接口即可
-      ,done: function(res){
-        layer.msg('上传成功');
-        layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
-        console.log(res)
-      }
-      ,before: function(){
-        layer.msg('上传中', {icon: 16, time: 0});
-      }
-    });
-    
-    // 滑块
-    var sliderInst = slider.render({
-      elem: '#sliderDemo'
-      ,input: true //输入框
-    });
-    
+   
     // 底部信息
     var footerTpl = lay('#footer')[0].innerHTML;
     lay('#footer').html(layui.laytpl(footerTpl).render({}))
@@ -635,8 +589,9 @@ defer
     <blockquote class="layui-elem-quote" style="margin-top: 5px;">
       <div class="layui-text">
         <ul>
-          <li id="mapDescription">layui 是一套开源的 Web UI（界面）组件库。这是一个极其简洁的演示页面</li>
-          <li>By: <a href="https://juejove.github.io/" target="_blank" >Robin Lin</a> </li>
+          <li>This is a demonstration purpose page with a few popular webmap api viewers. Switch between them in tabs. By: <a href="https://juejove.github.io/" target="_blank" >Robin Lin</a> </li>
+          <li id="mapDescription"> ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide </li>
+
         </ul>
       </div>
     </blockquote>
