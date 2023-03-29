@@ -465,8 +465,6 @@ defer
         
             layer.bringToFront();
 
-            var popupContent = e.target.properties.qld_loca_2;
-            layer.bindPopup(popupContent);
         }
 
         function resetHighlight(e) {
@@ -496,6 +494,7 @@ defer
           mouseout: resetHighlight,
           click: zoomToFeature
       });
+      layer.bindPopup('<h3>'+feature.properties.qld_loca_2 +'</h3>')
   }
   
     var geojson = L.geoJson(QLDsub, {
