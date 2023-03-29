@@ -543,6 +543,9 @@ defer
     // Tab 切换
     element.on('tab(demo)', function(data){
 
+      if (data.index==0){
+        document.getElementById('mapDescription').innerHTML="ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide"
+      }
         if (data.index==1){
             document.getElementById('mapDescription').innerHTML="Mapbox webmap api"
             var tab1 = document.getElementById("mapbox");
@@ -588,7 +591,7 @@ defer
       <div class="layui-text">
         <ul>
           <li>This is a demonstration purpose page with a few popular webmap api viewers. Switch between them in tabs. By: <a href="https://juejove.github.io/" target="_blank" >Robin Lin</a> </li>
-          <li id="mapDescription"> ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide </li>
+          <li> <b id="mapDescription"> ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide </b></li>
 
         </ul>
       </div>
