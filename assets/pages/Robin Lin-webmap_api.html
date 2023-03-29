@@ -89,8 +89,8 @@ defer
     <ul class="layui-tab-title">
       <li class="layui-this">ArcGIS REST API</li>
       <li>Mapbox API</li>
-      <li>Leaflet API </li>
-      <li>Leaflet-Google Map API</li>
+      <li>Leaflet-Arcgis API </li>
+      <li>Leaflet-OSM API</li>
     </ul>
     <div class="layui-tab-content">
       <div class="layui-tab-item  layui-show ">
@@ -411,20 +411,19 @@ defer
       <!--TAB: leaflet google api tab -->
       <div class="layui-tab-item">
    
-        <div class="mapcontainer" id="leaflet-google"></div>
+        <div class="mapcontainer" id="leaflet-osm"></div>
 
         <script type="text/javascript" src="../js/suburb-10-qld.js"></script>
         <script>
-            const map4 = L.map("leaflet-google", {
+            const map4 = L.map("leaflet-osm", {
                 minZoom: 2,
                 maxZoom:24
-              }).setView([-24.9,152.4], 7);
+              }).setView([-24.4,152.4], 6);
       
-              var roadMutant = L.gridLayer.googleMutant({
-                  maxZoom: 24,
-                  type: "roadmap",
-              })
-              .addTo(map4);
+              var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map4);
 
             //  const geojson = L.geoJson(QLDsub).addTo(map4);
 
@@ -568,8 +567,8 @@ defer
 
     
      else if (data.index==3){
-        document.getElementById('mapDescription').innerHTML="Leaflet using Google map as basemap"
-        var tab4 = document.getElementById("leaflet-google");
+        document.getElementById('mapDescription').innerHTML="Leaflet using Open Street map as basemap"
+        var tab4 = document.getElementById("leaflet-osm");
 
 
 	    tab4.style.display = "block";
