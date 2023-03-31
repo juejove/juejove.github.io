@@ -58,6 +58,39 @@ defer
 <script src="https://js.arcgis.com/4.24/"></script>
 
   <style>
+
+    .map-overlay {
+      font: bold 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      position: absolute;
+      width: 15%;
+      bottom: 18%;
+      left: 5.5%;
+      padding: 10px;
+      }
+       
+      .map-overlay .map-overlay-inner {
+      background-color: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+      padding: 10px;
+      margin-bottom: 10px;
+      }
+       
+      .map-overlay label {
+      display: block;
+      margin: 0 0 10px;
+      }
+       
+      .map-overlay input {
+      background-color: transparent;
+      display: inline-block;
+      width: 100%;
+      position: relative;
+      margin: 0;
+      cursor: ew-resize;
+      }
+
+
     .mapcontainer{
         background-color: rgb(222, 222, 222);
         position:fixed;
@@ -302,14 +335,19 @@ defer
 
     <div class="mapcontainer" id="mapbox"> </div>
 
-
+    <div class="map-overlay top">
+      <div class="map-overlay-inner">
+      <label>Orthoimage opacity: <span id="slider-value">100%</span></label>
+      <input id="slider" type="range" min="0" max="100" step="0" value="100">
+      </div>
+    </div>
 
       
       <div id="menu">
-        <input id="streets-v12" type="radio" name="rtoggle" value="streets" checked="checked">
-        <label for="streets-v12">streets</label>
-        <input id="satellite-streets-v12" type="radio" name="rtoggle" value="satellite" >
+        <input id="satellite-streets-v12" type="radio" name="rtoggle" value="satellite" checked="checked">
         <label for="satellite-streets-v12">satellite </label>
+        <input id="streets-v12" type="radio" name="rtoggle" value="streets" >
+        <label for="streets-v12">streets</label>
         <input id="light-v11" type="radio" name="rtoggle" value="light">
         <label for="light-v11">light</label>
         <input id="dark-v11" type="radio" name="rtoggle" value="dark">
@@ -322,10 +360,33 @@ defer
         const map1 = new mapboxgl.Map({
         container: 'mapbox', // container ID
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-        style: 'mapbox://styles/mapbox/streets-v12', // style URL
-        center: [-75, 43], // starting position [lng, lat]
-        zoom: 5// starting zoom
+        style: 'mapbox://styles/mapbox/satellite-streets-v12', // style URL
+        center: [-107.8865, 38.9858], // starting position [lng, lat]
+        zoom: 15// starting zoom
         });
+
+        function addortho(){
+          map1.addSource('ortho', {
+            'type': 'image',
+            //'url': '..\source\radar.gif',
+            'url': "https://juejove.github.io/assets/source/ortho.gif",
+            'coordinates': [
+            [-107.8890544, 38.9883725],
+            [-107.88255, 38.9883725],
+            [-107.88255, 38.9829321],
+            [-107.8890544, 38.9829321]
+            ]
+            });
+            map1.addLayer({
+            id: 'ortho',
+            'type': 'raster',
+            'source': 'ortho',
+            'paint': {
+            'raster-fade-duration': 0
+            }
+            });
+            alert('tt')
+        }
         
        map1.addControl(
             new MapboxGeocoder({
@@ -335,39 +396,43 @@ defer
        ); 
         map1.addControl(new mapboxgl.NavigationControl());
 
+          map1.on('load', () => {
+            addortho()
+
+            const layerList = document.getElementById('menu');
+            const inputs = layerList.getElementsByTagName('input');
+            
+            for (const input of inputs) {
+            input.onclick = (layer) => {
+            const layerId = layer.target.id;
+            map1.setStyle('mapbox://styles/mapbox/' + layerId);
+            addortho()
+            
+
+            };}
+    
+
+            const slider = document.getElementById('slider');
+            slider.addEventListener('input', (e) => {
+              // Adjust the layers opacity. layer here is arbitrary - this could
+              // be another layer name found in your style or a custom layer
+              // added on the fly using `addSource`.
+              map1.setPaintProperty(
+              'ortho',
+              'raster-opacity',
+              parseInt(e.target.value, 10) / 100
+              );
+               
+              // Value indicator
+              const sliderValue = document.getElementById('slider-value');
+              sliderValue.textContent = e.target.value + '%';
+              });
+
+
+            });
 
 
 
-        const layerList = document.getElementById('menu');
-        const inputs = layerList.getElementsByTagName('input');
-        
-        for (const input of inputs) {
-        input.onclick = (layer) => {
-        const layerId = layer.target.id;
-        map1.setStyle('mapbox://styles/mapbox/' + layerId);
-
-        };}
-
-        map1.on('load', () => {
-          map1.addSource('radar', {
-          'type': 'image',
-          'url': 'https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif',
-          'coordinates': [
-          [-80.425, 46.437],
-          [-71.516, 46.437],
-          [-71.516, 37.936],
-          [-80.425, 37.936]
-          ]
-          });
-          map1.addLayer({
-          id: 'radar-layer',
-          'type': 'raster',
-          'source': 'radar',
-          'paint': {
-          'raster-fade-duration': 0
-          }
-          });
-          });
 
 
         </script>
@@ -413,7 +478,6 @@ defer
               }).addTo(map2);
 
               function forEachFeature(feature, layer) {
-                console.log(feature.properties)
                 var popupContent = "<p> <b> Earthquake: " + feature.properties.name + 
                     "</b></br> <ui> Date: "+ feature.properties.yyyymmdd +
                     "</ui> </br> <ui> Magnitude: "+ feature.properties.magnitude +
@@ -527,16 +591,7 @@ defer
       </div>
 
 
-      <!--TAB:  google api tab -->
-      <div class="layui-tab-item">
-        <div class="mapcontainer">
 
-
-
-        </div>
-
-    
-    </div>
 
 
     </div>
@@ -600,10 +655,7 @@ defer
 
     });
    
-    // 底部信息
-    var footerTpl = lay('#footer')[0].innerHTML;
-    lay('#footer').html(layui.laytpl(footerTpl).render({}))
-    .removeClass('layui-hide');
+
   });
 </script>
 <div class="layui-container" style="position:fixed;bottom:5px;">
