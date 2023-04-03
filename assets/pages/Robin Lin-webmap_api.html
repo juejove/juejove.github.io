@@ -92,6 +92,7 @@ defer
 
 
     .mapcontainer{
+
         background-color: rgb(222, 222, 222);
         position:fixed;
         width: 94%;
@@ -567,19 +568,20 @@ defer
             //  const geojson = L.geoJson(QLDsub).addTo(map4);
 
               function getColor(d) {
-                return d > 7 ? '#b2df8a' :
-                       d > 6  ? '#BD0026' :
-                       d > 5  ? '#ffffb3' :
-                       d > 4  ? '#FC4E2A' :
-                       d > 3   ? '#8dd3c7' :
-                       d > 2   ? '#FEB24C' :
-                       d > 1   ? '#beaed4' :
-                                  '#FFEDA0';
+                  let  res=d%8
+                return res > 6  ? '#BD0026' :
+                       res > 5  ? '#ffffb3' :
+                       res > 4  ? '#FC4E2A' :
+                       res > 3   ? '#8dd3c7' :
+                       res > 2   ? '#FEB24C' :
+                       res > 1   ? '#beaed4' :
+                       res > 0 ? '#b2df8a' :
+                       'rgb(100, 110, 180)';
             }
 
             function style(feature) {
               return {
-                  fillColor: getColor(Math.random()*8),
+                  fillColor: getColor(feature.properties.loc_pid.substring(3)),
                   weight: 1,
                   opacity: 1,
                   color: 'white',
