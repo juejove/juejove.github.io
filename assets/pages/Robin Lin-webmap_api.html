@@ -155,7 +155,7 @@ defer
               const view = new MapView({
                 container: "viewDiv",
                 map: map,
-                center: [149.065, -35.239],
+                center: [144.9631, -37.8136],
                 zoom: 11
               });
         
@@ -168,6 +168,26 @@ defer
                   }
                 },
               });
+              const bridgeRenderer = {
+                "type": "simple",
+                "symbol": {
+                  "type": "picture-marker",
+                 "url": "https://juejove.github.io/assets/images/icons8-bridge-48.png", 
+                  "width": "18px",
+                  "height": "18px"
+                }
+              }
+
+              const hydRenderer = {
+                "type": "simple",
+                "symbol": {
+                  "type": "picture-marker",
+                 "url": "https://juejove.github.io/assets/images/icons8-fire-hydrant-48.png", 
+                  "width": "14px",
+                  "height": "14px"
+                }
+              }
+
         
               const bgExpand = new Expand({
                 view: view,
@@ -189,40 +209,74 @@ defer
         
               const popupBridgeford = {
                 "title": "Road bridge or ford",
-                "content": "<b>Name:</b> {NAME}<br>"+
-                "<b>Purpose:</b> {PURPOSE}<br>"+
-                "<b>Crossingstructure:</b> {CROSSINGSTRUCTURE}<br>"+
-                "<b>Feature type:</b> {FEATURETYPE}<br>"+
+                "content": "<b>Name:</b> {NAME}<br/>"+
+                "<b>Purpose:</b> {PURPOSE}<br/>"+
+                "<b>Crossingstructure:</b> {CROSSINGSTRUCTURE}<br/>"+
+                "<b>Feature type:</b> {FEATURETYPE}<br/>"+
                 "<b>Attribute source:</b> {ATTRIBUTESOURCE} m"
               }
         
-              const popupRoad = {
-                "title": "Road information",
-                "content": "<b>Name:</b> {NAME}<br>"+
-                "<b>Class:</b> {CLASS}<br>"+
-                "<b>st_length(shape):</b> {st_length(shape)}"
+              const popupSewer = {
+                "title": "{SEWER_NAME}",
+                "content": "<b>Company Key:</b> {COMPKEY}<br/>"+
+                "<b>Unit Id:</b> {MXUNITID}<br/>"+
+                "<b>Unit Type:</b> {UNITTYPE_DESC}<br/>"+
+                "<b>Pipe Length:</b> {PIPE_LENGTH}<br/>"+
+                "<b>Pipe Width:</b> {PIPE_WIDTH}<br/>"+
+                "<b>As Constructed plan No:</b> {ASCONST_PLAN_NO}<br/>"+
+                "<b>Up Stream IL:</b> {UPSTREAM_IL}<br/>"+
+                "<b>Down Stream IL:</b> {DOWNSTREAM_IL}<br/>"
+                //(result.attributes.length*1.60934).toFixed(2)
+              }
+              const popupHyd = {
+                "title": "{asset_description}",
+                "content": "<b>Asset Number:</b> {asset_number}<br/>"+
+                "<b>Maintainer:</b> {maintainer_lupvalue}<br/>"+
+                "<b>Street Segment Location Description:</b> {street_segment_lupvalue}<br/>"+
+                "<b>Type:</b> {object_type_lupvalue}<br/>"
         
                 //(result.attributes.length*1.60934).toFixed(2)
               }
-        
+
+              const sewerLineRenderer = {
+                type: "simple",
+                symbol: {
+                  type: "simple-line",
+                  style: "solid",
+                  color: "orange",
+                  width: "3px"
+                }
+              };
         
               const RoadbridgefordLayer = new FeatureLayer({
         
                url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/8",
-        
-               outFields: ["NAME","PURPOSE","CROSSINGSTRUCTURE","FEATURETYPE","ATTRIBUTESOURCE"],
-               popupTemplate: popupBridgeford
+               popupTemplate: popupBridgeford,
+               renderer: bridgeRenderer,
+               title:'National Road Bridges & Fords'
+              });
+
+
+              require(["esri/layers/GeoJSONLayer"], function(GeoJSONLayer){
+                // points to the states layer in a service storing U.S. census data
+                const geojsonlayer = new GeoJSONLayer({
+                  title:'Melbourne Fire Hydrant',
+                  url: "https://data.melbourne.vic.gov.au/api/v2/catalog/datasets/fire-hydrants/exports/geojson",
+                  popupTemplate:popupHyd,
+                  renderer:hydRenderer,
+                });
+                map.add(geojsonlayer);  // adds the layer to the map
               });
         
+              const SewerLayer = new FeatureLayer({
         
-              const RoadnetworkLayer = new FeatureLayer({
-        
-                 url: "http://services.ga.gov.au/gis/rest/services/NM_Transport_Infrastructure/MapServer/15",
-                outFields: ["NAME","CLASS","st_length(shape)"],
-                popupTemplate: popupRoad
+                 url: "https://services5.arcgis.com/ZSYwjtv8RKVhkXIL/arcgis/rest/services/Sewerage_Network_Mains/FeatureServer/0",
+                popupTemplate: popupSewer,
+                title:'Melbourne Sewerage Network Main Pipelines',
+                renderer:sewerLineRenderer,
                });
                  
-              map.add(RoadnetworkLayer)
+              map.add(SewerLayer)
               map.add(RoadbridgefordLayer)
         
               const searchWidget = new Search({
@@ -294,7 +348,7 @@ defer
                       delbtn.onclick = function(){document.getElementById("directions").hidden=true};
                       directions.appendChild(delbtn);
                       const routetitle = document.createElement("a");
-                      routetitle.innerHTML="<br>Route:<br>"
+                      routetitle.innerHTML="<br/>Route:<br/>"
                       directions.appendChild(routetitle);
                       features.forEach(function(result,i){
                           const direction = document.createElement("li");
@@ -620,10 +674,10 @@ defer
     element.on('tab(demo)', function(data){
 
       if (data.index==0){
-        document.getElementById('mapDescription').innerHTML="ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide"
+        document.getElementById('mapDescription').innerHTML="ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom feature layers display with specific feature information popups"
       }
         if (data.index==1){
-            document.getElementById('mapDescription').innerHTML="Mapbox webmap api"
+            document.getElementById('mapDescription').innerHTML="Mapbox webmap api: Basemap switch, geocode search. Georeferenced Orthoimage generated by myself with drone images is displayed whose opacity could be adjusted. "
             var tab1 = document.getElementById("mapbox");
             tab1.style.display = "block";
             map1.resize()
@@ -632,7 +686,7 @@ defer
         }
 
      if (data.index==2){
-        document.getElementById('mapDescription').innerHTML="Leaflet showing the world-wide earthquake events in cluster since 1970. Popups declare the details"
+        document.getElementById('mapDescription').innerHTML="Leaflet showing the world-wide earthquake events in cluster since 1970. Popups will show the details"
         var tab2 = document.getElementById("leaflet-cluster");
 
 
@@ -645,7 +699,7 @@ defer
 
     
      else if (data.index==3){
-        document.getElementById('mapDescription').innerHTML="Leaflet using Open Street map as basemap"
+        document.getElementById('mapDescription').innerHTML="Leaflet using Open Street map as basemap. All suburbs feature layer is shown and will automatically zoom to feature."
         var tab4 = document.getElementById("leaflet-osm");
 
 
@@ -660,12 +714,11 @@ defer
 </script>
 <div class="layui-container" style="position:fixed;bottom:5px;">
 
-    <blockquote class="layui-elem-quote" style="margin-top: 5px;">
+    <blockquote class="layui-elem-quote" style="margin-top: 5px;width:1400px">
       <div class="layui-text">
         <ul>
           <li>This is a demonstration purpose page with a few popular webmap api viewers. Switch between them in tabs. By: <a href="https://juejove.github.io/" target="_blank" >Robin Lin</a> </li>
-          <li> <b id="mapDescription"> ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and custom layers display or hide </b></li>
-
+          <li> <b id="mapDescription"> ArcGIS REST API: Basemap switch, shortest route search by clicking two points, geocode search and feature layers display with specific item information popups </b></li>
         </ul>
       </div>
     </blockquote>
