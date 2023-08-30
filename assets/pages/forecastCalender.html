@@ -41,7 +41,7 @@
       appearance: button;
       backface-visibility: hidden;
       background-color: #405cf5;
-      border-radius: 6px;
+      border-radius: 12px;
       border-width: 0;
       box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;
       box-sizing: border-box;
@@ -49,9 +49,9 @@
       cursor: pointer;
       font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
       font-size: 100%;
-      height: 44px;
+      height: 60px;
       line-height: 1.15;
-      margin: 12px 0 0;
+      margin: 12px 20PX 20PX;
       outline: none;
       overflow: hidden;
       padding: 0 25px;
@@ -112,10 +112,8 @@
   <h4 id="date" class="small">
   </h4>
 
-  <h2 class="text small" id="tmr">
-    
-  </h2>
-
+  <h2 class="text small" id="tmr">  </h2>
+  <p class="text small" id="bigsmall"></p>
   <table >
     <thead>
       <th>Mon</th>
@@ -142,6 +140,7 @@
 </body>
 
 <script>
+
   var week = [['RDO','9:00 - 18:00', '10:00 - 18:00', '7:00 - 15:00', '12:30 - 19:30', 'RDO', 'RDO' ],
 [ '9:00 - 18:00', '7:00 - 15:00', '10:00 - 18:00','RDO', '9:00 - 18:00', '8:30 - 17:30','8:30 - 17:30']]
 
@@ -149,6 +148,8 @@
 
   const date = new Date();
   let day = date.getDate();
+  console.log(date)
+  document.getElementById('start').value= date
   //let day = new Date("08/14/2023");   
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
@@ -164,21 +165,36 @@ function main(input){
   else{
     var d2 = new Date();  
   }
-    
-var diff = d2.getTime() - d1.getTime();   
-    
-var daydiff = diff / (1000 * 60 * 60 * 24);   
+  d3=new Date();  
 
-weekindex=parseInt(daydiff/7)%2
 
-var divs=document.getElementById('w1');
-divs.innerHTML=''
-for(i=0;i<7;i++){
-    newDiv=document.createElement('td');
-    newDiv.innerHTML=week[weekindex][i]
-    divs.appendChild(newDiv);
+var diff 
+    
+var daydiff 
+
+function calc(inputday){
+  diff = inputday.getTime() - d1.getTime();   
+  daydiff = diff / (1000 * 60 * 60 * 24);   
+  weekindex=parseInt(daydiff/7)%2
+
+  var divs=document.getElementById('w1');
+  divs.innerHTML=''
+  dayofweek=parseInt(daydiff%7)
+  for(i=0;i<7;i++){
+      
+      newDiv=document.createElement('td');
+      newDiv.innerHTML=week[weekindex][i]
+      if (i==dayofweek){
+      newDiv.style.backgroundColor= 'rgb(123, 181, 185)'
+      }
+      divs.appendChild(newDiv);
+  }
 }
+
+
+calc(d3)
 content = 'Today roster:' + week[weekindex][parseInt(daydiff%7) ]
+
 document.getElementById('title').innerHTML = content
 if (weekindex==1 && parseInt(daydiff%7)==6){
   document.getElementById('tmr').innerHTML = "Tomorrow time: "+week[0][0]
@@ -189,10 +205,13 @@ else if (weekindex==0 && parseInt(daydiff%7)==6){
 else{
   document.getElementById('tmr').innerHTML = "Tomorrow time: "+week[weekindex][parseInt(daydiff%7)+1]
 }
-weekindex==0?bigsmall='周末休息周 & 林正常周' : bigsmall='无休周 & 林多休周' 
-document.getElementById('tmr').innerHTML += "   "+bigsmall 
 
-function getDates(currentTime) {//JS获取当前周从星期一到星期天的日期
+calc(d2)
+
+weekindex==0?bigsmall='下示周 为 周末休息周 & 林正常周' : bigsmall='下示周 为 无休周 & 林多休周' 
+document.getElementById('bigsmall').innerHTML = bigsmall 
+
+function getDates(currentTime) {//JS获取某周从星期一到星期天的日期
 
   var currentDate = currentTime
   var timesStamp = currentDate.getTime();
@@ -204,18 +223,21 @@ function getDates(currentTime) {//JS获取当前周从星期一到星期天的�
   return dates
 }
 
-console.log(getDates(d2))
 var divs=document.getElementById('datelist');
 divs.innerHTML=''
 for(i=0;i<7;i++){
     newDiv=document.createElement('td');
     newDiv.innerHTML=getDates(d2)[i]
+    if (i==dayofweek){
+      newDiv.style.backgroundColor= 'rgb(123, 181, 185)'
+    }
     divs.appendChild(newDiv);
 }
 }
-  main('09/18/2023')
+  main()
 function myfunc (){
-  alert("GOOD")
+  chosendate=document.getElementById('start').value
+  main(chosendate)
 }
 function myfunc2(){
   main()
