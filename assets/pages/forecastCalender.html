@@ -135,20 +135,22 @@
 
 <input type="date" id="start" name="trip-start" value="2024-10-17"  /><br/>
 <button class="button-9" onclick="myfunc()">  GO</button> 
-<button class="button-9" onclick="myfunc2()">  Today</button><br/>
+<button class="button-9" onclick="myfunc2()">  Today</button>
+<button class="button-9" onclick="myfunc4()"> ⬅️Prev week</button>
+<button class="button-9" onclick="myfunc3()"> ➡️ Next week</button><br/>
 
 </body>
 
 <script>
 
   var week = [['RDO','9:00 - 18:00', '10:00 - 18:00', '7:00 - 15:00', '12:30 - 19:30(交租)', 'RDO', 'RDO' ],
-[ '9:00 - 18:00', '10:00 - 18:00', '9:00 - 18:00','RDO', '10:00 - 18:00', '8:30 - 17:30','8:30 - 17:30']]
+[ '9:00 - 18:00', '9:00 - 18:00', '10:00 - 18:00','RDO', '9:00 - 17:00', '8:30 - 17:30','8:30 - 17:30']]
 
+var focusdate=new Date()
 
 
   const date = new Date();
   let day = date.getDate();
-  console.log(date)
   document.getElementById('start').value= date
   //let day = new Date("08/14/2023");   
   let month = date.getMonth() + 1;
@@ -237,12 +239,35 @@ for(i=0;i<7;i++){
   main()
 function myfunc (){
   chosendate=document.getElementById('start').value
+  focusdate= (new Date(chosendate));
   main(chosendate)
 }
 function myfunc2(){
+  focusdate=new Date()
   main()
 }
 
+
+
+  function myfunc3(){ 
+const datenext = focusdate
+const theDayOfTheMonthOnNextWeek = datenext.getDate() + 7;
+datenext.setDate(theDayOfTheMonthOnNextWeek)
+main(datenext)
+focusdate=datenext
+
+}
+
+
+  
+  function myfunc4(){
+
+    const datenext = focusdate
+const theDayOfTheMonthOnNextWeek = datenext.getDate() - 7;
+datenext.setDate(theDayOfTheMonthOnNextWeek)
+main(datenext)
+focusdate=datenext
+}
 </script>
 
 </html>
