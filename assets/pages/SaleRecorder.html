@@ -26,36 +26,55 @@
         opacity: 1;
       }
     }
+
     .suggestion-container {
-  position: relative;
-}
+      position: relative;
+    }
 
-.suggestion-list {
-  position: absolute;
-  z-index: 100;
-  width: 100%;
-  max-height: 150px; /* Show about 5 items with scroll */
-  overflow-y: auto;
-  background: var(--card-background-color);
-  border: 1px solid var(--card-border-color);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  margin-top: -1px; /* Align with input border */
-}
+    .suggestion-list {
+      position: absolute;
+      z-index: 100;
+      width: 100%;
+      max-height: 150px;
+      /* Show about 5 items with scroll */
+      overflow-y: auto;
+      background: var(--card-background-color);
+      border: 1px solid var(--card-border-color);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: -1px;
+      /* Align with input border */
+    }
 
-.suggestion-item {
-  cursor: pointer;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--card-border-color);
-}
+    .actions-cell {
+      white-space: nowrap;
+    }
 
-.suggestion-item:hover {
-  background: var(--card-sectionning-background-color);
-}
+    .actions-cell button {
+      display: inline-block !important;
+      padding: 0 0.25rem !important;
+      min-width: auto !important;
+      width: auto !important;
+      margin-right: 2px;
+    }
 
-.suggestion-item:last-child {
-  border-bottom: none;
-}
+    .actions-cell button:last-child {
+      margin-right: 0;
+    }
+
+    .suggestion-item {
+      cursor: pointer;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--card-border-color);
+    }
+
+    .suggestion-item:hover {
+      background: var(--card-sectionning-background-color);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
 
     /* Custom styles */
     .container {
@@ -63,39 +82,39 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-    
+
     .title {
       text-align: center;
       margin-bottom: 2rem;
     }
-    
+
     .view-buttons {
       display: flex;
       justify-content: center;
       gap: 1rem;
       margin-bottom: 2rem;
     }
-    
+
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1rem;
     }
-    
+
     .form-actions {
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
       margin-top: 1rem;
     }
-    
+
     .search-container {
       display: flex;
       gap: 1rem;
       margin-bottom: 1rem;
       align-items: center;
     }
-    
+
     .suggestion-item {
       cursor: pointer;
       padding: 0.25rem 0.5rem;
@@ -103,27 +122,27 @@
       border: 1px solid var(--card-border-color);
       margin-top: 0.25rem;
     }
-    
+
     .suggestion-item:hover {
       background: var(--card-sectionning-background-color);
     }
-    
+
     table {
       width: 100%;
       margin-top: 1rem;
     }
-    
+
     th {
       cursor: pointer;
       white-space: nowrap;
     }
-    
+
     .empty-state {
       text-align: center;
       padding: 2rem;
       color: var(--muted-color);
     }
-    
+
     .actions-cell {
       white-space: nowrap;
     }
@@ -268,7 +287,7 @@
           .map(([value]) => value)
           .slice(0, 20); // max 20 suggestions
       };
-      
+
       return (
         <div className="container">
           <h1 className="title">Product Tracker</h1>
@@ -293,75 +312,75 @@
               <h2>{editingId ? 'Edit Record' : 'Add New Record'}</h2>
               <form onSubmit={handleSubmit}>
                 <div className="form-grid">
-<div className="suggestion-container">
-  <label htmlFor="buyerName">Buyer Name *</label>
-  <input
-    type="text"
-    id="buyerName"
-    name="buyerName"
-    value={formData.buyerName}
-    onChange={handleInputChange}
-    required
-    autoComplete="off"
-  />
-  {formData.buyerName && (
-    <div className="suggestion-list">
-      {getFrequencyMap('buyerName')
-        .filter(name => 
-          name.toLowerCase().startsWith(formData.buyerName.toLowerCase()) && 
-          name !== formData.buyerName
-        )
-        .slice(0, 20) // Max 20 items
-        .map((name, index) => (
-          <div
-            key={index}
-            onClick={() => {
-              setFormData({ ...formData, buyerName: name });
-              // Optional: focus next field after selection
-              document.getElementById('productName')?.focus();
-            }}
-            className="suggestion-item"
-          >
-            {name}
-          </div>
-        ))}
-    </div>
-  )}
-</div>
-<div className="suggestion-container">
-  <label htmlFor="productName">Product Name *</label>
-  <input
-    type="text"
-    id="productName"
-    name="productName"
-    value={formData.productName}
-    onChange={handleInputChange}
-    required
-    autoComplete="off"
-  />
-  {formData.productName && (
-    <div className="suggestion-list">
-      {getFrequencyMap('productName')
-        .filter(product => 
-          product.toLowerCase().startsWith(formData.productName.toLowerCase()) && 
-          product !== formData.productName
-        )
-        .slice(0, 20)
-        .map((product, index) => (
-          <div
-            key={index}
-            onClick={() => {
-              setFormData({ ...formData, productName: product });
-              document.getElementById('link')?.focus();
-            }}
-            className="suggestion-item"
-          >
-            {product}
-          </div>
-        ))}
-    </div>
-  )}
-</div>
+                  <div className="suggestion-container">
+                    <label htmlFor="buyerName">Buyer Name *</label>
+                    <input
+                      type="text"
+                      id="buyerName"
+                      name="buyerName"
+                      value={formData.buyerName}
+                      onChange={handleInputChange}
+                      required
+                      autoComplete="off"
+                    />
+                    {formData.buyerName && (
+                      <div className="suggestion-list">
+                        {getFrequencyMap('buyerName')
+                          .filter(name =>
+                            name.toLowerCase().startsWith(formData.buyerName.toLowerCase()) &&
+                            name !== formData.buyerName
+                          )
+                          .slice(0, 20) // Max 20 items
+                          .map((name, index) => (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                setFormData({ ...formData, buyerName: name });
+                                // Optional: focus next field after selection
+                                document.getElementById('productName')?.focus();
+                              }}
+                              className="suggestion-item"
+                            >
+                              {name}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="suggestion-container">
+                    <label htmlFor="productName">Product Name *</label>
+                    <input
+                      type="text"
+                      id="productName"
+                      name="productName"
+                      value={formData.productName}
+                      onChange={handleInputChange}
+                      required
+                      autoComplete="off"
+                    />
+                    {formData.productName && (
+                      <div className="suggestion-list">
+                        {getFrequencyMap('productName')
+                          .filter(product =>
+                            product.toLowerCase().startsWith(formData.productName.toLowerCase()) &&
+                            product !== formData.productName
+                          )
+                          .slice(0, 20)
+                          .map((product, index) => (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                setFormData({ ...formData, productName: product });
+                                document.getElementById('link')?.focus();
+                              }}
+                              className="suggestion-item"
+                            >
+                              {product}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <label htmlFor="link">Link (Optional)</label>
                     <input
@@ -373,41 +392,41 @@
                     />
                   </div>
 
-<div className="suggestion-container">
-  <label htmlFor="agreedPrice">Agreed Price *</label>
-  <input
-    type="number"
-    id="agreedPrice"
-    name="agreedPrice"
-    value={formData.agreedPrice}
-    onChange={handleInputChange}
-    required
-    step="1"
-    autoComplete="off"
-  />
-  {formData.agreedPrice && (
-    <div className="suggestion-list">
-      {getFrequencyMap('agreedPrice')
-        .filter(price => 
-          price.startsWith(formData.agreedPrice) && 
-          price !== formData.agreedPrice
-        )
-        .slice(0, 20)
-        .map((price, index) => (
-          <div
-            key={index}
-            onClick={() => {
-              setFormData({ ...formData, agreedPrice: price });
-              document.getElementById('size')?.focus();
-            }}
-            className="suggestion-item"
-          >
-            {price}
-          </div>
-        ))}
-    </div>
-  )}
-</div>
+                  <div className="suggestion-container">
+                    <label htmlFor="agreedPrice">Agreed Price *</label>
+                    <input
+                      type="number"
+                      id="agreedPrice"
+                      name="agreedPrice"
+                      value={formData.agreedPrice}
+                      onChange={handleInputChange}
+                      required
+                      step="1"
+                      autoComplete="off"
+                    />
+                    {formData.agreedPrice && (
+                      <div className="suggestion-list">
+                        {getFrequencyMap('agreedPrice')
+                          .filter(price =>
+                            price.startsWith(formData.agreedPrice) &&
+                            price !== formData.agreedPrice
+                          )
+                          .slice(0, 20)
+                          .map((price, index) => (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                setFormData({ ...formData, agreedPrice: price });
+                                document.getElementById('size')?.focus();
+                              }}
+                              className="suggestion-item"
+                            >
+                              {price}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div>
                     <label htmlFor="size">Size *</label>
@@ -537,14 +556,15 @@
                           已买货 {getSortIcon('isProductPurchased')}
                         </th>
                         <th>
+                          Actions
+                        </th>
+                        <th>
                           隐藏
                         </th>
                         <th onClick={() => requestSort('purchaseDate')}>
                           Date {getSortIcon('purchaseDate')}
                         </th>
-                        <th>
-                          Actions
-                        </th>
+
                       </tr>
                     </thead>
                     <tbody>
@@ -585,7 +605,10 @@
                               }}
                             />
                           </td>
-
+                          <td className="actions-cell">
+                            <button onClick={() => handleEdit(record)} className="secondary">✏️</button>
+                            <button onClick={() => handleDelete(record.id)} className="secondary">🗑️</button>
+                          </td>
                           <td>
                             <input
                               type="checkbox"
@@ -599,20 +622,7 @@
                             />
                           </td>
                           <td>{record.purchaseDate || '-'}</td>
-                          <td className="actions-cell">
-                            <button
-                              onClick={() => handleEdit(record)}
-                              className="secondary"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              onClick={() => handleDelete(record.id)}
-                              className="secondary"
-                            >
-                              🗑️
-                            </button>
-                          </td>
+
                         </tr>
                       ))}
                     </tbody>
