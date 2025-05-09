@@ -1,26 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Tracker</title>
   <!-- React CDN -->
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js">
+  </script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.21.2/babel.min.js"></script>
-  <!-- Tailwind CSS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+  <!-- Pico CSS (light) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <style>
     .fade-in {
       animation: fadeIn 0.3s ease-in;
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+    .suggestion-container {
+  position: relative;
+}
+
+.suggestion-list {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  max-height: 150px; /* Show about 5 items with scroll */
+  overflow-y: auto;
+  background: var(--card-background-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-top: -1px; /* Align with input border */
+}
+
+.suggestion-item {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--card-border-color);
+}
+
+.suggestion-item:hover {
+  background: var(--card-sectionning-background-color);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+    /* Custom styles */
+    .container {
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .title {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .view-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .search-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    
+    .suggestion-item {
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      background: var(--card-background-color);
+      border: 1px solid var(--card-border-color);
+      margin-top: 0.25rem;
+    }
+    
+    .suggestion-item:hover {
+      background: var(--card-sectionning-background-color);
+    }
+    
+    table {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    th {
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted-color);
+    }
+    
+    .actions-cell {
+      white-space: nowrap;
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+
+<body>
   <div id="root"></div>
 
   <script type="text/babel">
@@ -32,7 +142,8 @@
       const [editingId, setEditingId] = useState(null);
       const [searchTerm, setSearchTerm] = useState('');
       const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-      
+      const [showArchived, setShowArchived] = useState(false);
+
       const [formData, setFormData] = useState({
         id: Date.now(),
         buyerName: '',
@@ -68,18 +179,19 @@
 
       const handleSubmit = (e) => {
         e.preventDefault();
+        const currentDate = new Date().toISOString().split('T')[0];
+        const updatedFormData = {
+          ...formData,
+          purchaseDate: formData.purchaseDate || currentDate
+        };
         if (editingId !== null) {
-          // Update existing record
-          setRecords(records.map(record => 
-            record.id === editingId ? { ...formData } : record
+          setRecords(records.map(record =>
+            record.id === editingId ? { ...updatedFormData } : record
           ));
           setEditingId(null);
         } else {
-          // Add new record
-          setRecords([...records, { ...formData, id: Date.now() }]);
+          setRecords([...records, { ...updatedFormData, id: Date.now() }]);
         }
-        
-        // Reset form
         setFormData({
           id: Date.now(),
           buyerName: '',
@@ -136,24 +248,40 @@
         );
       });
 
+      const displayedRecords = filteredRecords.filter(r => showArchived || !r.archived);
+
       const getSortIcon = (key) => {
         if (sortConfig.key !== key) return '⇅';
         return sortConfig.direction === 'asc' ? '↑' : '↓';
       };
 
+      const getFrequencyMap = (key) => {
+        const map = {};
+        records.forEach(record => {
+          const value = record[key];
+          if (value) {
+            map[value] = (map[value] || 0) + 1;
+          }
+        });
+        return Object.entries(map)
+          .sort((a, b) => b[1] - a[1]) // sort by frequency
+          .map(([value]) => value)
+          .slice(0, 20); // max 20 suggestions
+      };
+      
       return (
-        <div className="container mx-auto p-4 max-w-6xl">
-          <h1 className="text-3xl font-bold text-center mb-8 text-blue-800">Product Tracker</h1>
-          
-          <div className="flex justify-center mb-6">
-            <button 
-              className={`px-6 py-2 mx-2 rounded-lg font-medium ${view === 'input' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+        <div className="container">
+          <h1 className="title">Product Tracker</h1>
+
+          <div className="view-buttons">
+            <button
+              className={view === 'input' ? 'active' : 'secondary'}
               onClick={() => setView('input')}
             >
               Input Mode
             </button>
-            <button 
-              className={`px-6 py-2 mx-2 rounded-lg font-medium ${view === 'view' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            <button
+              className={view === 'view' ? 'active' : 'secondary'}
               onClick={() => setView('view')}
             >
               View Records ({records.length})
@@ -161,108 +289,180 @@
           </div>
 
           {view === 'input' && (
-            <div className="bg-white p-6 rounded-lg shadow-md fade-in">
-              <h2 className="text-xl font-semibold mb-4">{editingId ? 'Edit Record' : 'Add New Record'}</h2>
+            <div className="card fade-in">
+              <h2>{editingId ? 'Edit Record' : 'Add New Record'}</h2>
               <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Buyer Name *</label>
-                    <input 
-                      type="text" 
-                      name="buyerName"
-                      value={formData.buyerName}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Product Name *</label>
-                    <input 
-                      type="text" 
-                      name="productName"
-                      value={formData.productName}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Link (Optional)</label>
-                    <input 
-                      type="text" 
+                <div className="form-grid">
+<div className="suggestion-container">
+  <label htmlFor="buyerName">Buyer Name *</label>
+  <input
+    type="text"
+    id="buyerName"
+    name="buyerName"
+    value={formData.buyerName}
+    onChange={handleInputChange}
+    required
+    autoComplete="off"
+  />
+  {formData.buyerName && (
+    <div className="suggestion-list">
+      {getFrequencyMap('buyerName')
+        .filter(name => 
+          name.toLowerCase().startsWith(formData.buyerName.toLowerCase()) && 
+          name !== formData.buyerName
+        )
+        .slice(0, 20) // Max 20 items
+        .map((name, index) => (
+          <div
+            key={index}
+            onClick={() => {
+              setFormData({ ...formData, buyerName: name });
+              // Optional: focus next field after selection
+              document.getElementById('productName')?.focus();
+            }}
+            className="suggestion-item"
+          >
+            {name}
+          </div>
+        ))}
+    </div>
+  )}
+</div>
+<div className="suggestion-container">
+  <label htmlFor="productName">Product Name *</label>
+  <input
+    type="text"
+    id="productName"
+    name="productName"
+    value={formData.productName}
+    onChange={handleInputChange}
+    required
+    autoComplete="off"
+  />
+  {formData.productName && (
+    <div className="suggestion-list">
+      {getFrequencyMap('productName')
+        .filter(product => 
+          product.toLowerCase().startsWith(formData.productName.toLowerCase()) && 
+          product !== formData.productName
+        )
+        .slice(0, 20)
+        .map((product, index) => (
+          <div
+            key={index}
+            onClick={() => {
+              setFormData({ ...formData, productName: product });
+              document.getElementById('link')?.focus();
+            }}
+            className="suggestion-item"
+          >
+            {product}
+          </div>
+        ))}
+    </div>
+  )}
+</div>
+                  <div>
+                    <label htmlFor="link">Link (Optional)</label>
+                    <input
+                      type="text"
+                      id="link"
                       name="link"
                       value={formData.link}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Agreed Price *</label>
-                    <input 
-                      type="number" 
-                      name="agreedPrice"
-                      value={formData.agreedPrice}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                      step="0.01"
-                    />
-                  </div>
+<div className="suggestion-container">
+  <label htmlFor="agreedPrice">Agreed Price *</label>
+  <input
+    type="number"
+    id="agreedPrice"
+    name="agreedPrice"
+    value={formData.agreedPrice}
+    onChange={handleInputChange}
+    required
+    step="1"
+    autoComplete="off"
+  />
+  {formData.agreedPrice && (
+    <div className="suggestion-list">
+      {getFrequencyMap('agreedPrice')
+        .filter(price => 
+          price.startsWith(formData.agreedPrice) && 
+          price !== formData.agreedPrice
+        )
+        .slice(0, 20)
+        .map((price, index) => (
+          <div
+            key={index}
+            onClick={() => {
+              setFormData({ ...formData, agreedPrice: price });
+              document.getElementById('size')?.focus();
+            }}
+            className="suggestion-item"
+          >
+            {price}
+          </div>
+        ))}
+    </div>
+  )}
+</div>
 
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Size *</label>
-                    <input 
-                      type="text" 
+                  <div>
+                    <label htmlFor="size">Size *</label>
+                    <input
+                      type="text"
+                      id="size"
                       name="size"
                       value={formData.size}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
                   </div>
 
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">Purchase Date (Optional)</label>
-                    <input 
-                      type="date" 
+                  <div>
+                    <label htmlFor="purchaseDate">Purchase Date (Optional)</label>
+                    <input
+                      type="date"
+                      id="purchaseDate"
                       name="purchaseDate"
                       value={formData.purchaseDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="mb-4 flex items-center">
-                    <input 
-                      type="checkbox" 
-                      name="isPaymentMade"
-                      checked={formData.isPaymentMade}
-                      onChange={handleInputChange}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-gray-700 font-medium">Payment Made</label>
+                  <div>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="isPaymentMade"
+                        checked={formData.isPaymentMade}
+                        onChange={handleInputChange}
+                        role="switch"
+                      />
+                      Payment Made
+                    </label>
                   </div>
 
-                  <div className="mb-4 flex items-center">
-                    <input 
-                      type="checkbox" 
-                      name="isProductPurchased"
-                      checked={formData.isProductPurchased}
-                      onChange={handleInputChange}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-gray-700 font-medium">Product Purchased</label>
+                  <div>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="isProductPurchased"
+                        checked={formData.isProductPurchased}
+                        onChange={handleInputChange}
+                        role="switch"
+                      />
+                      Product Purchased
+                    </label>
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-6">
+                <div className="form-actions">
                   {editingId && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setEditingId(null);
                         setFormData({
@@ -277,14 +477,13 @@
                           purchaseDate: '',
                         });
                       }}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 mr-2"
+                      className="secondary"
                     >
                       Cancel
                     </button>
                   )}
-                  <button 
-                    type="submit" 
-                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  <button
+                    type="submit"
                   >
                     {editingId ? 'Update Record' : 'Save Record'}
                   </button>
@@ -294,91 +493,124 @@
           )}
 
           {view === 'view' && (
-            <div className="bg-white p-6 rounded-lg shadow-md fade-in">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold mb-4 md:mb-0">All Records</h2>
-                <div className="w-full md:w-64">
-                  <input 
-                    type="text" 
-                    placeholder="Search by buyer or product name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+            <div className="card fade-in">
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Search by buyer or product name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button
+                  onClick={() => setShowArchived(!showArchived)}
+                  className="secondary"
+                >
+                  {showArchived ? 'Hide Archived' : 'Show Archived'}
+                </button>
               </div>
 
               {records.length === 0 ? (
-                <div className="text-center py-6 text-gray-500">
-                  No records found. Add some records in Input Mode.
+                <div className="empty-state">
+                  无记录
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white">
-                    <thead className="bg-gray-100">
+                <div className="table-responsive">
+                  <table>
+                    <thead>
                       <tr>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('buyerName')}>
-                          Buyer Name {getSortIcon('buyerName')}
+                        <th onClick={() => requestSort('buyerName')}>
+                          买家 {getSortIcon('buyerName')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('productName')}>
-                          Product {getSortIcon('productName')}
+                        <th onClick={() => requestSort('productName')}>
+                          产品 {getSortIcon('productName')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('agreedPrice')}>
-                          Price {getSortIcon('agreedPrice')}
+                        <th onClick={() => requestSort('agreedPrice')}>
+                          价格 {getSortIcon('agreedPrice')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider">
-                          Size
+                        <th>
+                          尺码
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('isPaymentMade')}>
-                          Payment {getSortIcon('isPaymentMade')}
+                        <th onClick={() => requestSort('isPaymentMade')}>
+                          已付款 {getSortIcon('isPaymentMade')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('isProductPurchased')}>
-                          Purchased {getSortIcon('isProductPurchased')}
+                        <th onClick={() => requestSort('isProductPurchased')}>
+                          已买货 {getSortIcon('isProductPurchased')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('purchaseDate')}>
+                        <th>
+                          隐藏
+                        </th>
+                        <th onClick={() => requestSort('purchaseDate')}>
                           Date {getSortIcon('purchaseDate')}
                         </th>
-                        <th className="py-3 px-4 text-left font-medium text-gray-600 uppercase tracking-wider">
+                        <th>
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {filteredRecords.map((record) => (
-                        <tr key={record.id} className="hover:bg-gray-50">
-                          <td className="py-3 px-4">{record.buyerName}</td>
-                          <td className="py-3 px-4">
+                    <tbody>
+                      {displayedRecords.map((record) => (
+                        <tr key={record.id}>
+                          <td>{record.buyerName}</td>
+                          <td>
                             {record.link ? (
-                              <a href={record.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              <a href={record.link} target="_blank" rel="noopener noreferrer">
                                 {record.productName}
                               </a>
                             ) : record.productName}
                           </td>
-                          <td className="py-3 px-4">${parseFloat(record.agreedPrice).toFixed(2)}</td>
-                          <td className="py-3 px-4">{record.size}</td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${record.isPaymentMade ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                              {record.isPaymentMade ? 'Paid' : 'Unpaid'}
-                            </span>
+                          <td>${parseFloat(record.agreedPrice).toFixed(2)}</td>
+                          <td>{record.size}</td>
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={record.isPaymentMade}
+                              onChange={() => {
+                                const updated = records.map(r =>
+                                  r.id === record.id ? { ...r, isPaymentMade: !r.isPaymentMade } : r
+                                );
+                                setRecords(updated);
+                              }}
+                            />
                           </td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${record.isProductPurchased ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                              {record.isProductPurchased ? 'Yes' : 'No'}
-                            </span>
+
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={record.isProductPurchased}
+                              onChange={() => {
+                                const updated = records.map(r =>
+                                  r.id === record.id ? { ...r, isProductPurchased: !r.isProductPurchased } : r
+                                );
+                                setRecords(updated);
+                              }}
+                            />
                           </td>
-                          <td className="py-3 px-4">{record.purchaseDate || '-'}</td>
-                          <td className="py-3 px-4">
-                            <button 
-                              onClick={() => handleEdit(record)} 
-                              className="text-blue-600 hover:text-blue-800 mr-3"
+
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={record.archived || false}
+                              onChange={() => {
+                                const updated = records.map(r =>
+                                  r.id === record.id ? { ...r, archived: !r.archived } : r
+                                );
+                                setRecords(updated);
+                              }}
+                            />
+                          </td>
+                          <td>{record.purchaseDate || '-'}</td>
+                          <td className="actions-cell">
+                            <button
+                              onClick={() => handleEdit(record)}
+                              className="secondary"
                             >
-                              Edit
+                              ✏️
                             </button>
-                            <button 
-                              onClick={() => handleDelete(record.id)} 
-                              className="text-red-600 hover:text-red-800"
+                            <button
+                              onClick={() => handleDelete(record.id)}
+                              className="secondary"
                             >
-                              Delete
+                              🗑️
                             </button>
                           </td>
                         </tr>
@@ -396,4 +628,5 @@
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
 </body>
+
 </html>
