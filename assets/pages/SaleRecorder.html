@@ -13,12 +13,12 @@
   <!-- Pico CSS (light) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <style>
-
-        .url-button {
+    .url-button {
       margin-left: 0.5rem;
       padding: 0.25rem 0.5rem;
       font-size: 0.8rem;
     }
+
     .fade-in {
       animation: fadeIn 0.3s ease-in;
     }
@@ -190,6 +190,7 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
+      width: 3rem;
     }
 
     .stats-table {
@@ -197,7 +198,8 @@
       border-collapse: collapse;
     }
 
-    .stats-table th, .stats-table td {
+    .stats-table th,
+    .stats-table td {
       padding: 0.5rem;
       text-align: left;
       border-bottom: 1px solid var(--card-border-color);
@@ -228,6 +230,38 @@
     .clickable-header:hover {
       text-decoration: underline;
     }
+
+    .x-checkbox {
+      appearance: none;
+      width: 1.2em;
+      height: 1.2em;
+      border: 2px solid var(--form-element-border-color);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .x-checkbox:checked::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70%;
+      height: 2px;
+      background: var(--form-element-invalid-border-color);
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .x-checkbox:checked::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70%;
+      height: 2px;
+      background: var(--form-element-invalid-border-color);
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
   </style>
 </head>
 
@@ -246,7 +280,7 @@
       const [showArchived, setShowArchived] = useState(false);
       const [modalData, setModalData] = useState(null);
       const [modalType, setModalType] = useState(null); // 'buyer' or 'product' or 'buyerFrequency'
- const [modalRecord, setModalRecord] = useState(null); // Track which record's URL to show
+      const [modalRecord, setModalRecord] = useState(null); // Track which record's URL to show
 
       const [formData, setFormData] = useState({
         id: Date.now(),
@@ -257,6 +291,7 @@
         size: '',
         isPaymentMade: false,
         isProductPurchased: false,
+        isProductShort: false,
         purchaseDate: '',
       });
 
@@ -273,6 +308,65 @@
         localStorage.setItem('productRecords', JSON.stringify(records));
       }, [records]);
 
+
+      const XCheckbox = ({ label, id, checked: propChecked, onChange }) => {
+        const [internalChecked, setInternalChecked] = useState(propChecked || false);
+
+        // Use controlled component pattern if propChecked is provided
+        const isControlled = typeof propChecked !== 'undefined';
+        const checked = isControlled ? propChecked : internalChecked;
+
+        const handleChange = (e) => {
+          if (!isControlled) {
+            setInternalChecked(e.target.checked);
+          }
+          onChange?.(e);
+        };
+
+        return (
+          <div style={{ position: 'relative' }}>
+            <input
+              type="checkbox"
+              id={id}
+              checked={checked}
+              onChange={handleChange}
+              style={{
+                appearance: 'none',
+                width: '1.2em',
+                height: '1.2em',
+                border: '2px solid var(--form-element-border-color)',
+                borderRadius: '2px',
+                position: 'relative',
+                cursor: 'pointer',
+                verticalAlign: 'middle',
+              }}
+            />
+            {checked && (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '0.2em',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--form-element-invalid-border-color)',
+                  fontWeight: 'bold',
+                  pointerEvents: 'none',
+                }}
+                aria-hidden="true"
+              >
+                X
+              </span>
+            )}
+            {label && (
+              <label htmlFor={id} style={{ marginLeft: '0.5em', cursor: 'pointer' }}>
+                {label}
+              </label>
+            )}
+          </div>
+        );
+      };
+
+
       const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({
@@ -282,12 +376,12 @@
       };
       const getProductFrequencyReport = () => {
         const productStats = {};
-        
+
         // Calculate stats for each product
         records.forEach(record => {
           const product = record.productName;
           if (!product) return;
-          
+
           if (!productStats[product]) {
             productStats[product] = {
               count: 0,
@@ -297,23 +391,23 @@
               records: []
             };
           }
-          
+
           productStats[product].count++;
           productStats[product].totalAmount += parseFloat(record.agreedPrice) || 0;
-          
+
           // Keep track of the most recent purchase date
-          if (!productStats[product].lastPurchaseDate || 
-              record.purchaseDate > productStats[product].lastPurchaseDate) {
+          if (!productStats[product].lastPurchaseDate ||
+            record.purchaseDate > productStats[product].lastPurchaseDate) {
             productStats[product].lastPurchaseDate = record.purchaseDate;
             // Update link to the most recent purchase
             if (record.link) {
               productStats[product].link = record.link;
             }
           }
-          
+
           productStats[product].records.push(record);
         });
-        
+
         // Convert to array and sort by count (descending)
         return Object.entries(productStats)
           .map(([name, stats]) => ({ name, ...stats }))
@@ -363,6 +457,7 @@
           size: '',
           isPaymentMade: false,
           isProductPurchased: false,
+          isProductShort: false,
           purchaseDate: '',
         });
       };
@@ -432,20 +527,25 @@
       };
 
       const getStatsData = (type, name) => {
-        const filteredRecords = records.filter(record => 
+        const filteredRecords = records.filter(record =>
           type === 'buyer' ? record.buyerName === name : record.productName === name
         );
-        
+
         // Calculate total amount spent
         const totalAmount = filteredRecords.reduce((sum, record) => {
           return sum + (parseFloat(record.agreedPrice) || 0);
         }, 0);
-        
+
         // Calculate average price
-        const avgPrice = filteredRecords.length > 0 
+        const avgPrice = filteredRecords.length > 0
           ? (totalAmount / filteredRecords.length).toFixed(0)
           : 0;
-        
+
+        const cheapPrice = filteredRecords.length
+          ? Math.min(...filteredRecords
+            .map(obj => parseFloat(obj.agreedPrice)))
+          : "0";
+
         // Get most common size
         const sizeCounts = {};
         filteredRecords.forEach(record => {
@@ -456,26 +556,28 @@
         const mostCommonSize = Object.entries(sizeCounts)
           .sort((a, b) => b[1] - a[1])
           .map(([size]) => size)[0] || 'N/A';
-        
+
         // Get payment status counts
         const paymentStatus = filteredRecords.reduce((acc, record) => {
           if (record.isPaymentMade) acc.paid++;
           else acc.unpaid++;
           return acc;
         }, { paid: 0, unpaid: 0 });
-        
+
         // Get purchase status counts
         const purchaseStatus = filteredRecords.reduce((acc, record) => {
           if (record.isProductPurchased) acc.purchased++;
           else acc.notPurchased++;
           return acc;
         }, { purchased: 0, notPurchased: 0 });
-        
+
         return {
           name,
+          link:filteredRecords[0].link,
           count: filteredRecords.length,
           totalAmount,
           avgPrice,
+          cheapPrice,
           mostCommonSize,
           paymentStatus,
           purchaseStatus,
@@ -485,12 +587,12 @@
 
       const getBuyerFrequencyReport = () => {
         const buyerStats = {};
-        
+
         // Calculate stats for each buyer
         records.forEach(record => {
           const buyer = record.buyerName;
           if (!buyer) return;
-          
+
           if (!buyerStats[buyer]) {
             buyerStats[buyer] = {
               count: 0,
@@ -499,19 +601,19 @@
               records: []
             };
           }
-          
+
           buyerStats[buyer].count++;
           buyerStats[buyer].totalAmount += parseFloat(record.agreedPrice) || 0;
-          
+
           // Keep track of the most recent purchase date
-          if (!buyerStats[buyer].lastPurchaseDate || 
-              record.purchaseDate > buyerStats[buyer].lastPurchaseDate) {
+          if (!buyerStats[buyer].lastPurchaseDate ||
+            record.purchaseDate > buyerStats[buyer].lastPurchaseDate) {
             buyerStats[buyer].lastPurchaseDate = record.purchaseDate;
           }
-          
+
           buyerStats[buyer].records.push(record);
         });
-        
+
         // Convert to array and sort by count (descending)
         return Object.entries(buyerStats)
           .map(([name, stats]) => ({ name, ...stats }))
@@ -735,6 +837,7 @@
                           size: '',
                           isPaymentMade: false,
                           isProductPurchased: false,
+                          isProductShort: false,
                           purchaseDate: '',
                         });
                       }}
@@ -780,10 +883,20 @@
                     <thead>
                       <tr>
                         <th onClick={handleBuyerHeaderClick} className="clickable-header">
-                          买家 {getSortIcon('buyerName')}
+                          {"买家    "}
+                          <span onClick={
+                            (e) => {
+                              e.stopPropagation();  // This stops the event from bubbling up
+                              requestSort('buyerName');
+                            }}>
+                            《{getSortIcon('buyerName')}》</span>
                         </th>
-                        <th onClick={() => requestSort('productName')}>
-                          产品 {getSortIcon('productName')}
+                        <th onClick={handleProductHeaderClick} className="clickable-header">
+                          {"产品    "}
+                          <span onClick={(e) => {
+                            e.stopPropagation();  // This stops the event from bubbling up
+                            requestSort('productName');
+                          }}>《{getSortIcon('productName')}》</span>
                         </th>
                         <th onClick={() => requestSort('agreedPrice')}>
                           价格 {getSortIcon('agreedPrice')}
@@ -794,8 +907,11 @@
                         <th onClick={() => requestSort('isPaymentMade')}>
                           付款 {getSortIcon('isPaymentMade')}
                         </th>
+                        <th onClick={() => requestSort('isProductShort')}>
+                          缺货 {getSortIcon('isProductShort')}
+                        </th>
                         <th onClick={() => requestSort('isProductPurchased')}>
-                          买货 {getSortIcon('isProductPurchased')}
+                          已购 {getSortIcon('isProductPurchased')}
                         </th>
                         <th>
                           Actions
@@ -813,8 +929,8 @@
                       {displayedRecords.map((record) => (
                         <tr key={record.id}>
                           <td>
-                            <span 
-                              className="clickable-name" 
+                            <span
+                              className="clickable-name"
                               onClick={() => showStatsModal('buyer', record.buyerName)}
                             >
                               {record.buyerName}
@@ -823,8 +939,8 @@
                           <td>
                             {record.link ? (
                               <a href={record.link} target="_blank" rel="noopener noreferrer">
-                                <span 
-                                  className="clickable-name" 
+                                <span
+                                  className="clickable-name"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     showStatsModal('product', record.productName);
@@ -834,8 +950,8 @@
                                 </span>
                               </a>
                             ) : (
-                              <span 
-                                className="clickable-name" 
+                              <span
+                                className="clickable-name"
                                 onClick={() => showStatsModal('product', record.productName)}
                               >
                                 {record.productName}
@@ -856,7 +972,18 @@
                               }}
                             />
                           </td>
-
+                          <td>
+                            <XCheckbox
+                              type="checkbox"
+                              checked={record.isProductShort}
+                              onChange={() => {
+                                const updated = records.map(r =>
+                                  r.id === record.id ? { ...r, isProductShort: !r.isProductShort } : r
+                                );
+                                setRecords(updated);
+                              }}
+                            />
+                          </td>
                           <td>
                             <input
                               type="checkbox"
@@ -869,6 +996,10 @@
                               }}
                             />
                           </td>
+
+
+
+
                           <td className="actions-cell">
                             <button onClick={() => handleEdit(record)} className="secondary">✏️</button>
                             <button onClick={() => handleDelete(record.id)} className="secondary">🗑️</button>
@@ -901,15 +1032,15 @@
             <div className="modal-overlay" onClick={closeModal}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                  <h2>
-                    {modalType === 'buyer' ? 'Buyer Statistics - ' + modalData.name : 
-                     modalType === 'product' ? 'Product Statistics - ' + modalData.name : 
-                     modalType === 'buyerFrequency' ? 'Top 20 Buyers by Purchase Count' :
-                     'Top 20 Products by Purchase Count'}
-                  </h2>
+                  <h5>
+                    {modalType === 'buyer' ? modalData.name :
+                      modalType === 'product' ? modalData.name :
+                        modalType === 'buyerFrequency' ? 'Top 20 Buyers ' :
+                          'Top 20 Products'}
+                  </h5>
                   <button className="modal-close" onClick={closeModal}>×</button>
                 </div>
-                
+
                 {modalType === 'buyerFrequency' || modalType === 'productFrequency' ? (
                   <div>
                     <table className="stats-table">
@@ -928,10 +1059,10 @@
                           <tr key={item.name}>
                             <td>{index + 1}</td>
                             <td>
-                              <span 
+                              <span
                                 className="clickable-name"
                                 onClick={() => showStatsModal(
-                                  modalType === 'buyerFrequency' ? 'buyer' : 'product', 
+                                  modalType === 'buyerFrequency' ? 'buyer' : 'product',
                                   item.name
                                 )}
                               >
@@ -958,20 +1089,12 @@
                 ) : (
                   <>
                     <div>
-                      <h3>Summary</h3>
-                      <p>Total Records: {modalData.count}</p>
-                      {modalType === 'buyer' && <p>Total Amount: ￥{modalData.totalAmount.toFixed(0)}</p>}
-                      {modalType === 'product' && (
-                        <>
-                          <p>Total Amount: ￥{modalData.totalAmount.toFixed(0)}</p>
-                          <p>Average Price: ￥{modalData.avgPrice}</p>
-                          <p>Most Common Size: {modalData.mostCommonSize}</p>
-                          {modalRecord?.link && (
+                      {modalData?.link && (
                             <p>
-                              Product Link: 
-                              <a 
-                                href={modalRecord.link} 
-                                target="_blank" 
+                              Product Link:
+                              <a
+                                href={modalData.link}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="url-button secondary"
                               >
@@ -979,6 +1102,14 @@
                               </a>
                             </p>
                           )}
+                      <p>Total Records: {modalData.count}</p>
+                      {modalType === 'buyer' && <p>Total Amount: ￥{modalData.totalAmount.toFixed(0)}</p>}
+                      {modalType === 'product' && (
+                        <>
+                          <p>Total Amount: ￥{modalData.totalAmount.toFixed(0)}</p>
+                          <p>Average Price: ￥{modalData.avgPrice}</p>
+                          <p>Lowest Price in history: ￥{modalData.cheapPrice}</p>
+
                         </>
                       )}
                       <p>
@@ -988,7 +1119,7 @@
                         Purchase Status: {modalData.purchaseStatus.purchased} purchased / {modalData.purchaseStatus.notPurchased} not purchased
                       </p>
                     </div>
-                    
+
                     <h3>All Records</h3>
                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                       <table className="stats-table">
@@ -1000,7 +1131,8 @@
                             <th>Price</th>
                             {modalType === 'product' && <th>Size</th>}
                             <th>Paid</th>
-                            <th>Purchased</th>
+                            <th>缺货？</th>
+                            <th>已购？</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1012,6 +1144,7 @@
                               <td>￥{parseFloat(record.agreedPrice).toFixed(0)}</td>
                               {modalType === 'product' && <td>{record.size}</td>}
                               <td>{record.isPaymentMade ? '✓' : '✗'}</td>
+                              <td>{record.isProductShort ? '✓' : '✗'}</td>
                               <td>{record.isProductPurchased ? '✓' : '✗'}</td>
                             </tr>
                           ))}
