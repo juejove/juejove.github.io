@@ -143,7 +143,7 @@
     <script>
         function calculateCountdown() {
             const now = new Date();
-            const target = new Date('2025-10-07');
+            const target = new Date(2025,9,7);
             
             const diffTime = now - target;
             const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -161,4 +161,5 @@
         setInterval(calculateCountdown, 60000);
     </script>
 </body>
+
 </html>
