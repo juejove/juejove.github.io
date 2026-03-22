@@ -525,3 +525,23 @@ div.col-sm-4 a b{
 	height: 216px;
 
 }
+
+.nav-item-collapsible .nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fa-chevron-icon {
+  transition: transform 0.3s ease;
+  margin-left: 10px;
+}
+
+.nav-toggle[aria-expanded="true"] .fa-chevron-icon {
+  transform: rotate(90deg);
+}
+
+.nav-pills.nav-stacked li a {
+  padding-left: 30px;
+  font-size: 0.9em;
+}
