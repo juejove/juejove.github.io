@@ -1,13 +1,466 @@
-<nav>
-    <div class="collapsible">
-        <button class="collapsible-button">Latest Works</button>
-        <div class="collapsible-content">
-            <ul>
-                <li><a href="#">Project 1</a></li>
-                <li><a href="#">Project 2</a></li>
-                <li><a href="#">Project 3</a></li>
-                <!-- Add more projects as needed -->
-            </ul>
-        </div>
-    </div>
-</nav>
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="ie ie7 lte9 lte8 lte7" lang="en-US"><![endif]-->
+<!--[if IE 8]><html class="ie ie8 lte9 lte8" lang="en-US">	<![endif]-->
+<!--[if IE 9]><html class="ie ie9 lte9" lang="en-US"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="noIE" lang="en-US">
+<!--<![endif]-->
+
+<head>
+	<title>Robin LIN's Works</title>
+
+	<!-- meta -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale=1.0, user-scalable=no" />
+
+	<!-- google fonts -->
+	<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans'>
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Serif:regular,bold" />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Alegreya+Sans:regular,italic,bold,bolditalic" />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nixie+One:regular,italic,bold,bolditalic" />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Alegreya+SC:regular,italic,bold,bolditalic" />
+
+	<!-- css -->
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/css/style.css" media="screen" />
+	<link href="assets/css/sliderstyle.css" rel="stylesheet" type="text/css" />
+
+	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+			<script src="assets/js/html5shiv.js"></script>
+			<script src="assets/js/respond.js"></script>
+		<![endif]-->
+
+	<!--[if IE 8]>
+	    	<script src="assets/js/selectivizr.js"></script>
+	    <![endif]-->
+</head>
+
+<body>
+	<div id="drawer-right">
+		<div class="cross text-right">
+			<a class="toggleDrawer" href="#"><i class="fa fa-times-circle fa-2x"></i></a>
+		</div>
+		<h2>Navigate</h2>
+		<nav>
+			<ul class="nav nav-pills nav-stacked">
+				<li>
+					<a href="#"><i class="fa fa-home"></i> Home</a>
+				</li>
+				<li>
+					<a href="#recent"><i class="fa fa-bookmark"></i> Latest Works</a>
+				</li>
+				<li>
+					<a href="#finding"><i class="fa fa-wordpress"></i> New Findings</a>
+				</li>
+                    <!-- Expandable menu item -->
+    <li class="nav-item-collapsible">
+      <a href="#" class="nav-toggle" data-toggle="collapse" data-target="#recent-menu">
+        <i class="fa fa-bookmark"></i> Latest Works
+        <i class="fa fa-chevron-right fa-chevron-icon"></i>
+      </a>
+      <ul class="collapse nav nav-pills nav-stacked" id="recent-menu">
+        <li><a href="./assets/pages/Robin Lin-webmap_api.html" target="_blank">Web Map</a></li>
+        <li><a href="./assets/pages/property_simulator.html" target="_blank">Property & Net Value Simulator</a></li>
+      </ul>
+    </li>
+    
+    <!-- More items... -->
+				<li>
+					<a href="#resume" target=""><i class="fa fa-heart"></i> Resume </a>
+				</li>
+				<li>
+					<a href="#education"><i class="fa fa-thumbs-up"></i> Education</a>
+				</li>
+				<li>
+					<a href="#contact"><i class="fa fa-phone-square"></i> Contact</a>
+				</li>
+			</ul>
+		</nav>
+		<!-- <div class="social">
+			<h2>Stay Connected</h2>
+			<ul>
+				<li><a href="https://www.facebook.com/robin.lin.71697/" target="_blank"><i
+							class="fa fa-facebook-square fa-3x"></i></a></li>
+				<li><a href=""><i class="fa fa-twitter-square fa-3x"></i></a></li>
+				<li><a href=""><i class="fa fa-tumblr-square fa-3x"></i></a></li>
+				<li><a href=""><i class="fa fa-google-plus-square fa-3x"></i></a></li>
+			</ul>
+		</div> -->
+
+	</div><!-- #drawer-right -->
+
+	<div id="wrapper">
+
+		<div id="header" class="content-block header-wrapper">
+			<div class="header-wrapper-inner">
+				<section class="top clearfix">
+					<div class="pull-left">
+						<h1><a class="logo" href="index.html">Robin LIN Index</a></h1>
+					</div>
+					<div class="pull-right">
+						<a class="toggleDrawer" href="#"><i class="fa fa-bars fa-2x"></i></a>
+					</div>
+				</section>
+				<section class="center">
+					<div class="slogan">
+						Welcome to Robin LIN space
+					</div>
+					<div class="secondary-slogan">
+						Robin Lin Front-end Collections
+					</div>
+				</section>
+
+			</div>
+		</div><!-- header -->
+
+
+		<div class="content-block" >
+			<div class="container" >
+				<header class="block-heading cleafix" id="recent" >
+					<a href="#" class="btn btn-o btn-lg pull-right">Top</a>
+					<h1>My latest Works</h1>
+					<p> Take a look at some of my recent projects</p>
+				</header>
+
+				<section class="block-body">
+
+					<div class="row">
+						<div class="col-sm-4">
+							<a href="./assets/pages/Robin Lin-webmap_api.html" target="_blank" class="recent-work"
+								style="background-image:url(assets/images/map.jpg); background-size:cover">
+								<div><b class="title">Web Map</b></div>
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+						<div class="col-sm-4">
+							<a href="./assets/pages/Play2048.html" target="_blank" class="recent-work"
+								style="background-image:url(assets/images/img2048.png); background-size:cover">
+								<div>
+									<b class="title">2048</b>
+								</div>
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+						<div class="col-sm-4">
+							<a href="./assets/pages/Tetris_RL.HTML" target="_blank" class="recent-work"
+								style="background-image:url(assets/images/tetris.jpg); background-size:cover">
+								<div>
+									<b class="title">Tetris</b>
+								</div>
+
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+					</div>
+
+
+					<div class="row">
+						<div class="col-sm-4 blog-post">
+							<a href="./assets/pages/Robin Lin-webmap_api.html" target="_blank">
+								<h2>Web Map</h2>
+							</a>
+							<p>A web map demo using Esri, mapbox and Leaflet web map API allowing shortest route search, custom layer presentation and information pop up, point cluster, polygon feature presentation, drone orthoimage, a variety of basemaps to choose from and geocode searching.
+							</p>
+						</div>
+						<div class="col-sm-4 blog-post">
+							<a href="./assets/pages/Play2048.html" target="_blank">
+								<h2>2048</h2>
+							</a>
+							<p>2048 is a popular single-player game. It's a type of “sliding block puzzle”. The object of the game is to combine the numbers displayed on the tiles until you reach 2048.
+							</p>
+
+						</div>
+						<div class="col-sm-4 blog-post">
+							<a href="./assets/pages/Tetris_RL.HTML" target="_blank">
+								<h2>Tetris</h2>
+							</a>
+							<p>A very well-known falling block puzzle game. Make falling blocks in a row to eliminate them and get scores. More rows eliminated at once will get bonus rewards.
+							</p>
+
+						</div>
+					</div>
+				</section>
+
+
+
+				<section class="block-body">
+
+					<div class="row">
+						<div class="col-sm-4">
+							<a href="./assets/pages/MineSweeper_RL.html" target="_blank" class="recent-work"
+								style="background-image:url(assets/images/minesweeperimg.jpg); background-size:cover">
+								<div>
+									<b class="title">Mine Sweeper</b>
+								</div>
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+						<div class="col-sm-4">
+							<a href="./assets/pages/Sheep Tile.html" target="_blank" class="recent-work"
+								style="background-image:url(assets/images/SheepTile/cover.webp.jpg); background-size:cover">
+								<div>
+									<b class="title">Sheep Tile</b>
+								</div>
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+						<div class="col-sm-4">
+							<a href="./assets/pages/Reversi.HTML" class="recent-work" target="_blank"
+								style="background-image:url(assets/images/reversri/Reversi\ OG\ Image.png); background-size:cover">
+								<div>
+									<b class="title">Reversi</b>
+								</div>
+								<span class="btn btn-o-white">Jump In!</span>
+							</a>
+						</div>
+					</div>
+
+
+					<div class="row">
+						<div class="col-sm-4 blog-post">
+							<a href="./assets/pages/Robin Lin-webmap_api.html" target="_blank">
+								<h2>Mine Sweeper</h2>
+							</a>
+							<p>Classic Minesweeper game written in Vue.js with a local record module. Add a few short-cut operations on top of the 
+								original edition.
+							</p>
+
+						</div>
+						<div class="col-sm-4 blog-post">
+							<a href="./assets/pages/Sheep Tile.html" target="_blank">
+								<h2>Sheep Tile</h2>
+							</a>
+							<p>A React popular puzzle game: Collect three same type tile blocks into your temporary collection strip and they dissapear. Too easy! Don't overload your collection stripe and that's it.
+								And you get two chances to remove some tiles from your strip as well. A marvelous fireworks🎆(Canvas) is awaiting you!
+							</p>
+
+						</div>
+						<div class="col-sm-4 blog-post">
+							<a href='./assets/pages/Reversi.HTML' target="_blank">
+								<h2>Reversi</h2>
+							</a>
+							<p>	Reversi (also known as Othello) is a pretty simple but requires thinking in depth game. It consists of a 8x8 square board, 
+								and pieces with one black and one white side. the aim of the game is to get more of your pieces on the board than the opponent's pieces.
+								Developed via React with AI option to compete with computer.
+							</p>
+
+						</div>
+					</div>
+				</section>
+
+			</div>
+		</div><!-- #blog -->
+
+
+
+		<div class="content-block parallax" id="services">
+			<div class="container text-center">
+				<header class="block-heading cleafix">
+					<h1>What I am interested in</h1>
+					<p>A little about what I do</p>
+				</header>
+				<section class="block-body">
+	
+					<div class="row">
+						<div class="col-md-4">
+							<div class="service">
+						<img width="200px"  src="./assets/images/RLIN photo.jpg" alt="">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="service">
+								<i class="fa fa-heart-o"></i>
+								<h2>Photogrammetry & 3D Modeling</h2>
+								<p>Photogrammetry is the art and science of extracting 3D information from photographs. 
+								The process involves taking overlapping photographs of an object, structure, or space and converting them into 2D or 3D digital models.</p>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="service">
+								<i class="fa fa-camera-retro"></i>
+								<h2>Photography</h2>
+								<p>Photography is an important derivative of scientific and technological progress, and the art of photography has increasingly become an important part of the world's cultural and artistic treasures, as well as an important manifestation of cultural development and social progress.</p>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div><!-- #services -->
+
+		<div class="content-block" id="portfolio">
+			<div class="container">
+				<header class="block-heading cleafix" id="finding" name="finding">
+					<a href="#" class="btn btn-o btn-lg pull-right">Top</a>
+					<h1>New Findings</h1>
+					<p>Keep up with the latest happenings.</p>
+				</header>
+				<section class="block-body">
+
+
+
+
+					<div class="row blog">
+
+						<div class="col-sm-4 blog-post">
+							
+							<a target="_blank" href="https://towardsdatascience.com/how-chatgpt-works-the-models-behind-the-bot-1ce5fca96286">
+								<img src="assets/images/ChatGPT_Diagram.svg" height="180px">
+								<h2>How ChatGPT Works: The Model Behind The Bot</h2>
+							</a>
+							<div class="date">31 Jan, 2023</div>
+							<p>ChatGPT is an extrapolation of a class of machine learning Natural Language Processing models known as Large Language Model (LLMs). LLMs digest huge quantities of text data and infer relationships between words within the text. 
+							</p>
+							<a href="https://towardsdatascience.com/how-chatgpt-works-the-models-behind-the-bot-1ce5fca96286" target="_blank">Read More</a>
+						</div>
+
+						<div class="col-sm-4 blog-post">
+							
+							<a href="https://threejs.org/examples/#webgl_animation_skinning_ik" target="_blank">
+								<img src="./assets/images/findings/animation-skinning.jpg"  height="180px" >
+								<h2>Three.js : interactive 3D scene</h2>
+							</a>
+							<div class="date">3 Nov, 2022</div>
+							<p> Three.js is a 3D library that tries to make it as easy as possible to get 3D content on
+								a webpage.
+								It handles stuff like scenes, lights, shadows, materials, textures, 3d math, all things.
+							</p>
+							<a target="_blank" href="https://threejs.org/manual/#en/fundamentals">Read More</a>
+						</div>
+
+
+						<div class="col-sm-4 blog-post">
+						
+							<a target="_blank" href="https://medium.com/yals/dry-out-react-code-into-presentational-components-8308f42a8b80#:~:text=Don't%20Repeat%20Yourself%20(DRY,unrelated%20parts%20of%20the%20application.">
+								<img src="assets/images/dry.webp.jpg" height="180px">
+								<h2>DRY out React Code into Presentational Components</h2>
+							</a>
+							<div class="date">16 Jun, 2017</div>
+							<p>Don't Repeat Yourself (DRY) is a programming principle which states that every logic or piece of knowledge in your code should be represented by only one abstraction. 
+								With that in mind, changing a given element should not affect the unrelated parts of the application.
+								
+							</p>
+							<a target="_blank" href="https://medium.com/yals/dry-out-react-code-into-presentational-components-8308f42a8b80#:~:text=Don't%20Repeat%20Yourself%20(DRY,unrelated%20parts%20of%20the%20application.">Read More</a>
+						</div>
+
+
+
+
+					</div>
+				</section>
+
+			</div>
+		</div><!-- #portfolio -->
+
+
+
+		<div class="content-block parallax"  id="parallax">
+			<div class="container text-center" id="resume">
+				<h1>
+					Actively looking for GIS opportunies.
+
+				</h1>
+				<a href="./assets/source/RobinLIN_Resume.pdf" target="_blank" class="btn btn-o-white btn-lg"> Download
+					my Resume (Robin Lin)</a>
+			</div>
+		</div><!-- #parallax -->
+
+		<div class="content-block" id="testimonials">
+			<div class="container" id="education">
+				<header class="block-heading cleafix">
+					<h1>Education</h1>
+					<p>My education experience </p>
+				</header>
+				<section class="block-body">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="testimonial">
+								<img src="assets/images/Tongji_Uni_logo.svg.png" height="150px" ><br />
+								<strong>Tongji University</strong><br />
+								<b>Bachelor of Engineering in Surveying and Mapping Engineering</b>
+								<p> Established in 1907, Tongji University is a comprehensive public research university located in Shanghai.  Tongji is one of the longest-standing, most selective, and most prestigious universities in China.
+									</p>
+
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="testimonial">
+								<img src="assets/images/unimelb.png" height="150px"> <br />
+								<strong>The University of Melbourne</strong><br />
+								<strong>Master of Engineering (Spatial) </strong><br/>
+								<p>The University of Melbourne is a public research university located in Melbourne, Australia. Founded in 1853, it is Australia's second oldest university and the oldest in Victoria.</p>
+							</div>
+						</div>
+
+					</div>
+				</section>
+			</div>
+		</div><!-- /#testimonials -->
+
+
+		<div class="content-block" id="contact">
+			<div class="container text-center">
+				<header class="block-heading cleafix">
+					<h1>Contact Me</h1>
+					<p>Feel free to leave me a message.</p>
+
+				</header>
+				<section class="block-body">
+					<div class="row">
+						<div class="col-md-6 col-md-offset-3">
+							<form class="" role="form">
+								<div class="form-group">
+									<input type="name" class="form-control form-control-white" id="subject"
+										placeholder="Your Name" required>
+								</div>
+								<div class="form-group">
+									<input type="email" class="form-control form-control-white" id="exampleInputEmail2"
+										placeholder="Enter email" required>
+								</div>
+								<div class="form-group">
+									<textarea class="form-control form-control-white" placeholder="Leave your message"
+										required style="resize:none;height:10em"></textarea>
+								</div>
+								<input type="submit" class="btn btn-o-white" value="Say Hello">
+								<p></p>
+								<p class="contactInfo">Email: <a
+										href="mailto:robinlin526@gmail.com">robinlin526@gmail.com</a> </p>
+								<p class="contactInfo">Ph: 0413292200</p>
+							</form>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div><!-- #contact -->
+
+		<div class="content-block" id="footer">
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-6 text-right"></div>
+				</div>
+			</div>
+		</div><!-- #footer -->
+
+
+	</div>
+	<!--/#wrapper-->
+
+
+
+
+
+
+	<script src="assets/js/jquery-2.1.3.min.js"></script>
+	<script src="assets/js/jquery-migrate-1.2.1.min.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
+	<script src="assets/js/jquery.actual.min.js"></script>
+	<script src="assets/js/jquery.scrollTo.min.js"></script>
+	<script src="assets/js/script.js"></script>
+	<script type="text/javascript" src="assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="assets/js/slider.js"></script>
+
+</body>
+
+</html>
