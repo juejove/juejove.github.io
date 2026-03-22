@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property vs Rent — Wealth Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181c25;
+    --border: #252b38;
+    --accent: #4ade80;
+    --accent2: #38bdf8;
+    --accent3: #fb923c;
+    --accent4: #f472b6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --dim: #1e2434;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .logo { font-size: 20px; font-weight: 700; color: var(--text); }
+  .logo em { color: var(--accent); font-style: normal; }
+  .tagline { font-size: 13px; color: var(--muted); }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .control-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .control-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+  .control-value { font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 10px; line-height: 1; }
+
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--dim);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .rate-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding: 12px 16px;
+    background: var(--dim);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .rate-strip strong { color: var(--text); font-weight: 600; }
+
+  .property-section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .property-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .prop-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .prop-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .prop-btn.active { background: var(--accent); border-color: var(--accent); color: #0f1117; font-weight: 700; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .summary-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .sc-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 5px; }
+  .sc-val { font-size: 19px; font-weight: 700; line-height: 1.1; }
+  .sc-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .chart-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chart-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .chart-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .chart-container { position: relative; }
+  .chart-container.tall { height: 400px; }
+  .chart-container.comparison { height: 460px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .legend-swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+
+  .view-toggle {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .toggle-btn {
+    background: var(--dim);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .toggle-btn.active { background: var(--accent2); border-color: var(--accent2); color: #0f1117; font-weight: 700; }
+  .toggle-btn:hover:not(.active) { border-color: var(--accent2); color: var(--accent2); }
+
+  .year-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+  .year-btn {
+    background: var(--dim);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .year-btn.active { background: var(--accent3); border-color: var(--accent3); color: #0f1117; font-weight: 700; }
+  .year-btn:hover:not(.active) { border-color: var(--accent3); color: var(--accent3); }
+
+  .table-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .table-wrapper {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--dim); }
+  th {
+    padding: 11px 14px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+  td {
+    padding: 9px 14px;
+    text-align: right;
+    border-bottom: 1px solid rgba(37,43,56,0.5);
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; color: var(--muted); font-size: 12px; }
+  tr:hover td { background: rgba(74,222,128,0.03); }
+  tr.year-row td { background: rgba(74,222,128,0.05); border-bottom: 1px solid var(--border); }
+  tr.year-row td:first-child { color: var(--accent); font-weight: 700; }
+
+  .num-input {
+    width: 100%;
+    background: var(--dim);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  .num-input::-webkit-outer-spin-button,
+  .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .num-input:focus { border-color: var(--accent2); }
+
+  .price-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .price-input-row label { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .price-input-row .num-input { margin-bottom: 0; max-width: 200px; }
+  .price-input-row .hint { font-size: 11px; color: var(--muted); }
+
+  .pos { color: var(--accent); }
+  .neg { color: var(--accent4); }
+  .neu { color: var(--accent2); }
+  .exp { color: var(--accent3); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo"><em>Property</em> vs Rent — Wealth Simulator</div>
+    <div class="tagline" id="scenarioTag">—</div>
+  </header>
+
+  <div class="section-label">Parameters</div>
+  <div class="controls-grid">
+    <div class="control-block">
+      <div class="control-label">Starting Net Worth</div>
+      <input type="number" class="num-input" id="netInput" min="200000" max="3000000" step="50000" value="1050000">
+      <div class="control-value" id="netVal">$1,050,000</div>
+      <input type="range" id="netSlider" min="200000" max="3000000" step="50000" value="1050000">
+    </div>
+    <div class="control-block">
+      <div class="control-label">Monthly Income (after tax)</div>
+      <input type="number" class="num-input" id="incomeInput" min="1000" max="50000" step="100" value="6000">
+      <div class="control-value" style="color:var(--accent2)" id="incomeVal">$6,000</div>
+      <input type="range" id="incomeSlider" min="1000" max="20000" step="500" value="6000">
+    </div>
+    <div class="control-block">
+      <div class="control-label">Annual Growth @ $1M base (%)</div>
+      <input type="number" class="num-input" id="growthInput" min="0" max="20" step="0.1" value="4.0">
+      <div class="control-value" style="color:var(--accent3)" id="growthVal">4.0%</div>
+      <input type="range" id="growthSlider" min="0" max="10" step="0.5" value="4">
+    </div>
+    <div class="control-block">
+      <div class="control-label">Annual Holding Costs</div>
+      <div class="sc-val" style="color:var(--accent4);font-size:13px;line-height:1.6;margin-top:4px" id="holdingCostDisplay">—</div>
+    </div>
+    <div class="control-block">
+      <div class="control-label">Monthly Repayment (fixed 30yr)</div>
+      <div class="sc-val" style="color:var(--accent);font-size:18px;line-height:1.6;margin-top:4px" id="repaymentDisplay">—</div>
+    </div>
+  </div>
+
+  <!-- Foldable advanced rates -->
+  <details id="advancedRates" style="margin-bottom:14px;">
+    <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text);user-select:none;">
+      <span id="advArrow" style="font-size:11px;transition:transform 0.2s;display:inline-block;">▶</span>
+      Advanced Rate Settings
+      <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:4px" id="advSummaryText">— mortgage 5.6% · savings 5.0% · rent yield 3.5%</span>
+    </summary>
+    <div style="background:var(--panel);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:18px 20px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+        <div class="control-block" style="border-radius:6px;">
+          <div class="control-label">Mortgage Rate (%)</div>
+          <input type="number" class="num-input" id="mortgageInput" min="0.1" max="15" step="0.05" value="5.6">
+          <input type="range" id="mortgageSlider" min="0.5" max="12" step="0.05" value="5.6">
+        </div>
+        <div class="control-block" style="border-radius:6px;">
+          <div class="control-label">Cash Savings Rate (%)</div>
+          <input type="number" class="num-input" id="savingsInput" min="0.1" max="15" step="0.05" value="5.0">
+          <input type="range" id="savingsSlider" min="0.5" max="12" step="0.05" value="5.0">
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Net after 15% tax: <strong id="netSavingsDisplay">4.25%</strong></div>
+        </div>
+        <div class="control-block" style="border-radius:6px;">
+          <div class="control-label">Base Rent Yield @ $1M (%)</div>
+          <input type="number" class="num-input" id="rentYieldInput" min="0.5" max="10" step="0.05" value="3.5">
+          <input type="range" id="rentYieldSlider" min="0.5" max="8" step="0.05" value="3.5">
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Yield = base + (1M−price)×1e-8</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="rate-strip" id="rateStrip">
+    <span>Mortgage: <strong id="stripMortgage">5.60%</strong> p.a.</span>
+    <span>Cash savings: <strong id="stripSavings">5.00%</strong> → net <strong id="stripNet">4.25%</strong> after 15% tax</span>
+    <span>Rent yield base: <strong id="stripRent">3.50%</strong> @ $1M</span>
+    <span>Holding costs: <strong>0.33% × price + $1,200/yr</strong></span>
+    <span>Growth: <strong>base% − (price − $1M) × 0.1%/$100k</strong> · monthly = (1+g)^(1/12)−1</span>
+    <span>Loan term: <strong>30-year P&amp;I</strong></span>
+  </div>
+
+  <div class="property-section">
+    <div class="section-label">Select Property Price (highlighted = selected for detail view)</div>
+    <div class="price-input-row">
+      <label>Custom price $</label>
+      <input type="number" class="num-input" id="priceInput" min="100000" max="10000000" step="50000" value="1000000">
+      <span class="hint">Type any value and press Enter — nearest preset will highlight</span>
+    </div>
+    <div class="property-grid" id="propGrid"></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid" id="summaryCards"></div>
+
+  <!-- ── Chart 1: All-properties comparison ── -->
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">All Properties — Total Net Worth at Year End</div>
+        <div class="chart-sub">Every line is one property price · white line = your selected property · colour ramp: teal (cheap) → red (expensive)</div>
+      </div>
+      <div class="year-selector" id="yearSelector"></div>
+    </div>
+    <div class="chart-container comparison">
+      <canvas id="comparisonChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Chart 2: Detail breakdown ── -->
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Selected Property — Wealth Breakdown</div>
+        <div class="chart-sub" id="detailSub">—</div>
+      </div>
+      <div class="view-toggle">
+        <button class="toggle-btn active" id="btnYear" onclick="setView('year')">Annual</button>
+        <button class="toggle-btn" id="btnMonth" onclick="setView('month')">Monthly</button>
+      </div>
+    </div>
+    <div class="chart-container tall">
+      <canvas id="detailChart"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#4ade80"></div>House Equity</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#38bdf8"></div>Offset + True Cash</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fb923c"></div>Living Experience (Accumulated Rent Equiv.)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f472b6"></div>Total Net Worth (dashed)</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-section-header">
+    <span class="section-label" style="margin-bottom:0">Detail Table</span>
+    <div class="view-toggle">
+      <button class="toggle-btn active" id="tblBtnYear" onclick="setView('year')">Annual</button>
+      <button class="toggle-btn" id="tblBtnMonth" onclick="setView('month')">Monthly</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>House Value</th>
+          <th>Loan Balance</th>
+          <th>Equity</th>
+          <th>Offset Acct</th>
+          <th>True Cash</th>
+          <th>Effective Loan</th>
+          <th>Interest/mo</th>
+          <th>Living Exp (Acc.)</th>
+          <th>Total Net Worth</th>
+          <th>Repayment/mo</th>
+          <th>Rent Equiv/mo</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+<script>
+// ── Constants ──
+const TAX_RATE = 0.15;
+const LOAN_YEARS = 30;
+
+const prices = [];
+for (let p = 700000; p <= 1450000; p += 50000) prices.push(p);
+for (let p = 1500000; p <= 2000000; p += 100000) prices.push(p);
+
+const state = {
+  netWorth: 1050000,
+  monthlyIncome: 6000,
+  propGrowth: 0.04,
+  selectedPrice: 1000000,
+  view: 'year',
+  compareYear: 15,
+  // adjustable rates
+  mortgageRate: 0.056,
+  savingsRate: 0.05,
+  baseRentYield: 0.035,
+};
+
+let detailChart = null, compChart = null;
+
+function fmt(n) {
+  const s = n < 0 ? '-' : '', a = Math.abs(n);
+  if (a >= 1e6) return s + '$' + (a / 1e6).toFixed(2) + 'M';
+  return s + '$' + Math.round(a).toLocaleString();
+}
+function pct(n) { return (n * 100).toFixed(2) + '%'; }
+
+function calcMortgage(p, r, y) {
+  const rm = r / 12, n = y * 12;
+  if (rm === 0) return p / n;
+  return p * rm * Math.pow(1 + rm, n) / (Math.pow(1 + rm, n) - 1);
+}
+
+function simulatePrice(price) {
+  const loan = Math.max(0, price - state.netWorth);
+  // Surplus net worth sits in offset from day 1
+  const initOffset = Math.max(0, state.netWorth - price);
+  const rentYield = state.baseRentYield + (1e6 - price) * 1e-8;
+  // rentYield is fixed at purchase, but rent amount grows as house value appreciates
+  // Fixed repayment calculated on original loan amount, constant for 30 years
+  const netCashRate = state.savingsRate * (1 - TAX_RATE);
+  const monthlyRepayment = loan > 0 ? calcMortgage(loan, state.mortgageRate, LOAN_YEARS) : 0;
+  const annualHolding = price * 0.0033 + 1200;
+  const monthlyPropCost = annualHolding / 12;
+
+  let houseVal = price;
+  let loanBal = loan;    // outstanding principal (not offset-reduced)
+  let offset = loan > 0 ? initOffset : 0; // offset only meaningful when loan exists
+  let trueCash = loan > 0 ? 0 : initOffset; // if no loan, surplus is straight cash from day 1
+  let accRent = 0;
+
+  const rows = [];
+
+  for (let m = 1; m <= 180; m++) {
+    // 1. House appreciates — growth adjusted for price, compounded monthly
+    // effectiveAnnualGrowth reduces by 0.1% per $100k above $1M
+    const effectiveAnnualGrowth = state.propGrowth - (price - 1000000) * 1e-8;  // 0.1% less per $100k above $1M
+    const monthlyGrowthRate = Math.pow(1 + effectiveAnnualGrowth, 1/12) - 1;
+    houseVal *= (1 + monthlyGrowthRate);
+
+    if (loanBal > 0) {
+      // 2. Interest is only charged on (loanBal - offset)
+      const effectiveLoan = Math.max(0, loanBal - offset);
+      const interestCharged = effectiveLoan * state.mortgageRate / 12;
+
+      // 3. Principal paid = repayment - interest charged
+      const principalPaid = Math.min(loanBal, monthlyRepayment - interestCharged);
+      loanBal = Math.max(0, loanBal - principalPaid);
+
+      // 4. Repayment and holding costs come out of offset; income goes in
+      offset += state.monthlyIncome - monthlyRepayment - monthlyPropCost;
+      if (offset < 0) offset = 0; // can't go negative (would mean cash flow crunch)
+
+      // 5. If offset now exceeds remaining loan, overflow becomes true cash
+      if (offset > loanBal) {
+        trueCash += offset - loanBal;
+        offset = loanBal;
+      }
+    } else {
+      // No loan (cash purchase or fully repaid) — all surplus goes to true cash
+      offset = 0;
+      trueCash += state.monthlyIncome - monthlyPropCost;
+    }
+
+    // 6. True cash earns net interest (5% gross, 15% tax = 4.25% net)
+    if (trueCash > 0) {
+      trueCash += trueCash * netCashRate / 12;
+    }
+
+    // 7. Living experience accumulates — rent grows with house value
+    const monthlyRent = houseVal * rentYield / 12;
+    accRent += monthlyRent;
+
+    const equity = houseVal - loanBal;
+    const liquidSavings = offset + trueCash; // total liquid money
+    const effectiveLoanForRow = Math.max(0, loanBal - offset);
+    const interestCharged = effectiveLoanForRow * state.mortgageRate / 12;
+
+    rows.push({
+      month: m,
+      year: Math.ceil(m / 12),
+      yearMonth: `Y${Math.ceil(m/12)} M${((m-1)%12)+1}`,
+      houseVal, loanBal, equity,
+      offset, trueCash, liquidSavings,
+      accRent,
+      total: equity + liquidSavings + accRent,
+      effectiveLoan: effectiveLoanForRow,
+      interestCharged,
+      isYearEnd: m % 12 === 0,
+      monthlyRepayment: loan > 0 ? monthlyRepayment : 0,
+      monthlyRent,
+    });
+  }
+  const initMonthlyRent = price * rentYield / 12;
+  return { rows, loan, initOffset, monthlyRepayment, initMonthlyRent, rentYield, annualHolding };
+}
+
+// Colour ramp: teal → green → amber → red (cheap → expensive)
+function priceColor(price) {
+  const t = (price - 700000) / (2000000 - 700000);
+  let r, g, b;
+  if (t < 0.33) {
+    const s = t / 0.33;
+    r = Math.round(56  + s * (74  - 56));
+    g = Math.round(189 + s * (222 - 189));
+    b = Math.round(248 - s * (248 - 80));
+  } else if (t < 0.66) {
+    const s = (t - 0.33) / 0.33;
+    r = Math.round(74  + s * (251 - 74));
+    g = Math.round(222 - s * (222 - 146));
+    b = Math.round(80  - s * 50);
+  } else {
+    const s = (t - 0.66) / 0.34;
+    r = Math.round(251 + s * (239 - 251));
+    g = Math.round(146 - s * (146 - 68));
+    b = Math.round(30  + s * (68  - 30));
+  }
+  return `rgb(${r},${g},${b})`;
+}
+
+function buildPropGrid() {
+  const g = document.getElementById('propGrid');
+  g.innerHTML = '';
+  prices.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'prop-btn' + (p === state.selectedPrice ? ' active' : '');
+    b.dataset.price = p;
+    b.textContent = fmt(p);
+    b.onclick = () => {
+      state.selectedPrice = p;
+      document.getElementById('priceInput').value = p;
+      buildPropGrid();
+      render();
+    };
+    g.appendChild(b);
+  });
+}
+
+function buildYearSelector() {
+  const el = document.getElementById('yearSelector');
+  el.innerHTML = '';
+  [1, 3, 5, 7, 10, 12, 15].forEach(y => {
+    const b = document.createElement('button');
+    b.className = 'year-btn' + (y === state.compareYear ? ' active' : '');
+    b.textContent = `Year ${y}`;
+    b.onclick = () => { state.compareYear = y; buildYearSelector(); buildCompChart(); };
+    el.appendChild(b);
+  });
+}
+
+function buildCompChart() {
+  const maxY = state.compareYear;
+  const labels = Array.from({length: maxY}, (_, i) => `Year ${i + 1}`);
+
+  const datasets = prices.map(price => {
+    const sim = simulatePrice(price);
+    const yearRows = sim.rows.filter(r => r.isYearEnd).slice(0, maxY);
+    const isSel = price === state.selectedPrice;
+    const col = priceColor(price);
+    return {
+      label: fmt(price),
+      data: yearRows.map(r => r.total),
+      borderColor: isSel ? '#ffffff' : col,
+      backgroundColor: 'transparent',
+      borderWidth: isSel ? 3 : 1.5,
+      pointRadius: isSel ? 5 : 1.5,
+      pointHoverRadius: 7,
+      tension: 0.3,
+      order: isSel ? 0 : 1,
+      _sel: isSel,
+    };
+  });
+
+  const ctx = document.getElementById('comparisonChart').getContext('2d');
+  if (compChart) compChart.destroy();
+  compChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e2434',
+          borderColor: '#252b38',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#e2e8f0',
+          padding: 10,
+          titleFont: { size: 13, weight: '600' },
+          bodyFont: { size: 12 },
+          itemSort: (a, b) => b.parsed.y - a.parsed.y,
+          callbacks: {
+            title: items => items[0].label,
+            label: c => ` ${c.dataset.label}: ${fmt(c.parsed.y)}${c.dataset._sel ? '  ★ selected' : ''}`,
+            labelColor: c => ({ borderColor: c.dataset.borderColor, backgroundColor: c.dataset.borderColor })
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(37,43,56,0.7)' }, ticks: { color: '#64748b', font: { size: 12 } }, border: { color: '#252b38' } },
+        y: { grid: { color: 'rgba(37,43,56,0.7)' }, ticks: { color: '#64748b', font: { size: 12 }, callback: v => fmt(v) }, border: { color: '#252b38' } }
+      }
+    }
+  });
+}
+
+function buildDetailChart(rows) {
+  const v = state.view;
+  const filtered = v === 'year' ? rows.filter(r => r.isYearEnd) : rows;
+  const labels = filtered.map(r => v === 'year' ? `Year ${r.year}` : r.yearMonth);
+
+  const ctx = document.getElementById('detailChart').getContext('2d');
+  if (detailChart) detailChart.destroy();
+  detailChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Equity',           data: filtered.map(r => r.equity),   borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.07)',   fill: true,  tension: 0.3, borderWidth: 2, pointRadius: v==='year'?4:0, pointHoverRadius: 6 },
+        { label: 'Offset + Cash',     data: filtered.map(r => r.liquidSavings), borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.07)',   fill: true,  tension: 0.3, borderWidth: 2, pointRadius: v==='year'?4:0, pointHoverRadius: 6 },
+        { label: 'Living Exp.',      data: filtered.map(r => r.accRent),  borderColor: '#fb923c', backgroundColor: 'rgba(251,146,60,0.07)',   fill: true,  tension: 0.3, borderWidth: 2, pointRadius: v==='year'?4:0, pointHoverRadius: 6 },
+        { label: 'Total Net Worth',  data: filtered.map(r => r.total),    borderColor: '#f472b6', backgroundColor: 'transparent',             fill: false, tension: 0.3, borderWidth: 2.5, borderDash: [6,3], pointRadius: v==='year'?5:0, pointHoverRadius: 7 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e2434', borderColor: '#252b38', borderWidth: 1,
+          titleColor: '#94a3b8', bodyColor: '#e2e8f0', padding: 10,
+          titleFont: { size: 12, weight: '600' }, bodyFont: { size: 12 },
+          callbacks: { label: c => ` ${c.dataset.label}: ${fmt(c.parsed.y)}` }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(37,43,56,0.7)' }, ticks: { color: '#64748b', font: { size: 11 }, maxTicksLimit: v==='year'?15:18, maxRotation: 45 }, border: { color: '#252b38' } },
+        y: { grid: { color: 'rgba(37,43,56,0.7)' }, ticks: { color: '#64748b', font: { size: 11 }, callback: v => fmt(v) }, border: { color: '#252b38' } }
+      }
+    }
+  });
+}
+
+function buildSummary(rows, sim) {
+  const last = rows[rows.length - 1];
+  const y5  = rows.find(r => r.month === 60);
+  const y10 = rows.find(r => r.month === 120);
+
+  // Update holding cost display
+  const hc = document.getElementById('holdingCostDisplay');
+  if (hc) hc.innerHTML = `${fmt(sim.annualHolding)}/yr<br><span style="color:var(--muted);font-size:11px">${fmt(sim.annualHolding/12)}/mo · 0.33%×price + $1,200</span>`;
+
+  // Show repayment prominently
+  const rd = document.getElementById('repaymentDisplay');
+  if (rd) {
+    if (sim.loan > 0) {
+      rd.innerHTML = `${fmt(sim.monthlyRepayment)}/mo<br><span style="color:var(--muted);font-size:11px">Fixed 30yr · Loan ${fmt(sim.loan)}</span>`;
+    } else {
+      rd.innerHTML = `None<br><span style="color:var(--muted);font-size:11px">Cash purchase (no loan)</span>`;
+    }
+  }
+
+  document.getElementById('summaryCards').innerHTML = [
+    { label: 'Total Net Worth (15Y)', val: fmt(last.total),            sub: 'equity + savings + living exp.', color: 'var(--accent4)' },
+    { label: 'House Equity (15Y)',    val: fmt(last.equity),            sub: `from ${fmt(state.selectedPrice)}`, color: 'var(--accent)' },
+    { label: 'Savings (15Y)',         val: fmt(last.liquidSavings),     sub: `offset ${fmt(last.offset)} + cash ${fmt(last.trueCash)}`, color: 'var(--accent2)' },
+    { label: 'Living Exp. (15Y)',     val: fmt(last.accRent),           sub: `${fmt(sim.initMonthlyRent)}/mo at purchase`, color: 'var(--accent3)' },
+    { label: 'Annual Holding Cost',   val: fmt(sim.annualHolding),      sub: `${fmt(sim.annualHolding/12)}/mo`, color: 'var(--accent4)' },
+    { label: 'Rent Yield',            val: pct(sim.rentYield),          sub: 'on property value', color: 'var(--accent3)' },
+    { label: 'Monthly Repayment',     val: sim.loan > 0 ? fmt(sim.monthlyRepayment) : 'None', sub: sim.loan > 0 ? `Loan: ${fmt(sim.loan)}` : 'Cash purchase', color: 'var(--accent)' },
+    { label: 'Net Worth @ Year 5',    val: y5  ? fmt(y5.total)  : '—', sub: '', color: 'var(--text)' },
+    { label: 'Net Worth @ Year 10',   val: y10 ? fmt(y10.total) : '—', sub: '', color: 'var(--text)' },
+  ].map(c => `
+    <div class="summary-card">
+      <div class="sc-label">${c.label}</div>
+      <div class="sc-val" style="color:${c.color}">${c.val}</div>
+      <div class="sc-sub">${c.sub}</div>
+    </div>`).join('');
+
+  document.getElementById('scenarioTag').textContent =
+    `${fmt(state.selectedPrice)} · ${fmt(state.netWorth)} net worth · $${state.monthlyIncome.toLocaleString()}/mo`;
+  document.getElementById('detailSub').textContent =
+    `${fmt(state.selectedPrice)} · repayment ${sim.loan > 0 ? fmt(sim.monthlyRepayment)+'/mo' : 'none (cash)'} · rent yield ${pct(sim.rentYield)} · ${fmt(sim.initMonthlyRent)}/mo at purchase`;
+}
+
+function buildTable(rows) {
+  const v = state.view;
+  const filtered = v === 'year' ? rows.filter(r => r.isYearEnd) : rows;
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  filtered.forEach(r => {
+    const tr = document.createElement('tr');
+    if (r.isYearEnd) tr.className = 'year-row';
+    tr.innerHTML = `
+      <td>${v === 'year' ? `Year ${r.year}` : r.yearMonth}</td>
+      <td class="pos">${fmt(r.houseVal)}</td>
+      <td class="neg">${fmt(r.loanBal)}</td>
+      <td class="pos">${fmt(r.equity)}</td>
+      <td class="neu">${fmt(r.offset)}</td>
+      <td class="neu">${fmt(r.trueCash)}</td>
+      <td class="neg" style="font-size:11px">${fmt(r.effectiveLoan)}</td>
+      <td class="neg" style="font-size:11px">${fmt(r.interestCharged)}</td>
+      <td class="exp">${fmt(r.accRent)}</td>
+      <td style="color:var(--accent4);font-weight:700">${fmt(r.total)}</td>
+      <td class="neg">${r.monthlyRepayment > 0 ? fmt(r.monthlyRepayment) : '—'}</td>
+      <td class="exp">${fmt(r.monthlyRent)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function setView(v) {
+  state.view = v;
+  document.getElementById('btnYear').classList.toggle('active', v === 'year');
+  document.getElementById('btnMonth').classList.toggle('active', v !== 'year');
+  document.getElementById('tblBtnYear').classList.toggle('active', v === 'year');
+  document.getElementById('tblBtnMonth').classList.toggle('active', v !== 'year');
+  const sim = simulatePrice(state.selectedPrice);
+  buildDetailChart(sim.rows);
+  buildTable(sim.rows);
+}
+window.setView = setView;
+
+function render() {
+  const sim = simulatePrice(state.selectedPrice);
+  buildSummary(sim.rows, sim);
+  buildCompChart();
+  buildDetailChart(sim.rows);
+  buildTable(sim.rows);
+}
+
+// ── Sync helpers ──
+function setNetWorth(v) {
+  v = Math.max(200000, Math.min(3000000, +v || 1050000));
+  state.netWorth = v;
+  document.getElementById('netVal').textContent = fmt(v);
+  document.getElementById('netSlider').value = Math.min(3000000, Math.max(200000, v));
+  document.getElementById('netInput').value = v;
+  render();
+}
+function setIncome(v) {
+  v = Math.max(1000, +v || 6000);
+  state.monthlyIncome = v;
+  document.getElementById('incomeVal').textContent = '$' + v.toLocaleString();
+  document.getElementById('incomeSlider').value = Math.min(20000, Math.max(1000, v));
+  document.getElementById('incomeInput').value = v;
+  render();
+}
+function setGrowth(v) {
+  v = Math.max(0, Math.min(20, +v || 4));
+  state.propGrowth = v / 100;
+  document.getElementById('growthVal').textContent = v.toFixed(1) + '%';
+  document.getElementById('growthSlider').value = Math.min(10, Math.max(0, v));
+  document.getElementById('growthInput').value = v;
+  render();
+}
+function setPriceCustom(v) {
+  v = Math.max(100000, +v || 1000000);
+  // snap to nearest price in list
+  let nearest = prices.reduce((a, b) => Math.abs(b - v) < Math.abs(a - v) ? b : a);
+  // if typed value not in list, use it directly (arbitrary price)
+  state.selectedPrice = v;
+  // highlight nearest preset button
+  document.querySelectorAll('.prop-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.price) === nearest && v === nearest);
+  });
+  // if exact match highlight that one
+  document.querySelectorAll('.prop-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.price) === v);
+  });
+  render();
+}
+
+// Sliders
+document.getElementById('netSlider').addEventListener('input', e => setNetWorth(+e.target.value));
+document.getElementById('incomeSlider').addEventListener('input', e => setIncome(+e.target.value));
+document.getElementById('growthSlider').addEventListener('input', e => setGrowth(+e.target.value));
+
+// Number inputs — update on change/enter
+document.getElementById('netInput').addEventListener('change', e => setNetWorth(+e.target.value));
+document.getElementById('netInput').addEventListener('keydown', e => { if (e.key === 'Enter') setNetWorth(+e.target.value); });
+document.getElementById('incomeInput').addEventListener('change', e => setIncome(+e.target.value));
+document.getElementById('incomeInput').addEventListener('keydown', e => { if (e.key === 'Enter') setIncome(+e.target.value); });
+document.getElementById('growthInput').addEventListener('change', e => setGrowth(+e.target.value));
+document.getElementById('growthInput').addEventListener('keydown', e => { if (e.key === 'Enter') setGrowth(+e.target.value); });
+
+// Price input
+document.getElementById('priceInput').addEventListener('change', e => setPriceCustom(+e.target.value));
+document.getElementById('priceInput').addEventListener('keydown', e => { if (e.key === 'Enter') setPriceCustom(+e.target.value); });
+
+
+// ── Advanced rate controls ──
+function updateAdvSummary() {
+  const net = (state.savingsRate * (1 - TAX_RATE) * 100).toFixed(2);
+  document.getElementById('advSummaryText').textContent =
+    `— mortgage ${(state.mortgageRate*100).toFixed(2)}% · savings ${(state.savingsRate*100).toFixed(2)}% · rent yield ${(state.baseRentYield*100).toFixed(2)}%`;
+  document.getElementById('netSavingsDisplay').textContent = net + '%';
+  document.getElementById('stripMortgage').textContent = (state.mortgageRate*100).toFixed(2) + '%';
+  document.getElementById('stripSavings').textContent = (state.savingsRate*100).toFixed(2) + '%';
+  document.getElementById('stripNet').textContent = net + '%';
+  document.getElementById('stripRent').textContent = (state.baseRentYield*100).toFixed(2) + '%';
+}
+
+function setMortgageRate(v) {
+  v = Math.max(0.1, Math.min(15, +v || 5.6));
+  state.mortgageRate = v / 100;
+  document.getElementById('mortgageInput').value = v.toFixed(2);
+  document.getElementById('mortgageSlider').value = Math.min(12, Math.max(0.5, v));
+  updateAdvSummary(); render();
+}
+function setSavingsRate(v) {
+  v = Math.max(0.1, Math.min(15, +v || 5.0));
+  state.savingsRate = v / 100;
+  document.getElementById('savingsInput').value = v.toFixed(2);
+  document.getElementById('savingsSlider').value = Math.min(12, Math.max(0.5, v));
+  updateAdvSummary(); render();
+}
+function setBaseRentYield(v) {
+  v = Math.max(0.5, Math.min(10, +v || 3.5));
+  state.baseRentYield = v / 100;
+  document.getElementById('rentYieldInput').value = v.toFixed(2);
+  document.getElementById('rentYieldSlider').value = Math.min(8, Math.max(0.5, v));
+  updateAdvSummary(); render();
+}
+
+document.getElementById('mortgageSlider').addEventListener('input', e => setMortgageRate(+e.target.value));
+document.getElementById('mortgageInput').addEventListener('change', e => setMortgageRate(+e.target.value));
+document.getElementById('mortgageInput').addEventListener('keydown', e => { if (e.key==='Enter') setMortgageRate(+e.target.value); });
+
+document.getElementById('savingsSlider').addEventListener('input', e => setSavingsRate(+e.target.value));
+document.getElementById('savingsInput').addEventListener('change', e => setSavingsRate(+e.target.value));
+document.getElementById('savingsInput').addEventListener('keydown', e => { if (e.key==='Enter') setSavingsRate(+e.target.value); });
+
+document.getElementById('rentYieldSlider').addEventListener('input', e => setBaseRentYield(+e.target.value));
+document.getElementById('rentYieldInput').addEventListener('change', e => setBaseRentYield(+e.target.value));
+document.getElementById('rentYieldInput').addEventListener('keydown', e => { if (e.key==='Enter') setBaseRentYield(+e.target.value); });
+
+// Rotate arrow on open/close
+document.getElementById('advancedRates').addEventListener('toggle', e => {
+  document.getElementById('advArrow').style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
+});
+
+updateAdvSummary();
+buildPropGrid();
+buildYearSelector();
+render();
+</script>
+</body>
+</html>
