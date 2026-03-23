@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Street Shop Simulator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#060610;font-family:'Courier New',monospace;overflow:hidden;user-select:none}
+#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;cursor:grab}
+#three-canvas.grabbing{cursor:grabbing}
+
+/* ── HUD ── */
+#hud{
+  position:fixed;top:12px;left:12px;z-index:100;
+  background:rgba(0,0,0,.88);border:1px solid #1e2030;
+  padding:11px 15px;border-radius:8px;color:#e0e0e0;
+  font-size:12px;line-height:1.9;min-width:172px;
+  pointer-events:all;
+}
+#hud .time-big{font-size:25px;font-weight:bold;color:#fff;letter-spacing:3px}
+#hud .date-sm{font-size:11px;color:#556}
+#hud .ped-line{font-size:11px;color:#445;margin-top:1px}
+#hud .rev-line{font-size:11px;color:#3a8;margin-top:1px;font-weight:bold}
+#hud .spd-row{display:flex;gap:5px;margin-top:8px}
+#hud .spd-row button{
+  background:#0c0c18;border:1px solid #252535;color:#668;
+  padding:3px 11px;border-radius:3px;cursor:pointer;font-size:11px;font-family:inherit;
+}
+#hud .spd-row button.on{background:#0f2a50;border-color:#2060b0;color:#80c0ff}
+
+/* ── Mode bar ── */
+#modebar{position:fixed;top:12px;right:12px;z-index:100;display:flex;gap:8px;pointer-events:all}
+#modebar button{
+  background:rgba(0,0,0,.88);border:1px solid #1e2030;color:#668;
+  padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;
+}
+#modebar button.on{background:#0a2818;border-color:#208040;color:#70e898}
+#modebar button.devbtn{border-color:#3a1a05}
+#modebar button.devbtn.on{background:#2a1000;border-color:#b04010;color:#ffaa55}
+
+/* ── Popup ── */
+#popup{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:200;
+  background:rgba(5,5,14,.97);border:1px solid #18184a;border-radius:10px;
+  padding:22px 26px;color:#bbb;min-width:355px;max-width:440px;
+  box-shadow:0 0 60px rgba(30,60,200,.18);display:none;pointer-events:all;
+}
+#popup h2{
+  color:#fff;font-size:14px;margin-bottom:13px;
+  border-bottom:1px solid #101028;padding-bottom:9px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+#popup h2 .close-x{background:none;border:none;color:#444;cursor:pointer;font-size:20px;line-height:1}
+#popup h2 .close-x:hover{color:#fff}
+.pr{display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;padding:4px 0;border-bottom:1px solid #0a0a1a}
+.pr .lb{color:#556}
+.pr .vl{color:#ddd;font-weight:bold}
+.pr input,.pr select{
+  background:#080818;border:1px solid #20204a;color:#d0d0f8;
+  padding:2px 7px;border-radius:3px;font-size:12px;width:148px;font-family:inherit
+}
+.rev-box{padding:6px 9px;background:rgba(0,50,30,.14);
+  border:1px solid #0a2820;border-radius:5px;text-align:center;font-size:11px;color:#446;margin-top:8px}
+.revval{font-size:15px;font-weight:bold;color:#44e8a0}
+.net-box{margin-top:5px;padding:9px;background:rgba(10,40,20,.15);
+  border:1px solid #102820;border-radius:5px;text-align:center;font-size:12px;color:#556}
+.netval{font-size:18px;font-weight:bold}
+.apply-btn{margin-top:11px;width:100%;padding:8px;border:none;border-radius:5px;
+  cursor:pointer;font-family:inherit;font-size:13px;
+  background:#0e2e0e;color:#80e880;border:1px solid #1e6e1e}
+.dev-note{font-size:10px;color:#783808;margin-top:5px;text-align:center}
+
+/* ── Count overlays ── */
+.cov{
+  position:fixed;z-index:150;pointer-events:all;
+  background:rgba(0,0,0,.92);border:1px solid #1a2030;border-radius:22px;
+  padding:4px 10px;display:none;align-items:center;gap:6px;
+}
+.cov .cname{color:#445;font-size:10px;max-width:44px;overflow:hidden;white-space:nowrap}
+.cov .cbtn{
+  background:#080c08;border:1px solid #1a401a;color:#4ac04a;
+  width:22px;height:22px;border-radius:50%;cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.cov .cbtn:hover{background:#102010;color:#8fff8f}
+.cov .cnum{color:#40e8e8;font-size:13px;font-weight:bold;min-width:24px;text-align:center}
+
+/* ── Auto badges ── */
+.abadge{
+  position:fixed;z-index:140;pointer-events:none;
+  background:rgba(0,0,0,.84);border:1px solid #252530;border-radius:10px;
+  padding:2px 8px;font-size:11px;color:#aaa;display:none;white-space:nowrap;line-height:1.6;
+}
+.abadge .rv{font-size:10px;color:#4a9}
+.abadge.full{border-color:#2f2;color:#2f2}
+.abadge.half{border-color:#fa0;color:#fa0}
+
+/* ── For-sale label ── */
+.sale-lbl{
+  position:fixed;z-index:145;pointer-events:none;display:none;
+  font-size:13px;font-weight:900;color:#ff1818;
+  text-shadow:0 0 5px #ff2200,0 0 12px #ff4400;
+  letter-spacing:1px;white-space:nowrap;
+  animation:salebounce 2.2s ease-in-out infinite;
+}
+@keyframes salebounce{
+  0%,100%{transform:rotate(-10deg) scale(1);}
+  30%{transform:rotate(12deg) scale(1.1);}
+  60%{transform:rotate(-6deg) scale(.96);}
+  80%{transform:rotate(9deg) scale(1.07);}
+}
+
+/* ── Legend ── */
+#legend{
+  position:fixed;bottom:14px;left:12px;z-index:100;
+  background:rgba(0,0,0,.78);border:1px solid #151525;
+  padding:8px 13px;border-radius:6px;color:#445;font-size:10px;line-height:1.9;
+  pointer-events:none;
+}
+#legend b{color:#778}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:62px;left:50%;transform:translateX(-50%);z-index:300;
+  background:#0e3818;color:#8fda8f;padding:8px 22px;border-radius:5px;
+  font-size:13px;display:none;pointer-events:none;border:1px solid #1e7a1e;
+}
+</style>
+</head>
+<body>
+
+<!-- Canvas container -->
+<canvas id="three-canvas"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="time-big" id="tdisp">08:00</div>
+  <div class="date-sm"  id="ddisp">Day 1 — Monday</div>
+  <div class="ped-line">👥 <span id="pedcnt">0</span> pedestrians</div>
+  <div class="rev-line" id="hud-rev">💰 Today: $0</div>
+  <div class="spd-row">
+    <button id="sp1"  class="on" onclick="setSpeed(1)">1×</button>
+    <button id="sp3"            onclick="setSpeed(3)">3×</button>
+    <button id="sp10"           onclick="setSpeed(10)">10×</button>
+  </div>
+</div>
+
+<!-- Mode bar -->
+<div id="modebar">
+  <button id="btn-auto"  class="on"     onclick="setMode('auto')">📊 Auto</button>
+  <button id="btn-count"               onclick="setMode('count')">🖐 Count</button>
+  <button id="btn-dev"   class="devbtn" onclick="setMode('dev')">⚙️ Dev</button>
+</div>
+
+<!-- Shop popup -->
+<div id="popup">
+  <h2>
+    <span id="ptitle">Shop</span>
+    <button class="close-x" onclick="closePopup()">✕</button>
+  </h2>
+  <div id="pfields"></div>
+  <div class="rev-box">Today's Revenue: <span class="revval" id="prev">$0</span></div>
+  <div class="net-box">Est. Net / Month: <span class="netval" id="pnet">$0</span></div>
+  <div id="devctrl" style="display:none">
+    <button class="apply-btn" onclick="applyDev()">✔ Queue Changes for Tomorrow</button>
+    <div class="dev-note">⚠ Changes take effect at start of next day</div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+  <b>📊 Auto</b> — live customers + revenue, resets daily<br>
+  <b>🖐 Count</b> — manual +/− tally, no auto-increment<br>
+  <b>⚙️ Dev</b> — click shop to edit (takes effect next day)<br>
+  <b>Scroll</b> = height &nbsp;·&nbsp; <b>Left drag</b> = pan<br>
+  <b>Middle drag</b> = rotate &nbsp;·&nbsp; <b>Click</b> = shop info<br>
+  <span style="color:#ff4422;font-weight:bold">⬤ FOR SALE</span> = shop for sale
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ══════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════ */
+var DAY_REAL_SECS     = 180;
+var GAME_MINS_PER_SEC = 1440 / DAY_REAL_SECS;
+var DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+var WEEKDAY_MULT = [0.82,0.85,0.88,0.92,1.12,1.40,1.22];
+
+var PAYMENT_METHODS = ['Monthly','2M Bond+Monthly','3M Bond+Quarterly','6M Bond+6-Monthly'];
+var SHOP_TYPES = [
+  {name:'Café',        color:0xe0924e, em:0x1a0900, sign:'☕'},
+  {name:'Bakery',      color:0xf0bf60, em:0x1a1000, sign:'🥐'},
+  {name:'Bookshop',    color:0x587ab0, em:0x000818, sign:'📚'},
+  {name:'Florist',     color:0xd85898, em:0x200010, sign:'🌸'},
+  {name:'Grocer',      color:0x58b058, em:0x002000, sign:'🥦'},
+  {name:'Pharmacy',    color:0x46b0a0, em:0x001414, sign:'💊'},
+  {name:'Clothing',    color:0x8858b0, em:0x100020, sign:'👗'},
+  {name:'Electronics', color:0x4868d0, em:0x000620, sign:'📱'},
+  {name:'Jewellery',   color:0xd0b028, em:0x140c00, sign:'💎'},
+  {name:'Restaurant',  color:0xd04828, em:0x200500, sign:'🍜'},
+];
+
+// Road edge at Z=±7. Sidewalk Z=7..16 (north). Buildings at Z=10.8..16. Footpath Z=7..10.8.
+var NZ = 16.0;  // north back wall
+var SZ = -16.0; // south back wall
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function randNorm(mean, sd) {
+  var u = 0, v = 0;
+  while (!u) u = Math.random();
+  while (!v) v = Math.random();
+  return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+function el(id) { return document.getElementById(id); }
+
+/* ══════════════════════════════════════════════
+   THREE.JS — use existing canvas
+══════════════════════════════════════════════ */
+var canvas = el('three-canvas');
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+var scene  = new THREE.Scene();
+scene.fog  = new THREE.FogExp2(0x88ccee, 0.012);
+var camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 300);
+
+/* Lights */
+var ambLight = new THREE.AmbientLight(0x506070, 0.55);
+scene.add(ambLight);
+
+var sunLight = new THREE.DirectionalLight(0xfff0d0, 1.2);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(2048, 2048);
+sunLight.shadow.camera.left   = -52;
+sunLight.shadow.camera.right  =  52;
+sunLight.shadow.camera.top    =  52;
+sunLight.shadow.camera.bottom = -52;
+sunLight.shadow.camera.near   = 0.5;
+sunLight.shadow.camera.far    = 130;
+scene.add(sunLight);
+
+/* ══════════════════════════════════════════════
+   DAYLIGHT
+══════════════════════════════════════════════ */
+var SKY = {
+  night:    {sky:0x020206, amb:0x060514, sunC:0x000006, fog:0x020206, si:0.0},
+  predawn:  {sky:0x120520, amb:0x180c2a, sunC:0x38100e, fog:0x0c031a, si:0.08},
+  dawn:     {sky:0xf05010, amb:0x582808, sunC:0xff9840, fog:0xd04010, si:0.38},
+  morning:  {sky:0x80c8ee, amb:0x506878, sunC:0xfff0d0, fog:0x9ec0de, si:1.0},
+  noon:     {sky:0x3380ff, amb:0x5878a0, sunC:0xffffff, fog:0x80a8ee, si:1.25},
+  afternoon:{sky:0x5890d8, amb:0x486878, sunC:0xffe8a0, fog:0x80a8c8, si:0.95},
+  evening:  {sky:0xf04810, amb:0x601808, sunC:0xff6818, fog:0xc84010, si:0.45},
+  dusk:     {sky:0x0e0512, amb:0x180620, sunC:0x401020, fog:0x0c0410, si:0.08},
+};
+function getSkyPhase(m) {
+  var h = m / 60;
+  if (h < 4 || h >= 23) return 'night';
+  if (h < 5.5)          return 'predawn';
+  if (h < 7.5)          return 'dawn';
+  if (h < 11.5)         return 'morning';
+  if (h < 15)           return 'noon';
+  if (h < 18.5)         return 'afternoon';
+  if (h < 20.5)         return 'evening';
+  return 'dusk';
+}
+var lampLights = [];
+function updateDaylight(m) {
+  var c = SKY[getSkyPhase(m)];
+  scene.background = new THREE.Color(c.sky);
+  scene.fog.color.set(c.fog);
+  ambLight.color.set(c.amb);
+  sunLight.color.set(c.sunC);
+  sunLight.intensity = c.si;
+  var ang = (m / 60 / 24) * Math.PI * 2 - Math.PI / 2;
+  sunLight.position.set(Math.cos(ang) * 44, Math.max(1, Math.sin(ang) * 36 + 2), 14);
+  var on = (m / 60 < 7.5 || m / 60 >= 18.5);
+  lampLights.forEach(function(l) { l.visible = on; });
+}
+
+/* ══════════════════════════════════════════════
+   SCENE GEOMETRY
+══════════════════════════════════════════════ */
+// Road
+var road = new THREE.Mesh(
+  new THREE.PlaneGeometry(100, 14),
+  new THREE.MeshLambertMaterial({ color: 0x222230 })
+);
+road.rotation.x = -Math.PI / 2;
+road.receiveShadow = true;
+scene.add(road);
+
+// Sidewalks
+function addSidewalk(z) {
+  var m = new THREE.Mesh(
+    new THREE.BoxGeometry(100, 0.22, 9),
+    new THREE.MeshLambertMaterial({ color: 0x686878 })
+  );
+  m.position.set(0, 0.11, z);
+  m.receiveShadow = true;
+  scene.add(m);
+}
+addSidewalk(11.5);
+addSidewalk(-11.5);
+
+// Road dashes
+for (var rx = -48; rx < 48; rx += 8) {
+  var dash = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.5, 0.28),
+    new THREE.MeshLambertMaterial({ color: 0xddddcc })
+  );
+  dash.rotation.x = -Math.PI / 2;
+  dash.position.set(rx, 0.01, 0);
+  scene.add(dash);
+}
+
+// Street lamps
+function addLamp(x, side) {
+  var g   = new THREE.Group();
+  var pm  = new THREE.MeshLambertMaterial({ color: 0x3a3a4a });
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.082, 5.8, 8), pm);
+  pole.position.y = 2.9;
+  g.add(pole);
+  var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.6, 5), pm);
+  arm.rotation.z = Math.PI / 2;
+  arm.position.set(0.8, 5.9, 0);
+  g.add(arm);
+  var globe = new THREE.Mesh(
+    new THREE.SphereGeometry(0.22, 8, 6),
+    new THREE.MeshLambertMaterial({ color: 0xffff99 })
+  );
+  globe.position.set(1.6, 5.9, 0);
+  g.add(globe);
+  var pl = new THREE.PointLight(0xffee88, 0.9, 16);
+  pl.position.set(1.6, 5.9, 0);
+  pl.visible = false;
+  g.add(pl);
+  lampLights.push(pl);
+  g.position.set(x, 0.22, side * 7.8);
+  scene.add(g);
+}
+for (var lx = -42; lx <= 42; lx += 12) { addLamp(lx, 1); addLamp(lx, -1); }
+
+// Trees
+function addTree(x, z) {
+  var g  = new THREE.Group();
+  var tr = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.16, 1.4, 7),
+    new THREE.MeshLambertMaterial({ color: 0x42230a })
+  );
+  tr.position.y = 0.7;
+  g.add(tr);
+  var lv = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1.1, 0),
+    new THREE.MeshLambertMaterial({ color: 0x286028 })
+  );
+  lv.position.y = 2.3;
+  lv.scale.y = 0.8;
+  g.add(lv);
+  g.position.set(x, 0.22, z);
+  scene.add(g);
+}
+[-36,-24,-12,0,12,24,36].forEach(function(x) {
+  addTree(x,      10.0);  // north footpath
+  addTree(x + 4, -10.0); // south footpath
+});
+
+/* ══════════════════════════════════════════════
+   SHOP DATA & MESH
+══════════════════════════════════════════════ */
+var shops = [];
+
+function makeShopData(type, id, side, xPos) {
+  var frontage  = parseFloat((3 + Math.random() * 2).toFixed(2));
+  var levels    = 1 + Math.floor(Math.random() * 3);
+  var baseDaily = clamp(Math.round(randNorm(150, 50)), 0, 300);
+  var staff     = 1 + Math.floor(Math.random() * 5);
+  var rent      = Math.round(1800 + Math.random() * 7200);
+  var salary    = Math.round(staff * (2600 + Math.random() * 2800));
+  var util      = Math.round(220  + Math.random() * 900);
+  var gpm       = parseFloat((0.18 + Math.random() * 0.52).toFixed(2));
+  var avgPrice  = parseFloat((8   + Math.random() * 92).toFixed(1));
+  return {
+    id: id, side: side, xPos: xPos,
+    type: type.name, sign: type.sign, color: type.color, em: type.em,
+    frontage: frontage, levels: levels,
+    baseDaily: baseDaily,
+    weeklyStreak: 0.78 + Math.random() * 0.44,
+    dailyTarget: 0,
+    todayAuto: 0,       // auto mode — increments as peds physically enter
+    todayCount: 0,      // count mode — manual only
+    todayRevenue: 0,    // todayAuto * avgPrice
+    rent: rent, paymentMethod: PAYMENT_METHODS[Math.floor(Math.random() * 4)],
+    staff: staff, salary: salary, gpm: gpm, util: util,
+    avgPrice: avgPrice,
+    forSale: Math.random() < 0.2,
+    salePrice: Math.round(rent * 20 + Math.random() * 200000),
+    mesh: null, doorX: xPos, doorZ: 0,
+  };
+}
+
+function rollDailyTarget(shop, dayIdx) {
+  if (dayIdx % 7 === 0) shop.weeklyStreak = 0.76 + Math.random() * 0.48;
+  var mean = shop.baseDaily * WEEKDAY_MULT[dayIdx % 7] * shop.weeklyStreak;
+  shop.dailyTarget = clamp(Math.round(randNorm(mean, mean * 0.20)), 0, 300);
+}
+
+function buildShopMesh(shop) {
+  // ── GEOMETRY PLAN ───────────────────────────────────────────────
+  // Road at Z=0 (width 14 → edges at Z=±7).
+  // Sidewalks centred at Z=±9 (width 7, from Z=5.5 to 12.5 north, mirrored south).
+  // NZ=12.5, SZ=-12.5 are the outer edges (building back walls).
+  //
+  // NORTH shops (side=+1):
+  //   Back wall at Z=NZ=12.5, front face at Z=NZ-d=7.1  ← faces road ✓
+  //   Group position Z = NZ - d/2 = 9.8  (centre of depth)
+  //   No rotation needed.
+  //
+  // SOUTH shops (side=-1):
+  //   Back wall at Z=SZ=-12.5, front face at Z=SZ+d=-7.1 ← faces road ✓
+  //   Group position Z = SZ + d/2 = -9.8
+  //   Rotate Y=180° so local -Z (front) points toward +Z (road).
+  //
+  // All decorations (door, sign, awning, windows) placed at local Z = -d/2
+  // (front face in local space). After 180° rotation on south shops,
+  // local -Z becomes world +Z so they correctly face the road.
+  //
+  // Footpath walking Z (world): north ~7.6-8.4, south ~-7.6 to -8.4
+  // doorZ (world): north=7.2, south=-7.2  (just in front of door face)
+  // ────────────────────────────────────────────────────────────────
+  var g = new THREE.Group();
+  g.userData.shopId = shop.id;
+  var w = shop.frontage, h = 2.8 * shop.levels, d = 5.4;
+  var fz = -d / 2;  // local Z of front face for ALL shops
+
+  // Body
+  var body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshLambertMaterial({ color: shop.color }));
+  body.position.y = h / 2 + 0.22;
+  body.castShadow = true; body.receiveShadow = true;
+  body.userData.shopId = shop.id;
+  g.add(body);
+
+  // Roof
+  var roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.16, 0.26, d + 0.16),
+    new THREE.MeshLambertMaterial({ color: 0x1a1a28 }));
+  roof.position.y = h + 0.35;
+  g.add(roof);
+
+  // Awning (overhangs from front face toward road)
+  var awC = new THREE.Color(shop.color); awC.multiplyScalar(1.5);
+  var aw = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, 0.12, 1.7),
+    new THREE.MeshLambertMaterial({ color: awC }));
+  aw.position.set(0, 2.68, fz - 0.65);
+  g.add(aw);
+
+  // Sign board on front face
+  var sn = new THREE.Mesh(new THREE.BoxGeometry(w * 0.62, 0.6, 0.16),
+    new THREE.MeshLambertMaterial({ color: 0x060614,
+      emissive: new THREE.Color(shop.color), emissiveIntensity: 0.5 }));
+  sn.position.set(0, 2.96, fz - 0.1);
+  sn.userData.shopId = shop.id;
+  g.add(sn);
+
+  // Door on front face
+  var dr = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.1, 0.1),
+    new THREE.MeshLambertMaterial({ color: 0x3a1c05 }));
+  dr.position.set(0, 1.27, fz);
+  dr.userData.shopId = shop.id;
+  g.add(dr);
+
+  // Windows per floor on front face
+  for (var l = 0; l < shop.levels; l++) {
+    var wn = new THREE.Mesh(new THREE.BoxGeometry(w * 0.52, 1.35, 0.09),
+      new THREE.MeshLambertMaterial({ color: 0x6888b8,
+        emissive: new THREE.Color(shop.em), emissiveIntensity: 0.7 }));
+    wn.position.set(0, 1.6 + l * 2.8, fz);
+    wn.userData.shopId = shop.id;
+    g.add(wn);
+  }
+
+  // Place group and rotate south shops 180° so their front faces the road
+  var groupZ = shop.side > 0 ? (NZ - d / 2) : (SZ + d / 2);
+  g.position.set(shop.xPos, 0, groupZ);
+  if (shop.side < 0) g.rotation.y = Math.PI;
+  scene.add(g);
+  shop.mesh = g;
+
+  // World Z of door threshold (just road-side of door face)
+  // North: front face world Z = groupZ + fz = (NZ-d/2) + (-d/2) = NZ - d = 7.1 → doorZ = 7.5
+  // South: after 180°, front face world Z = -(groupZ + fz) = -((SZ+d/2)+(-d/2)) = -(SZ) = 12.5... wrong
+  // Actually for south with rotation: group at -9.8, rotated 180°, local fz=-2.7 becomes +2.7 in world
+  // So south front world Z = -9.8 + 2.7 = -7.1 → doorZ = -7.5
+  shop.doorZ = shop.side > 0 ? 10.7 : -10.7;  // world Z just inside door face
+}
+
+// Layout shops on both sides
+// NOTE: makeShopData generates frontage randomly — we must create the data first
+// (with a placeholder xPos=0), then fix xPos once we know the frontage.
+(function() {
+  var xN = -38, xS = -38, idx = 0;
+  while (xN < 38 && idx < 25) {
+    var t = SHOP_TYPES[idx % SHOP_TYPES.length];
+    var s = makeShopData(t, idx, 1, 0);          // xPos placeholder
+    s.xPos   = xN + s.frontage / 2 + 0.35;       // correct xPos now we know frontage
+    s.doorX  = s.xPos;
+    buildShopMesh(s); rollDailyTarget(s, 0); shops.push(s);
+    xN += s.frontage + 0.35; idx++;
+  }
+  idx = 0;
+  while (xS < 38 && idx < 25) {
+    var t2 = SHOP_TYPES[(idx + 5) % SHOP_TYPES.length];
+    var s2 = makeShopData(t2, shops.length, -1, 0);
+    s2.xPos  = xS + s2.frontage / 2 + 0.35;
+    s2.doorX = s2.xPos;
+    buildShopMesh(s2); rollDailyTarget(s2, 0); shops.push(s2);
+    xS += s2.frontage + 0.35; idx++;
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   FOR-SALE DOM LABELS
+══════════════════════════════════════════════ */
+var saleEls = [];
+function buildSaleLabels() {
+  saleEls.forEach(function(e) { e.parentNode && e.parentNode.removeChild(e); });
+  saleEls = [];
+  shops.forEach(function(s) {
+    var div = document.createElement('div');
+    div.className = 'sale-lbl';
+    div.id = 'sale-' + s.id;
+    div.textContent = '⬤ FOR SALE';
+    div.style.display = 'none';
+    document.body.appendChild(div);
+    saleEls.push(div);
+  });
+}
+buildSaleLabels();
+
+var _sv = new THREE.Vector3();
+function updateSaleLabels() {
+  shops.forEach(function(s) {
+    var div = document.getElementById('sale-' + s.id);
+    if (!div) return;
+    if (!s.forSale) { div.style.display = 'none'; return; }
+    _sv.set(s.xPos, s.levels * 2.8 + 2.1, s.side > 0 ? 13.3 : -13.3);
+    _sv.project(camera);
+    var sx = (_sv.x + 1) / 2 * innerWidth;
+    var sy = (-_sv.y + 1) / 2 * innerHeight;
+    if (_sv.z < 1) {
+      div.style.display = 'block';
+      div.style.left = (sx - 38) + 'px';
+      div.style.top  = (sy - 8)  + 'px';
+    } else {
+      div.style.display = 'none';
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   PEDESTRIANS
+══════════════════════════════════════════════ */
+var peds = [];
+
+function pedDensity(m) {
+  var h = m / 60;
+  if (h >= 7    && h < 9)    return 0.72 + 0.28 * Math.sin((h - 7)    / 2 * Math.PI);
+  if (h >= 11.5 && h < 13.5) return 0.62 + 0.38 * Math.sin((h - 11.5) / 2 * Math.PI);
+  if (h >= 16   && h < 21)   return 0.80 + 0.20 * Math.sin((h - 16)   / 5 * Math.PI);
+  if (h >= 9    && h < 11.5) return 0.28;
+  if (h >= 13.5 && h < 16)   return 0.32;
+  if (h >= 21   || h < 5)    return 0.04;
+  return 0.13;
+}
+function targetPedCount(m) { return Math.max(1, Math.round(pedDensity(m) * 42)); }
+
+function makePedMesh() {
+  var g   = new THREE.Group();
+  var hue = Math.random();
+  var bm  = new THREE.MeshLambertMaterial({ color: new THREE.Color().setHSL(hue, 0.68, 0.44) });
+  var lm  = new THREE.MeshLambertMaterial({ color: new THREE.Color().setHSL(hue, 0.25, 0.20) });
+  var sm  = new THREE.MeshLambertMaterial({ color: new THREE.Color().setHSL(0.06 + Math.random() * 0.06, 0.40, 0.58) });
+  var torso = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.68, 0.15), bm);
+  torso.position.y = 0.60; torso.castShadow = true;
+  g.add(torso);
+  [-0.07, 0.07].forEach(function(lx) {
+    var leg = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.52, 0.14), lm);
+    leg.position.set(lx, 0.06, 0);
+    leg.userData.isLeg = true;
+    g.add(leg);
+  });
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.148, 7, 6), sm);
+  head.position.y = 1.04;
+  g.add(head);
+  return g;
+}
+
+function spawnPed() {
+  var side      = Math.random() < 0.5 ? 1 : -1;
+  // Sidewalk spans Z=5.5..12.5 (north) and Z=-5.5..-12.5 (south).
+  // Buildings occupy Z=7.1..12.5 (north). Peds walk on the ROAD-SIDE strip Z=5.8..7.0.
+  // Footpath walking lane: between road edge (Z=±7) and shop fronts (Z=±7.1)
+  // Actually footpath is Z=5.5..12.5 (north sidewalk). Shop fronts at Z=7.1.
+  // Peds walk in the strip Z=7.6..8.4 (between shop fronts and road edge).
+  // Footpath Z=7..10.6 (north). Walk in the clear strip, not on road or in buildings.
+  var z = side > 0 ? 7.3 + Math.random() * 2.5 : -7.3 - Math.random() * 2.5;
+  var fromLeft  = Math.random() < 0.5;
+  var mesh      = makePedMesh();
+  mesh.position.set(fromLeft ? -50 : 50, 0.22, z);
+  mesh.rotation.y = fromLeft ? 0 : Math.PI;
+  scene.add(mesh);
+
+  var sideShops = shops.filter(function(s) { return s.side === side; });
+  var tShop = null;
+  if (sideShops.length && Math.random() < 0.40) {
+    var total = sideShops.reduce(function(a, s) { return a + s.dailyTarget; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < sideShops.length; i++) {
+      r -= sideShops[i].dailyTarget;
+      if (r <= 0) { tShop = sideShops[i]; break; }
+    }
+    if (!tShop) tShop = sideShops[Math.floor(Math.random() * sideShops.length)];
+  }
+  peds.push({
+    mesh: mesh, side: side, fromLeft: fromLeft,
+    spd: 0.020 + Math.random() * 0.022,
+    tShop: tShop, wo: Math.random() * Math.PI * 2,
+    state: 'walk', timer: 0, entered: false, done: false
+  });
+}
+
+function updatePeds(dtSec) {
+  var want  = targetPedCount(simTime % 1440);
+  var alive = peds.filter(function(p) { return !p.done; });
+  if (alive.length < want && Math.random() < 0.22) spawnPed();
+  if (alive.length > want + 10 && Math.random() < 0.12) {
+    var kill = alive[Math.floor(Math.random() * alive.length)];
+    kill.done = true; scene.remove(kill.mesh);
+  }
+  for (var i = peds.length - 1; i >= 0; i--) {
+    var p  = peds[i];
+    if (p.done) { peds.splice(i, 1); continue; }
+    var mp = p.mesh.position;
+    if (p.state === 'walk') {
+      p.wo += dtSec * 6;
+      mp.x += p.fromLeft ? p.spd : -p.spd;
+      mp.y  = 0.22 + Math.abs(Math.sin(p.wo)) * 0.04;
+      p.mesh.children.forEach(function(c) {
+        if (c.userData.isLeg) c.rotation.x = Math.sin(p.wo) * 0.30;
+      });
+      if (p.tShop && !p.entered && Math.abs(mp.x - p.tShop.doorX) < 0.65) {
+        p.state = 'enter'; p.entered = true;
+      }
+      if (Math.abs(mp.x) > 52) { p.done = true; scene.remove(p.mesh); peds.splice(i, 1); }
+    } else if (p.state === 'enter') {
+      // Walk toward door; vanish once within 0.1m of doorZ (at the threshold)
+      var dz = p.tShop.doorZ - mp.z;
+      if (Math.abs(dz) > 0.10) {
+        mp.z += Math.sign(dz) * Math.min(0.07, Math.abs(dz));
+      } else {
+        p.state = 'inside'; p.timer = 0; p.mesh.visible = false;
+        p.tShop.todayAuto++;
+        p.tShop.todayRevenue = Math.round(p.tShop.todayAuto * p.tShop.avgPrice);
+        updateBadge(p.tShop);
+        updateHudRevenue();
+      }
+    } else if (p.state === 'inside') {
+      p.timer += dtSec;
+      if (p.timer > 5 + Math.random() * 25) {
+        // Reappear at door position
+        mp.z = p.tShop.doorZ;
+        p.state = 'exit'; p.mesh.visible = true;
+      }
+    } else if (p.state === 'exit') {
+      // Return to road-side footpath walking lane
+      var walkZ = p.side > 0 ? 8.5 : -8.5;  // return to footpath centre
+      var dzE = walkZ - mp.z;
+      if (Math.abs(dzE) > 0.08) mp.z += Math.sign(dzE) * 0.07;
+      else { p.state = 'walk'; p.tShop = null; }
+    }
+  }
+  el('pedcnt').textContent = peds.filter(function(p) { return !p.done; }).length;
+}
+
+/* ══════════════════════════════════════════════
+   DAY ROLLOVER
+══════════════════════════════════════════════ */
+function onNewDay(dayIdx) {
+  // Apply pending dev changes
+  Object.keys(pendingChanges).forEach(function(k) {
+    var ch = pendingChanges[k];
+    var s  = shops.find(function(x) { return x.id === ch.shopId; });
+    if (s) s[ch.key] = ch.val;
+  });
+  pendingChanges = {};
+  // Reset counters
+  shops.forEach(function(s) {
+    s.todayAuto    = 0;
+    s.todayCount   = 0;
+    s.todayRevenue = 0;
+    rollDailyTarget(s, dayIdx);
+    updateBadge(s);
+    var cn = el('cnum-' + s.id);
+    if (cn) cn.textContent = '0';
+  });
+  updateHudRevenue();
+  buildSaleLabels();
+  showToast('Day ' + (dayIdx + 1) + ' · ' + DAYS[dayIdx % 7]);
+}
+
+function updateHudRevenue() {
+  var total = shops.reduce(function(a, s) { return a + s.todayRevenue; }, 0);
+  el('hud-rev').textContent = '💰 Today: $' + total.toLocaleString();
+}
+
+/* ══════════════════════════════════════════════
+   TIME
+══════════════════════════════════════════════ */
+var simTime    = 8 * 60;
+var simSpeed   = 1;
+var prevDayIdx = 0;
+var lastNow    = performance.now();
+
+function fmtTime(m) {
+  return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' +
+         String(Math.floor(m % 60)).padStart(2, '0');
+}
+function tickTime(dtMs) {
+  var dtSec = Math.min(dtMs, 100) / 1000;
+  simTime  += dtSec * GAME_MINS_PER_SEC * simSpeed;
+  var dayIdx = Math.floor(simTime / 1440);
+  if (dayIdx !== prevDayIdx) { prevDayIdx = dayIdx; onNewDay(dayIdx); }
+  var dm = simTime % 1440;
+  el('tdisp').textContent = fmtTime(dm);
+  el('ddisp').textContent = 'Day ' + (dayIdx + 1) + ' — ' + DAYS[dayIdx % 7];
+  updateDaylight(dm);
+  return dtSec;
+}
+
+/* ══════════════════════════════════════════════
+   POPUP
+══════════════════════════════════════════════ */
+var appMode        = 'auto';
+var selectedShop   = null;
+var pendingChanges = {};
+
+function calcNet(s) {
+  return Math.round(s.dailyTarget * 30 * s.avgPrice * s.gpm - s.rent - s.salary - s.util);
+}
+
+var POPUP_ROWS = [
+  ["Daily Target",          '_target',       'readonly'],
+  ["Today's Customers",     '_today',        'readonly'],
+  ["Today's Revenue",       '_todayrev',     'readonly'],
+  ["Avg Price / Customer",  'avgPrice',      'float'],
+  ["Base Daily Customers",  'baseDaily',     'int'],
+  ["Rent / Month",          'rent',          'int'],
+  ["Payment Method",        'paymentMethod', 'select'],
+  ["Staff Count",           'staff',         'int'],
+  ["Staff Salary / Month",  'salary',        'int'],
+  ["Gross Profit Margin",   'gpm',           'pct'],
+  ["Utility Bills / Month", 'util',          'int'],
+  ["For Sale",              'forSale',       'bool'],
+  ["Sale Price",            'salePrice',     'int'],
+];
+
+function fmtVal(key, type, raw) {
+  if (type === 'pct')         return (raw * 100).toFixed(1) + '%';
+  if (type === 'bool')        return raw ? '✅ Yes' : '❌ No';
+  if (type === 'select')      return raw;
+  var moneyKeys = ['_todayrev','rent','salary','util','salePrice','avgPrice'];
+  if (moneyKeys.indexOf(key) >= 0) return '$' + Math.round(raw).toLocaleString();
+  return typeof raw === 'number' ? Math.round(raw).toLocaleString() : String(raw);
+}
+
+function openPopup(shop) {
+  selectedShop = shop;
+  el('ptitle').textContent = shop.sign + ' ' + shop.type + ' · ' + shop.frontage.toFixed(1) + 'm × ' + shop.levels + 'F';
+  var dev  = (appMode === 'dev');
+  var html = '';
+  POPUP_ROWS.forEach(function(row) {
+    var lbl = row[0], key = row[1], type = row[2];
+    var raw;
+    if      (key === '_today')    raw = (appMode === 'count') ? shop.todayCount : shop.todayAuto;
+    else if (key === '_target')   raw = shop.dailyTarget;
+    else if (key === '_todayrev') raw = shop.todayRevenue;
+    else raw = shop[key];
+
+    var disp;
+    if (dev && key[0] !== '_') {
+      if (type === 'select') {
+        disp = '<select id="pf-' + key + '">' +
+          PAYMENT_METHODS.map(function(o) {
+            return '<option' + (raw === o ? ' selected' : '') + '>' + o + '</option>';
+          }).join('') + '</select>';
+      } else if (type === 'bool') {
+        disp = '<select id="pf-' + key + '">' +
+          '<option value="true"'  + (raw  ? ' selected' : '') + '>Yes ✅</option>' +
+          '<option value="false"' + (!raw ? ' selected' : '') + '>No ❌</option>' +
+          '</select>';
+      } else if (type === 'pct') {
+        disp = '<input id="pf-' + key + '" type="number" step=".01" min="0" max="1" value="' + raw.toFixed(2) + '">';
+      } else if (type === 'float') {
+        disp = '<input id="pf-' + key + '" type="number" step=".1" value="' + raw.toFixed(1) + '">';
+      } else {
+        disp = '<input id="pf-' + key + '" type="number" value="' + Math.round(raw) + '">';
+      }
+    } else {
+      disp = '<span class="vl">' + fmtVal(key, type, raw) + '</span>';
+    }
+    html += '<div class="pr"><span class="lb">' + lbl + '</span>' + disp + '</div>';
+  });
+
+  el('pfields').innerHTML = html;
+  el('prev').textContent  = '$' + shop.todayRevenue.toLocaleString();
+
+  var net  = calcNet(shop);
+  var nEl  = el('pnet');
+  nEl.textContent  = (net >= 0 ? '+' : '') + '$' + Math.abs(net).toLocaleString();
+  nEl.style.color  = net >= 0 ? '#44e898' : '#ff4433';
+  el('devctrl').style.display = dev ? 'block' : 'none';
+  el('popup').style.display   = 'block';
+}
+
+function closePopup() {
+  el('popup').style.display = 'none';
+  selectedShop = null;
+}
+window.closePopup = closePopup;
+
+function applyDev() {
+  if (!selectedShop) return;
+  var s = selectedShop;
+  ['baseDaily','avgPrice','rent','staff','salary','gpm','util','salePrice'].forEach(function(k) {
+    var inp = el('pf-' + k); if (!inp) return;
+    var v = parseFloat(inp.value); if (!isNaN(v)) pendingChanges[s.id + '-' + k] = { shopId: s.id, key: k, val: v };
+  });
+  var pm = el('pf-paymentMethod');
+  if (pm) pendingChanges[s.id + '-pm'] = { shopId: s.id, key: 'paymentMethod', val: pm.value };
+  var fs = el('pf-forSale');
+  if (fs) pendingChanges[s.id + '-fs'] = { shopId: s.id, key: 'forSale', val: fs.value === 'true' };
+  showToast('Changes queued — effective tomorrow');
+  closePopup();
+}
+window.applyDev = applyDev;
+
+/* ══════════════════════════════════════════════
+   COUNT-MODE OVERLAYS
+══════════════════════════════════════════════ */
+var covEls = [];
+function buildCountOverlays() {
+  covEls.forEach(function(e) { e.parentNode && e.parentNode.removeChild(e); });
+  covEls = [];
+  shops.forEach(function(s) {
+    var div = document.createElement('div');
+    div.className = 'cov';
+    div.id = 'cov-' + s.id;
+    div.innerHTML =
+      '<span class="cname">' + s.sign + '</span>' +
+      '<button class="cbtn" onclick="cadj(' + s.id + ',-1)">−</button>' +
+      '<span class="cnum" id="cnum-' + s.id + '">0</span>' +
+      '<button class="cbtn" onclick="cadj(' + s.id + ',1)">+</button>';
+    document.body.appendChild(div);
+    covEls.push(div);
+  });
+}
+buildCountOverlays();
+
+window.cadj = function(id, d) {
+  var s = shops.find(function(x) { return x.id === id; });
+  if (!s) return;
+  s.todayCount = Math.max(0, s.todayCount + d);
+  var span = el('cnum-' + id);
+  if (span) span.textContent = s.todayCount;
+};
+
+/* AUTO BADGES */
+var abEls = [];
+function buildAutoBadges() {
+  abEls.forEach(function(e) { e.parentNode && e.parentNode.removeChild(e); });
+  abEls = [];
+  shops.forEach(function(s) {
+    var div = document.createElement('div');
+    div.className = 'abadge';
+    div.id = 'ab-' + s.id;
+    document.body.appendChild(div);
+    abEls.push(div);
+  });
+}
+buildAutoBadges();
+
+function updateBadge(s) {
+  var div = el('ab-' + s.id); if (!div) return;
+  var pct = s.dailyTarget > 0 ? s.todayAuto / s.dailyTarget : 0;
+  div.innerHTML = s.todayAuto + '/' + s.dailyTarget +
+    '<br><span class="rv">$' + s.todayRevenue.toLocaleString() + '</span>';
+  div.className = 'abadge' + (pct >= 1 ? ' full' : pct >= 0.5 ? ' half' : '');
+}
+
+var _tv = new THREE.Vector3();
+function updateOverlays() {
+  var showCov = (appMode === 'count');
+  var showAb  = (appMode === 'auto');
+  shops.forEach(function(s) {
+    _tv.set(s.xPos, s.levels * 2.8 + 1.5, s.side > 0 ? 13.3 : -13.3);
+    _tv.project(camera);
+    var sx = (_tv.x + 1) / 2 * innerWidth;
+    var sy = (-_tv.y + 1) / 2 * innerHeight;
+    var behind = (_tv.z >= 1);
+
+    var cov = el('cov-' + s.id);
+    if (cov) {
+      if (showCov && !behind) { cov.style.display = 'flex'; cov.style.left = (sx - 58) + 'px'; cov.style.top = (sy - 14) + 'px'; }
+      else cov.style.display = 'none';
+    }
+    var ab = el('ab-' + s.id);
+    if (ab) {
+      if (showAb && !behind) { ab.style.display = 'block'; ab.style.left = (sx - 24) + 'px'; ab.style.top = (sy - 14) + 'px'; }
+      else ab.style.display = 'none';
+    }
+  });
+  updateSaleLabels();
+}
+
+/* ══════════════════════════════════════════════
+   CAMERA CONTROLS (smooth)
+   Scroll       → height (phi) + slight zoom
+   Left drag    → pan XZ
+   Middle drag  → orbit (theta + phi)
+══════════════════════════════════════════════ */
+var camT = 0.06, camP = 0.52, camR = 44, camPX = 0, camPZ = 0;
+var tT   = 0.06, tP   = 0.52, tR   = 44, tPX   = 0, tPZ   = 0;
+var lDown = false, mDown = false;
+var lStart = { x: 0, y: 0 }, mPos = { x: 0, y: 0 };
+
+canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+canvas.addEventListener('mousedown', function(e) {
+  if (e.button === 0) { lDown = true; lStart = { x: e.clientX, y: e.clientY }; canvas.classList.add('grabbing'); }
+  if (e.button === 1) { mDown = true; e.preventDefault(); canvas.classList.add('grabbing'); }
+  mPos = { x: e.clientX, y: e.clientY };
+});
+window.addEventListener('mouseup', function() { lDown = false; mDown = false; canvas.classList.remove('grabbing'); });
+window.addEventListener('mousemove', function(e) {
+  var dx = e.clientX - mPos.x, dy = e.clientY - mPos.y;
+  mPos = { x: e.clientX, y: e.clientY };
+  if (mDown) {
+    tT  -= dx * 0.006;
+    tP   = clamp(tP - dy * 0.005, 0.06, 1.38);
+  }
+  if (lDown) {
+    var speed = tR * 0.0016;
+    var rx = Math.cos(tT), rz = -Math.sin(tT);
+    var fx = -Math.sin(tT), fz = -Math.cos(tT);
+    tPX -= (rx * dx - fx * dy) * speed;
+    tPZ -= (rz * dx - fz * dy) * speed;
+    tPX = clamp(tPX, -52, 52);
+    tPZ = clamp(tPZ, -30, 30);
+  }
+});
+canvas.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  // Scroll = zoom in/out only (change orbit radius)
+  tR = clamp(tR + e.deltaY * 0.06, 8, 90);
+}, { passive: false });
+
+// Click = shop info (only if mouse barely moved)
+canvas.addEventListener('click', function(e) {
+  if (appMode === 'count') return;
+  var dx = e.clientX - lStart.x, dy = e.clientY - lStart.y;
+  if (dx * dx + dy * dy > 25) return;
+  var mv = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  var rc = new THREE.Raycaster();
+  rc.setFromCamera(mv, camera);
+  var hits = rc.intersectObjects(scene.children, true);
+  var hit  = null;
+  for (var i = 0; i < hits.length; i++) {
+    if (hits[i].object.userData.shopId != null) { hit = hits[i]; break; }
+  }
+  if (hit) {
+    var s = shops.find(function(x) { return x.id === hit.object.userData.shopId; });
+    if (s) openPopup(s);
+  }
+});
+
+function updateCamera(dt) {
+  var k = Math.min(1, dt * 12);
+  camT += (tT - camT) * k; camP += (tP - camP) * k;
+  camR += (tR - camR) * k; camPX += (tPX - camPX) * k; camPZ += (tPZ - camPZ) * k;
+  var x = camR * Math.sin(camT) * Math.cos(camP);
+  var y = Math.max(1.5, camR * Math.sin(camP));
+  var z = camR * Math.cos(camT) * Math.cos(camP);
+  camera.position.set(x + camPX, y, z + camPZ);
+  camera.lookAt(camPX, 2.5, camPZ);
+}
+
+/* ══════════════════════════════════════════════
+   MODE / SPEED
+══════════════════════════════════════════════ */
+function setMode(m) {
+  appMode = m;
+  ['auto','count','dev'].forEach(function(id) {
+    el('btn-' + id).classList.toggle('on', id === m);
+  });
+  if (m === 'count') closePopup();
+}
+function setSpeed(s) {
+  simSpeed = s;
+  [1, 3, 10].forEach(function(v) { el('sp' + v).classList.toggle('on', v === s); });
+}
+window.setMode = setMode;
+window.setSpeed = setSpeed;
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+function showToast(msg) {
+  var t = el('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._tid); t._tid = setTimeout(function() { t.style.display = 'none'; }, 2800);
+}
+
+/* ══════════════════════════════════════════════
+   MAIN LOOP
+══════════════════════════════════════════════ */
+scene.background = new THREE.Color(0x80c8ee);
+updateDaylight(simTime % 1440);
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  var dtMs = Math.min(now - lastNow, 100); lastNow = now;
+  var dt   = tickTime(dtMs);
+  updatePeds(dt * simSpeed);
+  updateCamera(dt);
+  updateOverlays();
+  renderer.render(scene, camera);
+}
+window.addEventListener('resize', function() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+animate(performance.now());
+
+})(); // end IIFE
+</script>
+</body>
+</html>
