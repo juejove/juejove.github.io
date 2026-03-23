@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Designer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; font-family: 'Segoe UI', sans-serif; overflow: hidden; color: #eee; }
+  #canvas-container { width: 100vw; height: 100vh; position: relative; }
+  canvas { display: block; }
+
+  #ui-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  #top-bar {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; pointer-events: all;
+    background: rgba(10,10,20,0.85); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 10px 18px; backdrop-filter: blur(12px);
+    align-items: center;
+  }
+  #top-bar h1 { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #ffd97d; margin-right: 8px; text-transform: uppercase; }
+  
+  .btn {
+    padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    transition: all 0.2s; pointer-events: all;
+  }
+  .btn-primary { background: #ffd97d; color: #1a1a2e; }
+  .btn-primary:hover { background: #ffe9a0; transform: translateY(-1px); }
+  .btn-secondary { background: rgba(255,255,255,0.1); color: #eee; border: 1px solid rgba(255,255,255,0.2); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.18); }
+  .btn-danger { background: #ff6b6b; color: #fff; }
+  .btn-danger:hover { background: #ff8585; }
+  .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  #time-display {
+    font-size: 13px; color: #aaa; font-variant-numeric: tabular-nums;
+    background: rgba(255,255,255,0.06); padding: 5px 12px; border-radius: 7px;
+    min-width: 120px; text-align: center;
+  }
+  #time-display .time { font-size: 18px; color: #ffd97d; font-weight: 700; display: block; }
+  #time-display .status { font-size: 10px; color: #888; }
+
+  #design-panel {
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    background: rgba(10,10,20,0.9); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 16px; width: 200px; pointer-events: all;
+    backdrop-filter: blur(12px); display: none;
+  }
+  #design-panel h3 { font-size: 11px; letter-spacing: 2px; color: #ffd97d; text-transform: uppercase; margin-bottom: 12px; }
+  .area-btn {
+    display: block; width: 100%; text-align: left; padding: 8px 12px;
+    margin-bottom: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); color: #ddd; cursor: pointer;
+    font-size: 12px; transition: all 0.15s;
+  }
+  .area-btn:hover { background: rgba(255,215,125,0.15); border-color: #ffd97d; color: #ffd97d; }
+  .area-btn.selected { background: rgba(255,215,125,0.25); border-color: #ffd97d; color: #ffd97d; }
+  .area-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+
+  #status-bar {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,10,20,0.8); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 8px 18px; font-size: 12px; color: #aaa;
+    pointer-events: none; backdrop-filter: blur(8px); text-align: center;
+  }
+  #status-bar span { color: #ffd97d; }
+
+  #stats-panel {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    background: rgba(10,10,20,0.85); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 14px; width: 170px; pointer-events: none;
+    backdrop-filter: blur(12px);
+  }
+  #stats-panel h3 { font-size: 10px; letter-spacing: 2px; color: #ffd97d; text-transform: uppercase; margin-bottom: 10px; }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+  .stat-label { color: #888; }
+  .stat-value { color: #eee; font-weight: 600; }
+
+  #legend {
+    position: absolute; left: 16px; bottom: 16px;
+    background: rgba(10,10,20,0.8); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 10px 14px; font-size: 11px;
+    backdrop-filter: blur(8px);
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: #aaa; }
+  .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+
+  #modal-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+    pointer-events: all; backdrop-filter: blur(4px); z-index: 100;
+  }
+  #modal {
+    background: rgba(15,15,30,0.98); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 24px; min-width: 280px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  #modal h3 { font-size: 14px; letter-spacing: 1px; color: #ffd97d; margin-bottom: 6px; }
+  #modal p { font-size: 12px; color: #888; margin-bottom: 16px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .modal-area-btn {
+    padding: 10px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); color: #ddd; cursor: pointer;
+    font-size: 11px; text-align: center; transition: all 0.15s;
+  }
+  .modal-area-btn:hover { background: rgba(255,215,125,0.2); border-color: #ffd97d; color: #ffd97d; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div id="canvas-container">
+  <div id="ui-overlay">
+    <div id="top-bar">
+      <h1>🍜 RestaurantOS</h1>
+      <div id="time-display">
+        <span class="time" id="clock">08:00</span>
+        <span class="status" id="time-status">Opening Soon</span>
+      </div>
+      <button class="btn btn-primary" id="btn-design">✏️ Design</button>
+      <button class="btn btn-secondary" id="btn-simulate" disabled>▶ Simulate</button>
+      <button class="btn btn-danger" id="btn-reset">↺ Reset</button>
+      <button class="btn btn-secondary" id="btn-speed">1×</button>
+    </div>
+
+    <div id="design-panel">
+      <h3>Area Types</h3>
+      <button class="area-btn" data-type="kitchen"><span class="area-dot" style="background:#ff6b35"></span>Kitchen</button>
+      <button class="area-btn" data-type="small_table"><span class="area-dot" style="background:#4ecdc4"></span>Small Tables (4p)</button>
+      <button class="area-btn" data-type="booth"><span class="area-dot" style="background:#95e1d3"></span>Booth Seating</button>
+      <button class="area-btn" data-type="large_round"><span class="area-dot" style="background:#f9ca24"></span>Large Round (10p)</button>
+      <button class="area-btn" data-type="private_room"><span class="area-dot" style="background:#6c5ce7"></span>Private Room (8m²+)</button>
+      <button class="area-btn" data-type="storage"><span class="area-dot" style="background:#636e72"></span>Storage</button>
+      <button class="area-btn" data-type="front_desk"><span class="area-dot" style="background:#fd79a8"></span>Front Desk</button>
+      <hr style="border-color:rgba(255,255,255,0.1);margin:10px 0">
+      <button class="btn btn-primary" id="btn-done-design" style="width:100%">✓ Done Designing</button>
+    </div>
+
+    <div id="stats-panel">
+      <h3>Stats</h3>
+      <div class="stat-row"><span class="stat-label">Customers</span><span class="stat-value" id="stat-customers">0</span></div>
+      <div class="stat-row"><span class="stat-label">Seated</span><span class="stat-value" id="stat-seated">0</span></div>
+      <div class="stat-row"><span class="stat-label">Waiting</span><span class="stat-value" id="stat-waiting">0</span></div>
+      <div class="stat-row"><span class="stat-label">Revenue</span><span class="stat-value" id="stat-revenue">¥0</span></div>
+      <div class="stat-row"><span class="stat-label">Tables</span><span class="stat-value" id="stat-tables">0</span></div>
+      <div class="stat-row"><span class="stat-label">Capacity</span><span class="stat-value" id="stat-capacity">0</span></div>
+    </div>
+
+    <div id="legend">
+      <div class="legend-item"><div class="legend-color" style="background:#ff6b35"></div>Kitchen</div>
+      <div class="legend-item"><div class="legend-color" style="background:#4ecdc4"></div>Dining (Small)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#f9ca24"></div>Dining (Large)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#6c5ce7"></div>Private Room</div>
+      <div class="legend-item"><div class="legend-color" style="background:#fd79a8"></div>Front Desk</div>
+    </div>
+
+    <div id="status-bar">
+      <span id="status-text">Click <span>Design</span> to start laying out your restaurant</span>
+    </div>
+
+    <div id="modal-overlay">
+      <div id="modal">
+        <h3>Choose Area Type</h3>
+        <p id="modal-size-info">Selected area: 0 m²</p>
+        <div class="modal-grid">
+          <button class="modal-area-btn" data-type="kitchen">🍳 Kitchen</button>
+          <button class="modal-area-btn" data-type="small_table">🪑 Small Tables</button>
+          <button class="modal-area-btn" data-type="booth">🛋️ Booth Seating</button>
+          <button class="modal-area-btn" data-type="large_round">🔵 Large Round</button>
+          <button class="modal-area-btn" data-type="private_room">🚪 Private Room</button>
+          <button class="modal-area-btn" data-type="storage">📦 Storage</button>
+          <button class="modal-area-btn" data-type="front_desk">💳 Front Desk</button>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============================================================
+// GLOBALS
+// ============================================================
+let scene, camera, renderer, raycaster;
+let floorMesh, gridHelper, wallMeshes = [], ceilingMesh;
+let storeWidth, storeDepth, floorColor;
+let designMode = false;
+let simRunning = false;
+let simSpeed = 1;
+let selectedAreaType = null;
+let pendingSelection = null;
+
+// Design grid
+let gridPlane, selectionBox, selectionStartCell, selectionCurrentCell;
+let isDraggingGrid = false;
+let placedAreas = [];
+let furnitureMeshes = [];
+
+// Camera controls
+let camControls = { rotating: false, panning: false, lastX: 0, lastY: 0, theta: 0.3, phi: 0.7, radius: 20, target: new THREE.Vector3() };
+
+// Simulation
+let simTime = 8 * 60; // minutes from midnight
+let revenue = 0;
+let agents = [];
+let tables = [];
+let waiters = [];
+let chefs = [];
+let entrancePos = new THREE.Vector3();
+let kitchenPos = new THREE.Vector3();
+let frontDeskPos = new THREE.Vector3();
+let hasFrontDesk = false;
+let hasKitchen = false;
+let agentIdCounter = 0;
+let lastSpawnTime = 0;
+let animClock = new THREE.Clock();
+
+const AREA_COLORS = {
+  kitchen: 0xff6b35,
+  small_table: 0x4ecdc4,
+  booth: 0x95e1d3,
+  large_round: 0xf9ca24,
+  private_room: 0x6c5ce7,
+  storage: 0x636e72,
+  front_desk: 0xfd79a8
+};
+
+const AREA_NAMES = {
+  kitchen:'Kitchen', small_table:'Small Tables', booth:'Booth Seating',
+  large_round:'Large Round Table', private_room:'Private Room',
+  storage:'Storage', front_desk:'Front Desk'
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0d1a);
+  scene.fog = new THREE.Fog(0x0d0d1a, 40, 80);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+  raycaster = new THREE.Raycaster();
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambient);
+  const sun = new THREE.DirectionalLight(0xfff5e0, 1.2);
+  sun.position.set(10, 20, 10);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 100;
+  scene.add(sun);
+
+  generateStore();
+  updateCamera();
+
+  window.addEventListener('resize', onResize);
+  setupMouseControls();
+  setupUI();
+  animate();
+}
+
+// ============================================================
+// STORE GENERATION
+// ============================================================
+function generateStore() {
+  // Clear previous
+  clearAll();
+
+  storeWidth = Math.floor(Math.random() * 11 + 8); // 8–18
+  storeDepth = Math.floor(Math.random() * 11 + 6); // 6–16
+  // Clamp area 50-200
+  while (storeWidth * storeDepth < 50) storeWidth++; 
+  while (storeWidth * storeDepth > 200) storeWidth--;
+
+  // Random floor color (warm wood tones)
+  const floorPalette = [0xc8a96e, 0xa0785a, 0xd4b483, 0x8b6f47, 0xc4945a, 0xe8d5b0, 0x9e7b5e];
+  floorColor = floorPalette[Math.floor(Math.random() * floorPalette.length)];
+
+  buildStore();
+  camControls.target.set(storeWidth / 2, 0, storeDepth / 2);
+  camControls.radius = Math.max(storeWidth, storeDepth) * 1.4;
+  updateCamera();
+
+  setStatus(`Store: ${storeWidth}m × ${storeDepth}m (${storeWidth * storeDepth}m²). Click <span>Design</span> to start.`);
+}
+
+function buildStore() {
+  // Floor
+  const floorGeo = new THREE.PlaneGeometry(storeWidth, storeDepth);
+  const floorMat = new THREE.MeshLambertMaterial({ color: floorColor });
+  floorMesh = new THREE.Mesh(floorGeo, floorMat);
+  floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.position.set(storeWidth / 2, 0, storeDepth / 2);
+  floorMesh.receiveShadow = true;
+  scene.add(floorMesh);
+
+  // Walls (white)
+  buildWalls();
+
+  // Entrance (south wall, center)
+  entrancePos.set(storeWidth / 2, 0, 0);
+
+  // Grid plane (hidden by default)
+  const gridGeo = new THREE.PlaneGeometry(storeWidth, storeDepth, storeWidth, storeDepth);
+  const gridMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
+  gridPlane = new THREE.Mesh(gridGeo, gridMat);
+  gridPlane.rotation.x = -Math.PI / 2;
+  gridPlane.position.set(storeWidth / 2, 0.01, storeDepth / 2);
+  gridPlane.name = 'gridPlane';
+  scene.add(gridPlane);
+}
+
+function buildWalls() {
+  wallMeshes.forEach(m => scene.remove(m));
+  wallMeshes = [];
+
+  const wallH = 3;
+  const wallMat = new THREE.MeshLambertMaterial({ color: 0xf5f5f0 });
+  const wallConfigs = [
+    // south wall with door gap
+    { pos: [storeWidth * 0.25, wallH/2, 0], size: [storeWidth * 0.5 - 1, wallH, 0.2] },
+    { pos: [storeWidth * 0.75 + 0.5, wallH/2, 0], size: [storeWidth * 0.5 - 1, wallH, 0.2] },
+    // north wall
+    { pos: [storeWidth/2, wallH/2, storeDepth], size: [storeWidth + 0.2, wallH, 0.2] },
+    // east wall
+    { pos: [storeWidth, wallH/2, storeDepth/2], size: [0.2, wallH, storeDepth] },
+    // west wall
+    { pos: [0, wallH/2, storeDepth/2], size: [0.2, wallH, storeDepth] },
+  ];
+
+  wallConfigs.forEach(({ pos, size }) => {
+    const geo = new THREE.BoxGeometry(...size);
+    const mesh = new THREE.Mesh(geo, wallMat);
+    mesh.position.set(...pos);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    wallMeshes.push(mesh);
+  });
+
+  // Door frame
+  const doorGeo = new THREE.BoxGeometry(2, 2.5, 0.15);
+  const doorMat = new THREE.MeshLambertMaterial({ color: 0x8b5c2a });
+  const door = new THREE.Mesh(doorGeo, doorMat);
+  door.position.set(storeWidth / 2, 1.25, 0);
+  scene.add(door);
+  wallMeshes.push(door);
+}
+
+// ============================================================
+// DESIGN MODE
+// ============================================================
+function enterDesignMode() {
+  designMode = true;
+  document.getElementById('design-panel').style.display = 'block';
+  
+  // Show grid
+  if (gridHelper) scene.remove(gridHelper);
+  gridHelper = new THREE.GridHelper(Math.max(storeWidth, storeDepth) * 2, Math.max(storeWidth, storeDepth) * 2, 0x444466, 0x333355);
+  gridHelper.position.set(storeWidth / 2, 0.02, storeDepth / 2);
+  scene.add(gridHelper);
+
+  // Finer grid
+  const fineGrid = new THREE.GridHelper(storeWidth, storeWidth, 0x6666aa, 0x444466);
+  fineGrid.position.set(storeWidth / 2, 0.03, storeDepth / 2);
+  fineGrid.name = 'fineGrid';
+  scene.add(fineGrid);
+
+  setStatus('Select an area type from the panel, then drag on the floor to place it.');
+}
+
+function exitDesignMode() {
+  designMode = false;
+  document.getElementById('design-panel').style.display = 'none';
+  if (gridHelper) { scene.remove(gridHelper); gridHelper = null; }
+  const fg = scene.getObjectByName('fineGrid');
+  if (fg) scene.remove(fg);
+  if (selectionBox) { scene.remove(selectionBox); selectionBox = null; }
+
+  document.getElementById('btn-simulate').disabled = false;
+  setStatus('Design complete! Click <span>▶ Simulate</span> to run your restaurant.');
+  buildFurnitureFromAreas();
+  analyzeLayout();
+}
+
+function getGridCell(event) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mouse = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  );
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObject(gridPlane);
+  if (!hits.length) return null;
+  const p = hits[0].point;
+  return { x: Math.floor(p.x), z: Math.floor(p.z) };
+}
+
+function updateSelectionBox(c1, c2) {
+  if (!c1 || !c2) return;
+  const minX = Math.min(c1.x, c2.x), maxX = Math.max(c1.x, c2.x);
+  const minZ = Math.min(c1.z, c2.z), maxZ = Math.max(c1.z, c2.z);
+  const clamped = clampToStore({ minX, maxX, minZ, maxZ });
+  const w = clamped.maxX - clamped.minX + 1;
+  const d = clamped.maxZ - clamped.minZ + 1;
+  if (w <= 0 || d <= 0) return;
+
+  if (selectionBox) scene.remove(selectionBox);
+  const geo = new THREE.BoxGeometry(w, 0.08, d);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffd97d, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+  selectionBox = new THREE.Mesh(geo, mat);
+  selectionBox.position.set(clamped.minX + w/2, 0.05, clamped.minZ + d/2);
+  scene.add(selectionBox);
+}
+
+function clampToStore(r) {
+  return {
+    minX: Math.max(0, r.minX), maxX: Math.min(storeWidth - 1, r.maxX),
+    minZ: Math.max(0, r.minZ), maxZ: Math.min(storeDepth - 1, r.maxZ)
+  };
+}
+
+function confirmAreaPlacement(type) {
+  if (!pendingSelection) return;
+  const { minX, maxX, minZ, maxZ } = clampToStore({
+    minX: Math.min(pendingSelection.start.x, pendingSelection.end.x),
+    maxX: Math.max(pendingSelection.start.x, pendingSelection.end.x),
+    minZ: Math.min(pendingSelection.start.z, pendingSelection.end.z),
+    maxZ: Math.max(pendingSelection.start.z, pendingSelection.end.z)
+  });
+  const area = storeWidth * storeDepth; // unused
+  const w = maxX - minX + 1, d = maxZ - minZ + 1;
+
+  if (type === 'private_room' && w * d < 8) {
+    alert('Private room requires at least 8m². Please select a larger area.');
+    return;
+  }
+
+  placeArea(type, minX, maxX, minZ, maxZ);
+  if (selectionBox) { scene.remove(selectionBox); selectionBox = null; }
+  pendingSelection = null;
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+function placeArea(type, minX, maxX, minZ, maxZ) {
+  const w = maxX - minX + 1, d = maxZ - minZ + 1;
+  // Remove previous area overlapping
+  placedAreas = placedAreas.filter(a => {
+    const overlap = !(a.maxX < minX || a.minX > maxX || a.maxZ < minZ || a.minZ > maxZ);
+    if (overlap) {
+      if (a.mesh) scene.remove(a.mesh);
+    }
+    return !overlap;
+  });
+
+  const geo = new THREE.BoxGeometry(w, 0.1, d);
+  const mat = new THREE.MeshLambertMaterial({ color: AREA_COLORS[type], transparent: true, opacity: 0.75 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(minX + w/2, 0.06, minZ + d/2);
+  scene.add(mesh);
+
+  // Label (simple colored plane)
+  placedAreas.push({ type, minX, maxX, minZ, maxZ, w, d, mesh,
+    cx: minX + w/2, cz: minZ + d/2 });
+}
+
+// ============================================================
+// FURNITURE BUILDING
+// ============================================================
+function buildFurnitureFromAreas() {
+  furnitureMeshes.forEach(m => scene.remove(m));
+  furnitureMeshes = [];
+  tables = [];
+  kitchenPos.set(storeWidth / 2, 0, storeDepth / 2);
+  frontDeskPos.set(storeWidth / 2, 0, 2);
+  hasFrontDesk = false; hasKitchen = false;
+
+  placedAreas.forEach(area => {
+    switch (area.type) {
+      case 'kitchen': buildKitchen(area); break;
+      case 'small_table': buildSmallTables(area); break;
+      case 'booth': buildBooths(area); break;
+      case 'large_round': buildLargeRound(area); break;
+      case 'private_room': buildPrivateRoom(area); break;
+      case 'storage': buildStorage(area); break;
+      case 'front_desk': buildFrontDesk(area); break;
+    }
+  });
+
+  // Auto-place if missing
+  if (!hasKitchen) kitchenPos.set(storeWidth / 2, 0, storeDepth - 1);
+  if (!hasFrontDesk) frontDeskPos.set(storeWidth / 2, 0, 1);
+}
+
+function addFurniture(mesh) {
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  furnitureMeshes.push(mesh);
+  return mesh;
+}
+
+function buildKitchen(area) {
+  hasKitchen = true;
+  kitchenPos.set(area.cx, 0, area.cz);
+  // Counter
+  const geo = new THREE.BoxGeometry(area.w * 0.8, 0.9, area.d * 0.4);
+  const mat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(area.cx, 0.45, area.cz);
+  addFurniture(m);
+  // Stove top
+  const sg = new THREE.BoxGeometry(area.w * 0.6, 0.05, area.d * 0.3);
+  const sm = new THREE.MeshLambertMaterial({ color: 0x333333 });
+  const stove = new THREE.Mesh(sg, sm);
+  stove.position.set(area.cx, 0.92, area.cz);
+  addFurniture(stove);
+}
+
+function buildSmallTables(area) {
+  // Place 4-person tables in grid
+  const tableW = 1.2, tableD = 1.2, spacing = 0.8;
+  const cols = Math.max(1, Math.floor(area.w / (tableW + spacing)));
+  const rows = Math.max(1, Math.floor(area.d / (tableD + spacing)));
+  const startX = area.minX + (area.w - cols * (tableW + spacing) + spacing) / 2;
+  const startZ = area.minZ + (area.d - rows * (tableD + spacing) + spacing) / 2;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const tx = startX + c * (tableW + spacing) + tableW / 2;
+      const tz = startZ + r * (tableD + spacing) + tableD / 2;
+      placeSquareTable(tx, tz, 4);
+    }
+  }
+}
+
+function placeSquareTable(tx, tz, seats) {
+  const tableGeo = new THREE.BoxGeometry(0.9, 0.05, 0.9);
+  const tableMat = new THREE.MeshLambertMaterial({ color: 0xc8a96e });
+  const table = new THREE.Mesh(tableGeo, tableMat);
+  table.position.set(tx, 0.72, tz);
+  addFurniture(table);
+
+  // Leg
+  const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.72, 6);
+  const legMat = new THREE.MeshLambertMaterial({ color: 0x888877 });
+  const leg = new THREE.Mesh(legGeo, legMat);
+  leg.position.set(tx, 0.36, tz);
+  addFurniture(leg);
+
+  // Stools
+  const offsets = [[-0.6,0],[0.6,0],[0,-0.6],[0,0.6]];
+  offsets.slice(0, seats).forEach(([dx, dz]) => {
+    const sg = new THREE.CylinderGeometry(0.2, 0.18, 0.1, 8);
+    const sm = new THREE.MeshLambertMaterial({ color: 0x555555 });
+    const stool = new THREE.Mesh(sg, sm);
+    stool.position.set(tx + dx, 0.45, tz + dz);
+    addFurniture(stool);
+  });
+
+  const tableObj = { type: 'small', pos: new THREE.Vector3(tx, 0, tz), seats, customers: [], available: true };
+  tables.push(tableObj);
+  return tableObj;
+}
+
+function buildBooths(area) {
+  const boothH = 1.0, backH = 1.4;
+  // Back-to-back rows
+  const rows = Math.max(1, Math.floor(area.d / 2.5));
+  for (let r = 0; r < rows; r++) {
+    const tz = area.minZ + 1.5 + r * 2.5;
+    if (tz > area.maxZ - 0.5) break;
+    // Back (divider)
+    const bg = new THREE.BoxGeometry(area.w * 0.8, backH, 0.15);
+    const bm = new THREE.MeshLambertMaterial({ color: 0x8b6f47 });
+    const back = new THREE.Mesh(bg, bm);
+    back.position.set(area.cx, backH/2, tz);
+    addFurniture(back);
+    // Benches
+    [-0.7, 0.7].forEach(dz => {
+      const sg = new THREE.BoxGeometry(area.w * 0.75, 0.15, 0.55);
+      const sm = new THREE.MeshLambertMaterial({ color: 0x4a3728 });
+      const seat = new THREE.Mesh(sg, sm);
+      seat.position.set(area.cx, 0.4, tz + dz);
+      addFurniture(seat);
+    });
+    // Table
+    const tg = new THREE.BoxGeometry(area.w * 0.6, 0.06, 0.8);
+    const tm = new THREE.MeshLambertMaterial({ color: 0xd4b483 });
+    const tbl = new THREE.Mesh(tg, tm);
+    tbl.position.set(area.cx, 0.72, tz);
+    addFurniture(tbl);
+
+    const seats = Math.max(2, Math.floor(area.w / 0.7));
+    tables.push({ type: 'booth', pos: new THREE.Vector3(area.cx, 0, tz), seats, customers: [], available: true });
+  }
+}
+
+function buildLargeRound(area) {
+  const r = Math.min(area.w, area.d) * 0.38;
+  const tg = new THREE.CylinderGeometry(r, r, 0.07, 16);
+  const tm = new THREE.MeshLambertMaterial({ color: 0xd4b483 });
+  const tbl = new THREE.Mesh(tg, tm);
+  tbl.position.set(area.cx, 0.72, area.cz);
+  addFurniture(tbl);
+
+  // Center turntable
+  const rg = new THREE.CylinderGeometry(r * 0.45, r * 0.45, 0.04, 16);
+  const rm = new THREE.MeshLambertMaterial({ color: 0x9e7b5e });
+  const rot = new THREE.Mesh(rg, rm);
+  rot.position.set(area.cx, 0.76, area.cz);
+  addFurniture(rot);
+
+  // Chairs around
+  const seats = 10;
+  for (let i = 0; i < seats; i++) {
+    const angle = (i / seats) * Math.PI * 2;
+    const cx2 = area.cx + (r + 0.5) * Math.sin(angle);
+    const cz2 = area.cz + (r + 0.5) * Math.cos(angle);
+    const sg = new THREE.CylinderGeometry(0.22, 0.2, 0.1, 8);
+    const sm = new THREE.MeshLambertMaterial({ color: 0x555555 });
+    const s = new THREE.Mesh(sg, sm);
+    s.position.set(cx2, 0.45, cz2);
+    addFurniture(s);
+  }
+  tables.push({ type: 'large', pos: new THREE.Vector3(area.cx, 0, area.cz), seats: 10, customers: [], available: true });
+}
+
+function buildPrivateRoom(area) {
+  // Walls
+  const wallH = 2.5, wallMat = new THREE.MeshLambertMaterial({ color: 0xe8e0f5, transparent: true, opacity: 0.7 });
+  [[area.minX + area.w/2, area.minZ],[area.minX + area.w/2, area.maxZ+1],
+   [area.minX, area.minZ + area.d/2],[area.maxX+1, area.minZ + area.d/2]].forEach(([wx, wz], i) => {
+    const isNS = i < 2;
+    const geo = new THREE.BoxGeometry(isNS ? area.w : 0.1, wallH, isNS ? 0.1 : area.d);
+    const m = new THREE.Mesh(geo, wallMat);
+    m.position.set(wx, wallH/2, wz);
+    addFurniture(m);
+  });
+  buildLargeRound({ cx: area.cx, cz: area.cz, w: area.w, d: area.d });
+}
+
+function buildStorage(area) {
+  // Shelves
+  for (let i = 0; i < 3; i++) {
+    const sg = new THREE.BoxGeometry(area.w * 0.8, 0.06, 0.4);
+    const sm = new THREE.MeshLambertMaterial({ color: 0x888880 });
+    const shelf = new THREE.Mesh(sg, sm);
+    shelf.position.set(area.cx, 0.5 + i * 0.7, area.minZ + 0.3);
+    addFurniture(shelf);
+  }
+}
+
+function buildFrontDesk(area) {
+  hasFrontDesk = true;
+  frontDeskPos.set(area.cx, 0, area.cz);
+  const dg = new THREE.BoxGeometry(area.w * 0.9, 1.0, area.d * 0.5);
+  const dm = new THREE.MeshLambertMaterial({ color: 0xc8648a });
+  const desk = new THREE.Mesh(dg, dm);
+  desk.position.set(area.cx, 0.5, area.cz);
+  addFurniture(desk);
+}
+
+function analyzeLayout() {
+  let totalCap = 0;
+  tables.forEach(t => totalCap += t.seats);
+  document.getElementById('stat-tables').textContent = tables.length;
+  document.getElementById('stat-capacity').textContent = totalCap;
+}
+
+// ============================================================
+// AGENT (PERSON) SYSTEM
+// ============================================================
+const STATE = { ENTERING: 'entering', WAITING: 'waiting', WALKING: 'walking', SEATED: 'seated', ORDERING: 'ordering', EATING: 'eating', PAYING: 'paying', LEAVING: 'leaving' };
+
+function createAgentMesh(role) {
+  const group = new THREE.Group();
+  const colors = { customer: 0x4fc3f7, waiter: 0xffffff, chef: 0xffeb3b };
+  const col = colors[role] || 0xaaaaaa;
+
+  // Body
+  const bodyGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.7, 8);
+  const bodyMat = new THREE.MeshLambertMaterial({ color: col });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 0.35;
+  group.add(body);
+
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.2, 10, 8);
+  const headMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.position.y = 0.95;
+  group.add(head);
+
+  // Chef hat
+  if (role === 'chef') {
+    const hatGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.3, 8);
+    const hatMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const hat = new THREE.Mesh(hatGeo, hatMat);
+    hat.position.y = 1.25;
+    group.add(hat);
+  }
+
+  // Waiter tray
+  if (role === 'waiter') {
+    const trayGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.02, 8);
+    const trayMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+    const tray = new THREE.Mesh(trayGeo, trayMat);
+    tray.position.set(0.35, 0.75, 0);
+    group.add(tray);
+  }
+
+  return group;
+}
+
+function spawnAgent(role) {
+  const mesh = createAgentMesh(role);
+  const id = agentIdCounter++;
+  const startX = entrancePos.x + (Math.random() - 0.5) * 1.5;
+  mesh.position.set(startX, 0, -0.5);
+  scene.add(mesh);
+
+  const agent = { id, role, mesh, state: STATE.ENTERING, target: null, table: null,
+    timer: 0, maxTimer: 0, speed: role === 'waiter' ? 2.5 : 2.0 };
+  agents.push(agent);
+  return agent;
+}
+
+function spawnStaff() {
+  // Waiters
+  for (let i = 0; i < Math.max(1, Math.floor(tables.length / 4)); i++) {
+    const w = spawnAgent('waiter');
+    w.mesh.position.set(storeWidth * 0.3 + i * 1.5, 0, storeDepth * 0.5);
+    w.state = STATE.WALKING;
+    w.target = new THREE.Vector3(storeWidth * 0.5, 0, storeDepth * 0.4);
+    waiters.push(w);
+  }
+  // Chefs
+  for (let i = 0; i < Math.max(1, Math.floor(tables.length / 6)); i++) {
+    const c = spawnAgent('chef');
+    c.mesh.position.copy(kitchenPos.clone().add(new THREE.Vector3((Math.random()-0.5)*2, 0, 0)));
+    c.state = STATE.SEATED; // idle in kitchen
+    chefs.push(c);
+  }
+}
+
+function getAvailableTable() {
+  return tables.find(t => t.available && t.customers.length === 0);
+}
+
+function updateAgents(dt) {
+  const realDt = dt * simSpeed;
+  agents.forEach(agent => {
+    if (!agent.mesh) return;
+
+    // Move toward target
+    if (agent.target) {
+      const diff = agent.target.clone().sub(agent.mesh.position);
+      diff.y = 0;
+      const dist = diff.length();
+      if (dist > 0.1) {
+        const move = diff.normalize().multiplyScalar(agent.speed * realDt);
+        agent.mesh.position.add(move);
+        agent.mesh.lookAt(agent.mesh.position.clone().add(diff));
+      } else {
+        agent.mesh.position.copy(agent.target);
+        agent.target = null;
+      }
+    }
+
+    agent.timer -= realDt;
+
+    switch (agent.state) {
+      case STATE.ENTERING:
+        if (!agent.target) {
+          const tbl = getAvailableTable();
+          if (tbl) {
+            tbl.available = false;
+            tbl.customers.push(agent);
+            agent.table = tbl;
+            agent.state = STATE.WALKING;
+            agent.target = tbl.pos.clone().add(new THREE.Vector3((Math.random()-0.5)*0.8, 0, (Math.random()-0.5)*0.8));
+          } else {
+            agent.state = STATE.WAITING;
+            agent.target = new THREE.Vector3(storeWidth/2 + (Math.random()-0.5)*3, 0, 2);
+            updateStat('waiting', 1);
+          }
+        }
+        break;
+
+      case STATE.WAITING:
+        if (!agent.target) {
+          const tbl = getAvailableTable();
+          if (tbl) {
+            tbl.available = false;
+            tbl.customers.push(agent);
+            agent.table = tbl;
+            agent.state = STATE.WALKING;
+            agent.target = tbl.pos.clone().add(new THREE.Vector3((Math.random()-0.5)*0.5, 0, (Math.random()-0.5)*0.5));
+            updateStat('waiting', -1);
+          } else {
+            agent.target = new THREE.Vector3(storeWidth/2 + (Math.random()-0.5)*4, 0, 2.5);
+          }
+        }
+        break;
+
+      case STATE.WALKING:
+        if (!agent.target) {
+          agent.state = STATE.SEATED;
+          agent.timer = 10 + Math.random() * 20; // wait for order
+          updateStat('seated', 1);
+        }
+        break;
+
+      case STATE.SEATED:
+        if (agent.timer <= 0) {
+          agent.state = STATE.ORDERING;
+          agent.timer = 3 + Math.random() * 4;
+        }
+        break;
+
+      case STATE.ORDERING:
+        if (agent.timer <= 0) {
+          agent.state = STATE.EATING;
+          agent.timer = 15 + Math.random() * 25; // eating duration
+        }
+        break;
+
+      case STATE.EATING:
+        if (agent.timer <= 0) {
+          agent.state = STATE.PAYING;
+          agent.target = frontDeskPos.clone().add(new THREE.Vector3((Math.random()-0.5), 0, 0.5));
+          if (agent.table) { agent.table.available = true; agent.table.customers = []; }
+          updateStat('seated', -1);
+        }
+        break;
+
+      case STATE.PAYING:
+        if (!agent.target) {
+          revenue += 40 + Math.floor(Math.random() * 80);
+          document.getElementById('stat-revenue').textContent = '¥' + revenue;
+          agent.state = STATE.LEAVING;
+          agent.target = new THREE.Vector3(entrancePos.x + (Math.random()-0.5)*2, 0, -2);
+        }
+        break;
+
+      case STATE.LEAVING:
+        if (!agent.target) {
+          scene.remove(agent.mesh);
+          agent.mesh = null;
+        }
+        break;
+    }
+  });
+
+  // Remove dead agents
+  agents = agents.filter(a => a.mesh !== null);
+  document.getElementById('stat-customers').textContent = agents.filter(a => a.role === 'customer').length;
+}
+
+// Waiter patrol
+function updateWaiters(dt) {
+  waiters.forEach(w => {
+    if (w.state === STATE.WALKING && !w.target) {
+      // Patrol between tables randomly
+      if (tables.length > 0) {
+        const t = tables[Math.floor(Math.random() * tables.length)];
+        w.target = t.pos.clone().add(new THREE.Vector3((Math.random()-0.5)*1.5, 0, (Math.random()-0.5)*1.5));
+      }
+    }
+  });
+}
+
+// ============================================================
+// SIMULATION
+// ============================================================
+function startSimulation() {
+  simRunning = true;
+  simTime = 8 * 60;
+  revenue = 0;
+  agents = []; tables.forEach(t => { t.available = true; t.customers = []; });
+  spawnStaff();
+  document.getElementById('btn-simulate').textContent = '⏸ Pause';
+  setStatus('Restaurant is open! Watch your customers come and go.');
+}
+
+function getSpawnRate() {
+  const h = simTime / 60;
+  if (h >= 11.5 && h <= 13.5) return 0.8; // lunch peak
+  if (h >= 16 && h <= 21) return 0.6; // dinner peak
+  if (h < 10 || h > 22) return 0;
+  return 0.15;
+}
+
+function formatTime(mins) {
+  const h = Math.floor(mins / 60) % 24;
+  const m = Math.floor(mins % 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function getTimeStatus(h) {
+  if (h >= 22) return '🔒 Closed';
+  if (h >= 16 && h <= 21) return '🔥 Peak Hours';
+  if (h >= 11.5 && h <= 13.5) return '🍱 Lunch Rush';
+  if (h < 10) return '☕ Opening';
+  return '🍴 Open';
+}
+
+// ============================================================
+// STATS HELPERS
+// ============================================================
+const statCounts = { waiting: 0, seated: 0 };
+function updateStat(key, delta) {
+  statCounts[key] = Math.max(0, (statCounts[key] || 0) + delta);
+  document.getElementById('stat-' + key).textContent = statCounts[key];
+}
+
+// ============================================================
+// CAMERA CONTROLS
+// ============================================================
+function updateCamera() {
+  const x = camControls.target.x + camControls.radius * Math.sin(camControls.phi) * Math.sin(camControls.theta);
+  const y = camControls.radius * Math.cos(camControls.phi);
+  const z = camControls.target.z + camControls.radius * Math.sin(camControls.phi) * Math.cos(camControls.theta);
+  camera.position.set(x, Math.max(3, y), z);
+  camera.lookAt(camControls.target);
+}
+
+function setupMouseControls() {
+  const el = renderer.domElement;
+  el.addEventListener('mousedown', onMouseDown);
+  el.addEventListener('mousemove', onMouseMove);
+  el.addEventListener('mouseup', onMouseUp);
+  el.addEventListener('wheel', onWheel);
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+function onMouseDown(e) {
+  if (e.button === 1) { camControls.rotating = true; camControls.lastX = e.clientX; camControls.lastY = e.clientY; e.preventDefault(); return; }
+  if (e.button === 0) {
+    if (designMode) {
+      // In design mode, left click always tries to paint — no camera pan
+      const cell = getGridCell(e);
+      if (cell) {
+        isDraggingGrid = true;
+        selectionStartCell = cell;
+        selectionCurrentCell = cell;
+        updateSelectionBox(cell, cell);
+      }
+      return;
+    }
+    camControls.panning = true; camControls.lastX = e.clientX; camControls.lastY = e.clientY;
+  }
+}
+
+function onMouseMove(e) {
+  const dx = e.clientX - camControls.lastX, dy = e.clientY - camControls.lastY;
+  if (camControls.rotating) {
+    camControls.theta -= dx * 0.007;
+    camControls.phi = Math.max(0.15, Math.min(1.4, camControls.phi + dy * 0.007));
+    updateCamera();
+  }
+  if (camControls.panning) {
+    const panSpeed = camControls.radius * 0.001;
+    const right = new THREE.Vector3(); camera.getWorldDirection(right);
+    const forward = right.clone(); right.crossVectors(camera.up, forward).normalize();
+    forward.y = 0; forward.normalize();
+    camControls.target.addScaledVector(right, dx * panSpeed);
+    camControls.target.addScaledVector(forward, -dy * panSpeed);
+    updateCamera();
+  }
+  if (isDraggingGrid && designMode) {
+    const cell = getGridCell(e);
+    if (cell) { selectionCurrentCell = cell; updateSelectionBox(selectionStartCell, selectionCurrentCell); }
+    camControls.lastX = e.clientX; camControls.lastY = e.clientY;
+    return; // don't pan while painting
+  }
+  camControls.lastX = e.clientX; camControls.lastY = e.clientY;
+}
+
+function onMouseUp(e) {
+  if (e.button === 1) { camControls.rotating = false; return; }
+  if (e.button === 0) {
+    camControls.panning = false;
+    if (isDraggingGrid && designMode && selectionStartCell && selectionCurrentCell) {
+      isDraggingGrid = false;
+      const minX = Math.min(selectionStartCell.x, selectionCurrentCell.x);
+      const maxX = Math.max(selectionStartCell.x, selectionCurrentCell.x);
+      const minZ = Math.min(selectionStartCell.z, selectionCurrentCell.z);
+      const maxZ = Math.max(selectionStartCell.z, selectionCurrentCell.z);
+      const w = maxX - minX + 1, d = maxZ - minZ + 1;
+      pendingSelection = { start: { x: minX, z: minZ }, end: { x: maxX, z: maxZ } };
+      document.getElementById('modal-size-info').textContent = `Selected area: ${w}m × ${d}m = ${w*d}m²`;
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+  }
+}
+
+function onWheel(e) {
+  camControls.radius = Math.max(5, Math.min(60, camControls.radius + e.deltaY * 0.05));
+  updateCamera();
+  e.preventDefault();
+}
+
+// ============================================================
+// UI SETUP
+// ============================================================
+function setupUI() {
+  document.getElementById('btn-design').addEventListener('click', () => {
+    if (!designMode) { enterDesignMode(); } 
+    else { exitDesignMode(); }
+  });
+
+  document.getElementById('btn-done-design').addEventListener('click', exitDesignMode);
+
+  document.getElementById('btn-simulate').addEventListener('click', () => {
+    if (!simRunning) { startSimulation(); }
+    else { simRunning = !simRunning; document.getElementById('btn-simulate').textContent = simRunning ? '⏸ Pause' : '▶ Resume'; }
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    simRunning = false; designMode = false;
+    agents.forEach(a => { if (a.mesh) scene.remove(a.mesh); });
+    agents = []; waiters = []; chefs = [];
+    document.getElementById('btn-simulate').disabled = true;
+    document.getElementById('btn-simulate').textContent = '▶ Simulate';
+    document.getElementById('design-panel').style.display = 'none';
+    statCounts.waiting = 0; statCounts.seated = 0; revenue = 0;
+    document.getElementById('stat-waiting').textContent = '0';
+    document.getElementById('stat-seated').textContent = '0';
+    document.getElementById('stat-revenue').textContent = '¥0';
+    document.getElementById('stat-customers').textContent = '0';
+    generateStore();
+  });
+
+  document.getElementById('btn-speed').addEventListener('click', () => {
+    const speeds = [1, 2, 5, 10];
+    const idx = speeds.indexOf(simSpeed);
+    simSpeed = speeds[(idx + 1) % speeds.length];
+    document.getElementById('btn-speed').textContent = simSpeed + '×';
+  });
+
+  // Area buttons in panel
+  document.querySelectorAll('.area-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedAreaType = btn.dataset.type;
+      setStatus(`Selected: <span>${AREA_NAMES[selectedAreaType]}</span>. Drag on the floor to place.`);
+    });
+  });
+
+  // Modal area buttons
+  document.querySelectorAll('.modal-area-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      confirmAreaPlacement(btn.dataset.type);
+    });
+  });
+
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    document.getElementById('modal-overlay').style.display = 'none';
+    if (selectionBox) { scene.remove(selectionBox); selectionBox = null; }
+    pendingSelection = null;
+  });
+}
+
+function setStatus(html) {
+  document.getElementById('status-text').innerHTML = html;
+}
+
+// ============================================================
+// CLEAR ALL
+// ============================================================
+function clearAll() {
+  // Remove all meshes from scene except lights
+  const toRemove = [];
+  scene.traverse(obj => { if (obj.isMesh || obj.isGridHelper) toRemove.push(obj); });
+  toRemove.forEach(obj => scene.remove(obj));
+  wallMeshes = []; furnitureMeshes = []; placedAreas = []; tables = [];
+  agents.forEach(a => { if (a.mesh) scene.remove(a.mesh); });
+  agents = []; waiters = []; chefs = [];
+  floorMesh = null; gridPlane = null; gridHelper = null; selectionBox = null;
+  statCounts.waiting = 0; statCounts.seated = 0;
+}
+
+// ============================================================
+// ANIMATE
+// ============================================================
+let lastSimUpdate = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(animClock.getDelta(), 0.1);
+
+  if (simRunning) {
+    simTime += dt * simSpeed * 4; // 4 sim-mins per real second at 1x
+
+    const h = simTime / 60;
+    document.getElementById('clock').textContent = formatTime(simTime);
+    document.getElementById('time-status').textContent = getTimeStatus(h);
+
+    if (h >= 22) {
+      simRunning = false;
+      document.getElementById('btn-simulate').textContent = '▶ Simulate';
+      setStatus('Restaurant closed for the night. Revenue: <span>¥' + revenue + '</span>');
+    }
+
+    // Spawn customers
+    const rate = getSpawnRate();
+    if (rate > 0) {
+      lastSpawnTime += dt * simSpeed;
+      const interval = 1 / rate;
+      if (lastSpawnTime >= interval) {
+        lastSpawnTime = 0;
+        // Group: 1-4 customers
+        const groupSize = Math.ceil(Math.random() * 3);
+        for (let i = 0; i < groupSize; i++) {
+          const c = spawnAgent('customer');
+          c.state = STATE.ENTERING;
+        }
+      }
+    }
+
+    updateAgents(dt);
+    updateWaiters(dt);
+  }
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>
