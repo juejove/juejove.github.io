@@ -1,0 +1,169 @@
+interface site {
+    rent: number;
+    bond: number;
+    frontage: number;
+    depth: number;
+    area: number;
+    naturalFlow: number;
+    smokeFree: boolean;
+    renovationCompletion: number;
+    storey: number;
+    forlease: boolean;
+    forSale: boolean;
+    type: shopType;
+}
+
+type shopType =
+  | "shop"
+  | "school"
+  | "factory"
+  | "residential"
+  | "office"
+  | "station"
+  | "tourism";
+
+function generateType(): shopType {
+  const r = Math.random();
+
+  if (r < 0.6) return "shop" ;
+  if (r < 0.68) return "school" ;
+  if (r < 0.69) return "factory" ;
+  if (r < 0.72) return "residential" ;
+  if (r < 0.84) return "office" ;
+  if (r < 0.89) return "station" ;
+  return "tourism";
+}
+
+
+interface streetType {
+    demand: {
+        Single: number;
+        Couple: number;
+        Family: number;
+        Catchup: number;
+        FineDining: number;
+        //在本类型街道上某群体的占比
+    };
+    monthFactor: number[];
+    typicalFlow: number;
+}
+
+interface Street{
+
+
+}
+
+interface foodType {
+    Attraction: {
+        Single: number;
+        Couple: number;
+        Family: number;
+        Catchup: number;
+        FineDining: number;
+        //某群体进店消费概率
+    };
+    materialCost: number;
+    monthFactor: number[];
+}
+
+interface business {
+    "name": string;
+    "type": foodType;
+    "renovation": number;
+    "reputation": number;
+    "avgSpend": number;
+}
+
+let time: Date;
+
+let myBusiness: business;
+
+function forecastCustomersCount(site: site,food: foodType,street: streetType) {
+    function calcFrontageBuff(x) {
+        return Math.pow(x / 4, 0.67);
+    }
+    let businessBuff = myBusiness.reputation* myBusiness.renovation;
+    let singleAmount = calcFrontageBuff(site.frontage)*site.naturalFlow * street.demand.Single * food.Attraction.Single * street.monthFactor[time.getMonth()]*food.monthFactor[time.getMonth()];
+    let coupleAmount = calcFrontageBuff(site.frontage)*site.naturalFlow * street.demand.Couple * food.Attraction.Couple * street.monthFactor[time.getMonth()]*food.monthFactor[time.getMonth()];
+    let familyAmount = calcFrontageBuff(site.frontage)*site.naturalFlow * street.demand.Family * food.Attraction.Family * street.monthFactor[time.getMonth()]*food.monthFactor[time.getMonth()];
+    let catchupAmount = calcFrontageBuff(site.frontage)*site.naturalFlow * street.demand.Catchup * food.Attraction.Catchup * street.monthFactor[time.getMonth()]*food.monthFactor[time.getMonth()];
+    let fineDiningAmount = calcFrontageBuff(site.frontage)*site.naturalFlow * street.demand.FineDining * food.Attraction.FineDining * street.monthFactor[time.getMonth()]*food.monthFactor[time.getMonth()];
+    return businessBuff * (singleAmount + coupleAmount + familyAmount + catchupAmount + fineDiningAmount);
+};
+
+const frontageList =[4,4,4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,8,10,12,12,15]
+const depthList = [3,4,4,4,5,5,6,6,8,10,12]
+
+function randomDenseAtEdges(): number {
+  const x = Math.random();
+  return x < 0.5
+    ? 0.5 * Math.pow(2 * x, 2)
+    : 1 - 0.5 * Math.pow(2 * (1 - x), 2);
+}
+
+function GenerateStreet(stType: streetType) {
+    const StreetBaseFlow = stType.typicalFlow*randomDenseAtEdges()
+    let streetA: site[]=[]
+    let streetB: site[]=[]
+    let randDepth = depthList[Math.floor(Math.random()*depthList.length)]
+
+    for (let i = 0; i < 6; i++) {
+    streetA.push(generateSite(randDepth));
+    streetB.push(generateSite(randDepth));
+    }
+
+    return {
+        streetA,
+        streetB
+    }
+
+    
+    function generateSite(depth:number): site {
+        let calcRenovation = Math.floor(randomDenseAtEdges() * 100);
+        let calcArea = depth*frontageList[Math.floor(Math.random()*frontageList.length)];
+        let calcRent = Math.floor((calcRenovation/100*calcArea *Math.floor(Math.random() * 80) + 20) / 100) * 100;
+        let calcforLease = Boolean(Math.random() < (0.08*Math.random() + 0.05));
+        return {
+            frontage: frontageList[Math.floor(Math.random()*frontageList.length)],
+            depth,
+            type:generateType(),
+            area: calcArea,
+            rent:calcRent,
+            bond:calcRent* Math.floor(Math.random() * 4),
+            naturalFlow: Math.ceil(StreetBaseFlow * (1 + (Math.random() - 0.5) / 5)),   //未完成，未来根据临近客源/负面影响的距离调整客流量
+            smokeFree: Math.random() < 0.2,  //20%概率为禁油烟店铺
+            renovationCompletion: calcRenovation, //随机生成装修完成度
+            storey: Math.random() < 0.1 ?3: Math.random() < 0.2 ? 2 : 1, //10%概率为三层，20%概率为两层，70%概率为一层
+            forlease: Math.random() < 0.12, 
+            forSale: calcforLease? false:Math.random() <(0.08*Math.random() + 0.05)
+        }
+    }
+
+}
+
+const TypicalStreets: streetType[] = [
+{
+    demand: {
+        Single: 0.3,
+        Couple: 0.25,
+        Family: 0.2,
+        Catchup: 0.15,
+        FineDining: 0.1
+    },
+    typicalFlow: 5000,
+    monthFactor: [1.0, 0.9, 0.95, 1.05, 1.1, 1.2, 1.3, 1.25, 1.15, 1.05, 0.95, 0.9]
+},
+{
+    demand: {
+        Single: 0.2,
+        Couple: 0.3,
+        Family: 0.25,
+        Catchup: 0.15,
+        FineDining: 0.05
+    },
+    typicalFlow: 6800,
+    monthFactor: [0.9, 0.85, 0.9, 1.0, 1.1, 1.15, 1.2, 1.15, 1.05, 0.95, 0.9, 0.85]    }
+    ]
+
+console.log(GenerateStreet(TypicalStreets[0]));
+
