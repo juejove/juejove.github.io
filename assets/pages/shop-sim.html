@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Scout</title>
+<style>
+  :root {
+    --font-sans: 'Segoe UI', system-ui, sans-serif;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f5;
+    --color-background-info: #e6f1fb;
+    --color-text-primary: #111111;
+    --color-text-secondary: #666666;
+    --color-text-tertiary: #999999;
+    --color-text-success: #2d7a1f;
+    --color-text-warning: #a06000;
+    --color-text-danger: #c0392b;
+    --color-text-info: #185fa5;
+    --color-border-primary: #888888;
+    --color-border-secondary: #cccccc;
+    --color-border-tertiary: #e0e0e0;
+    --color-border-info: #185fa5;
+    --border-radius-md: 6px;
+    --border-radius-lg: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: #f9f9f9; color: var(--color-text-primary); }
+  #root { max-width: 900px; margin: 0 auto; padding: 1.25rem; }
+
+  .hud { display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .hud-card { background: white; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.5rem 0.9rem; flex: 1; min-width: 110px; }
+  .hud-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
+  .hud-value { font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
+  .hud-value.green { color: var(--color-text-success); }
+  .hud-value.amber { color: var(--color-text-warning); }
+  .hud-value.red { color: var(--color-text-danger); }
+
+  .controls { display: flex; align-items: center; gap: 6px; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .mode-btn { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 0.3rem 0.75rem; font-size: 12px; cursor: pointer; background: transparent; color: var(--color-text-secondary); transition: all 0.12s; }
+  .mode-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); font-weight: 500; }
+  .regen-btn { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 0.3rem 0.75rem; font-size: 12px; cursor: pointer; background: transparent; color: var(--color-text-secondary); margin-left: auto; }
+  .regen-btn:hover { background: var(--color-background-secondary); }
+
+  .legend { display: flex; gap: 14px; margin-bottom: 0.6rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid transparent; }
+
+  .street-section { margin-bottom: 0.5rem; }
+  .section-label { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 4px; }
+  .street-row { display: flex; width: 100%; gap: 0; }
+
+  /* BASE: all shop blocks get a visible border */
+  .site-block {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1.5px solid #bbb;
+    transition: border-color 0.12s, background 0.12s;
+    flex-shrink: 0;
+    background: #fff;
+  }
+  .site-block + .site-block { border-left: none; }
+  .site-block:hover { z-index: 2; border-color: #444 !important; border-left: 1.5px solid #444 !important; }
+  .site-block.not-interactive { cursor: default; }
+
+  /* for-lease: blue border */
+  .site-block.forlease { background: #e6f1fb; border-color: #185fa5; border-width: 1.5px; }
+  /* for-sale: green border */
+  .site-block.forsale { background: #eaf3de; border-color: #3b6d11; border-width: 1.5px; }
+  /* taken by player */
+  .site-block.taken { background: #eaf3de; border-color: #3b6d11; border-width: 1.5px; }
+  /* non-shop (office, residential, etc) */
+  .site-block.not-shop { background: #f0f0f0; border-color: #ccc; cursor: default; }
+
+  .site-icon { font-size: 13px; line-height: 1; pointer-events: none; }
+  .site-info { font-size: 8px; color: var(--color-text-secondary); text-align: center; line-height: 1.3; margin-top: 2px; pointer-events: none; max-width: 100%; overflow: hidden; }
+  .site-badge { position: absolute; top: 2px; right: 2px; font-size: 7px; font-weight: 600; padding: 1px 3px; border-radius: 2px; line-height: 1.4; pointer-events: none; }
+  .badge-L { background: #e6f1fb; color: #185fa5; }
+  .badge-S { background: #eaf3de; color: #3b6d11; }
+
+  .street-divider { text-align: center; font-size: 10px; color: var(--color-text-tertiary); letter-spacing: 0.08em; padding: 5px 0; border-top: 1px dashed var(--color-border-tertiary); border-bottom: 1px dashed var(--color-border-tertiary); margin: 4px 0; }
+
+  /* Modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #ffffff; border-radius: var(--border-radius-lg); border: 1px solid #ddd; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 1.25rem; width: min(360px, 92vw); max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .tag { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 500; }
+  .tag-lease { background: #e6f1fb; color: #185fa5; }
+  .tag-sale { background: #eaf3de; color: #3b6d11; }
+
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+  .mf { background: #f6f6f6; border-radius: var(--border-radius-md); padding: 0.45rem 0.65rem; }
+  .mf-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 1px; }
+  .mf-value { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+
+  .forecast-box { background: #f6f6f6; border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 1rem; }
+  .frow { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 0.5px solid #e0e0e0; }
+  .frow:last-child { border: none; font-weight: 500; font-size: 13px; }
+
+  .modal-note { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 0.9rem; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn { border: 0.5px solid var(--color-border-secondary); background: transparent; border-radius: var(--border-radius-md); padding: 0.4rem 0.9rem; font-size: 13px; cursor: pointer; color: var(--color-text-primary); transition: background 0.12s; }
+  .btn:hover { background: #f0f0f0; }
+  .btn.primary { background: #e6f1fb; color: #185fa5; border-color: #185fa5; }
+  .btn.primary:hover { opacity: 0.85; }
+
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 0.45rem 1.2rem; border-radius: var(--border-radius-md); font-size: 12px; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="hud">
+    <div class="hud-card"><div class="hud-label">cash</div><div class="hud-value green" id="hud-money">¥100,000</div></div>
+    <div class="hud-card"><div class="hud-label">month</div><div class="hud-value" id="hud-month">Jan 2025</div></div>
+    <div class="hud-card"><div class="hud-label">location</div><div class="hud-value amber" id="hud-street">—</div></div>
+    <div class="hud-card"><div class="hud-label">status</div><div class="hud-value" id="hud-status">Searching</div></div>
+  </div>
+
+  <div class="controls">
+    <button class="mode-btn active" id="btn-god" onclick="setMode('god')">god view</button>
+    <button class="mode-btn" id="btn-player" onclick="setMode('player')">player view</button>
+    <button class="regen-btn" onclick="regenerate()">↻ new street</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#e6f1fb;border-color:#185fa5"></div>for lease</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#eaf3de;border-color:#3b6d11"></div>for sale</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f0f0f0;border-color:#ccc"></div>occupied / other use</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#fff;border-color:#bbb"></div>available shop</div>
+  </div>
+
+  <div id="streets-container"></div>
+</div>
+
+<div id="modal-container"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SampleFood=[
+  {name:"高档中餐",Attraction:{Single:.1,Couple:.9,Family:1.2,Catchup:.8,FineDining:1.5},materialCost:80,monthFactor:[1.1,1.1,1,1,1,1.05,1.05,1,1,1,1.1,1.2]},
+  {name:"小吃摊",Attraction:{Single:1.2,Couple:.7,Family:.5,Catchup:.6,FineDining:0},materialCost:8,monthFactor:new Array(12).fill(1)},
+  {name:"面馆",Attraction:{Single:1,Couple:.6,Family:.6,Catchup:.4,FineDining:.1},materialCost:12,monthFactor:new Array(12).fill(1)},
+  {name:"普通小炒",Attraction:{Single:.6,Couple:.8,Family:1,Catchup:.7,FineDining:.2},materialCost:25,monthFactor:[1,1,1,1,1.05,1.05,1.05,1.05,1,1,1,1]},
+  {name:"烧烤",Attraction:{Single:.8,Couple:.9,Family:.5,Catchup:1.2,FineDining:.3},materialCost:30,monthFactor:[.1,.1,.3,.6,1,1.5,1.4,1.4,.8,.5,.3,.2]},
+  {name:"麻辣烫",Attraction:{Single:.7,Couple:.6,Family:.2,Catchup:.05,FineDining:0},materialCost:15,monthFactor:new Array(12).fill(1)},
+  {name:"奶茶",Attraction:{Single:1.1,Couple:1.5,Family:.7,Catchup:1,FineDining:.6},materialCost:5,monthFactor:[.8,.8,.85,.9,1,1.1,1.2,1.25,1.1,1,.9,.85]},
+  {name:"火锅",Attraction:{Single:.05,Couple:.5,Family:.4,Catchup:.8,FineDining:1.1},materialCost:40,monthFactor:[1.2,1.1,1,1,1,1.1,1.1,1.1,1,1,1.1,1.2]}
+];
+const SampleStreets=[
+  {name:"school district",demand:{Single:.05,Couple:.10,Family:.8,Catchup:.05,FineDining:0},typicalFlow:1500,monthFactor:[.95,.1,.3,1.1,.95,.9,.1,.1,1.25,1.15,1.05,1]},
+  {name:"office district",demand:{Single:.55,Couple:.05,Family:.05,Catchup:.25,FineDining:.10},typicalFlow:2000,monthFactor:[.9,.25,.9,1.0,1.1,1.15,1.1,1.15,1.05,.95,.9,.95]},
+  {name:"shopping mall",demand:{Single:.15,Couple:.35,Family:.35,Catchup:.05,FineDining:.10},typicalFlow:8000,monthFactor:[.85,1.25,.9,1.0,1.1,1.15,1.25,1.25,1.05,.95,.9,.9]},
+  {name:"residential district",demand:{Single:.25,Couple:.2,Family:.4,Catchup:.1,FineDining:.05},typicalFlow:1800,monthFactor:[1,1,1,1,1.05,1.05,1.05,1.05,1,1,1,1]},
+  {name:"station",demand:{Single:.7,Couple:.15,Family:.05,Catchup:.08,FineDining:.02},typicalFlow:12000,monthFactor:[1.1,1.2,.95,1,1,1,1.05,1.05,1,1.1,1.2,1.3]},
+  {name:"tourism district",demand:{Single:.2,Couple:.35,Family:.3,Catchup:.1,FineDining:.05},typicalFlow:9500,monthFactor:[.7,.8,.95,1.1,1.2,1.4,1.5,1.5,1.3,1.1,.9,.8]}
+];
+const frontageList=[4,4,4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,8,10,12,12,15];
+const depthList=[3,4,4,4,5,5,6,6,8,10,12];
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const TYPE_ICONS={"shop":"🏪","school":"🏫","factory":"🏭","residential":"🏠","office":"🏢","station":"🚉","tourism":"🗺️"};
+
+let money=100000,myBiz={reputation:1,renovation:1,avgSpend:30};
+let time=new Date(2025,0,1);
+let mode="god",currentStreet=null,streetData=null,myTakenSite=null;
+
+function pick(arr){return arr[Math.random()*arr.length|0];}
+function rDE(){const x=Math.random();return x<.5?.5*Math.pow(2*x,2):1-.5*Math.pow(2*(1-x),2);}
+
+function generateSiteType(name){
+  const r=Math.random();
+  if(name==="school district"){if(r<.05)return"station";if(r<.15)return"school";}
+  else if(name==="shopping mall"){if(r<.18)return"station";}
+  else if(name==="residential district"){if(r<.55)return"shop";if(r<.80)return"residential";if(r<.90)return"school";if(r<.97)return"office";return"station";}
+  else if(name==="office district"){if(r<.15)return"station";if(r<.85)return"office";}
+  else if(name==="station"){if(r<.40)return"shop";if(r<.85)return"station";if(r<.93)return"office";return"tourism";}
+  else if(name==="tourism district"){if(r<.30)return"shop";if(r<.90)return"tourism";return"station";}
+  return"shop";
+}
+
+function forecastCustomers(site,food,street){
+  function frontageBuff(x){return Math.pow(x/4,.67);}
+  const mo=time.getMonth();
+  const base=frontageBuff(site.frontage)*site.naturalFlow*street.monthFactor[mo]*food.monthFactor[mo];
+  const d=street.demand,a=food.Attraction;
+  return myBiz.reputation*myBiz.renovation*(base*(d.Single*a.Single+d.Couple*a.Couple+d.Family*a.Family+d.Catchup*a.Catchup+d.FineDining*a.FineDining));
+}
+
+function generateStreet(st){
+  const baseFlow=st.typicalFlow*rDE();
+  const depth=pick(depthList);
+  const streetPricePerSqm=Math.round((90+Math.random()*90));
+  function genSite(){
+    const reno=Math.floor(rDE()*100);
+    const frontage=pick(frontageList);
+    const area=depth*frontage;
+    const priceVariance=0.8+Math.random()*0.3;
+    const rent=Math.round(area*streetPricePerSqm*priceVariance/100)*100;
+    const sType=generateSiteType(st.name);
+    const isShop=sType==="shop";
+    const forlease=isShop&&Math.random()<.2;
+    const forsale=isShop&&!forlease&&Math.random()<.1;
+    const bondMonths=Math.floor(Math.random()*3)+1;
+    const flow=Math.ceil(baseFlow*(1+(Math.random()-.5)*.2));
+    const food=isShop?pick(SampleFood):undefined;
+    const salePrice=forsale?Math.round(rent*(18+Math.random()*12)):0;
+    const s={frontage,depth,area,rent,bond:rent*bondMonths,bondMonths,salePrice,type:sType,naturalFlow:flow,smokeFree:Math.random()<.2,renovationCompletion:reno,storey:Math.random()<.1?3:Math.random()<.2?2:1,food,forlease,forsale};
+    if(food)s.forecastRevenue=forecastCustomers(s,food,st)*myBiz.avgSpend;
+    return s;
+  }
+  return{street:st,depth,streetA:Array.from({length:6},genSite),streetB:Array.from({length:6},genSite)};
+}
+
+function regenerate(){
+  myTakenSite=null;
+  const st=pick(SampleStreets);
+  streetData=generateStreet(st);
+  currentStreet=st;
+  document.getElementById("hud-street").textContent=st.name;
+  renderStreets();
+  updateHUD();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById("btn-god").classList.toggle("active",m==="god");
+  document.getElementById("btn-player").classList.toggle("active",m==="player");
+  renderStreets();
+}
+
+function renderStreets(){
+  if(!streetData)return;
+  const c=document.getElementById("streets-container");
+  c.innerHTML="";
+  const totalFrontage=streetData.streetA.reduce((s,x)=>s+x.frontage,0);
+  const containerW=c.parentElement.offsetWidth||window.innerWidth-48;
+  const scale=Math.max(1,(containerW-4)/totalFrontage);
+  const depthPx=Math.max(60,Math.min(120,streetData.depth*scale*0.55));
+  c.appendChild(renderRow(streetData.streetA,"Side A",scale,depthPx));
+  const div=document.createElement("div");div.className="street-divider";div.textContent="— street —";c.appendChild(div);
+  c.appendChild(renderRow(streetData.streetB,"Side B",scale,depthPx));
+}
+
+function renderRow(sites,label,scale,depthPx){
+  const wrap=document.createElement("div");wrap.className="street-section";
+  const lbl=document.createElement("div");lbl.className="section-label";lbl.textContent=label;wrap.appendChild(lbl);
+  const row=document.createElement("div");row.className="street-row";
+  sites.forEach((s)=>{
+    const b=document.createElement("div");
+    b.className="site-block";
+    const isShop=s.type==="shop";
+    if(s===myTakenSite){b.classList.add("taken");}
+    else if(isShop&&s.forlease)b.classList.add("forlease");
+    else if(isShop&&s.forsale)b.classList.add("forsale");
+    else if(!isShop)b.classList.add("not-shop");
+    if(!isShop||s===myTakenSite)b.classList.add("not-interactive");
+    const w=Math.round(s.frontage*scale);
+    b.style.width=w+"px";
+    b.style.height=Math.round(depthPx)+"px";
+    b.style.minWidth=w+"px";
+
+    const icon=document.createElement("div");icon.className="site-icon";
+    icon.textContent=s===myTakenSite?"✅":TYPE_ICONS[s.type]||"🏪";
+    b.appendChild(icon);
+
+    const info=document.createElement("div");info.className="site-info";
+    if(s===myTakenSite){info.textContent="MINE";}
+    else if(mode==="god"&&isShop){info.innerHTML="¥"+s.rent+"/mo<br>"+s.frontage+"×"+s.depth+"m";}
+    else if(mode==="player"&&isShop){
+      if(s.forlease)info.innerHTML="¥"+s.rent+"/mo";
+      else if(s.forsale)info.innerHTML="for sale";
+    }else if(mode==="god"){info.textContent=s.type;}
+    b.appendChild(info);
+
+    if(w>32&&isShop){
+      if(s.forlease){const bdg=document.createElement("div");bdg.className="site-badge badge-L";bdg.textContent="L";b.appendChild(bdg);}
+      if(s.forsale){const bdg=document.createElement("div");bdg.className="site-badge badge-S";bdg.textContent="S";b.appendChild(bdg);}
+    }
+    if(isShop&&s!==myTakenSite){b.onclick=()=>showSiteModal(s);}
+    row.appendChild(b);
+  });
+  wrap.appendChild(row);
+  return wrap;
+}
+
+function showSiteModal(s){
+  window._modalSite=s;
+  const isl=s.forlease,iss=s.forsale,god=mode==="god";
+  const canAffordLease=money>=(s.rent+s.bond);
+  const canAffordSale=money>=(s.salePrice+s.bond);
+  const canAct=(isl||iss)&&!myTakenSite;
+  const enoughLease=isl&&canAffordLease;
+  const enoughSale=iss&&canAffordSale;
+
+  let fieldsHtml=`
+    <div class="mf"><div class="mf-label">frontage</div><div class="mf-value">${s.frontage}m</div></div>
+    <div class="mf"><div class="mf-label">depth</div><div class="mf-value">${s.depth}m</div></div>
+    <div class="mf"><div class="mf-label">area</div><div class="mf-value">${s.area}m²</div></div>
+    <div class="mf"><div class="mf-label">storeys</div><div class="mf-value">${s.storey}</div></div>
+    <div class="mf"><div class="mf-label">renovation</div><div class="mf-value">${s.renovationCompletion}%</div></div>
+    <div class="mf"><div class="mf-label">smoke-free</div><div class="mf-value">${s.smokeFree?"yes":"no"}</div></div>
+    <div class="mf"><div class="mf-label">monthly rent</div><div class="mf-value">¥${s.rent.toLocaleString()}</div></div>
+    <div class="mf"><div class="mf-label">bond (${s.bondMonths}mo)</div><div class="mf-value">¥${s.bond.toLocaleString()}</div></div>`;
+  if(iss)fieldsHtml+=`<div class="mf"><div class="mf-label">goodwill price</div><div class="mf-value">¥${s.salePrice.toLocaleString()}</div></div>`;
+  if(god)fieldsHtml+=`<div class="mf"><div class="mf-label">foot traffic</div><div class="mf-value">${s.naturalFlow.toLocaleString()}/day</div></div>`;
+  if(god&&s.forecastRevenue)fieldsHtml+=`<div class="mf"><div class="mf-label">est. daily rev</div><div class="mf-value">¥${Math.round(s.forecastRevenue).toLocaleString()}</div></div>`;
+
+  let costHtml="";
+  if(isl&&canAct){
+    costHtml=`<div class="forecast-box">
+      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">lease — upfront costs</div>
+      <div class="frow"><span>first month rent</span><span>¥${s.rent.toLocaleString()}</span></div>
+      <div class="frow"><span>bond (${s.bondMonths} months)</span><span>¥${s.bond.toLocaleString()}</span></div>
+      <div class="frow"><span>total upfront</span><span>¥${(s.rent+s.bond).toLocaleString()}</span></div>
+    </div>`;
+  }else if(iss&&canAct){
+    costHtml=`<div class="forecast-box">
+      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">sale — upfront costs</div>
+      <div class="frow"><span>goodwill / business purchase</span><span>¥${s.salePrice.toLocaleString()}</span></div>
+      <div class="frow"><span>first month rent</span><span>¥${s.rent.toLocaleString()}</span></div>
+      <div class="frow"><span>bond (${s.bondMonths} months)</span><span>¥${s.bond.toLocaleString()}</span></div>
+      <div class="frow"><span>total upfront</span><span>¥${(s.salePrice+s.rent+s.bond).toLocaleString()}</span></div>
+    </div>
+    <div class="modal-note">buying the existing business, equipment and lease — you still pay ¥${s.rent.toLocaleString()}/mo rent going forward.</div>`;
+  }
+
+  let warnHtml="";
+  if(canAct&&isl&&!enoughLease)warnHtml=`<div style="font-size:11px;color:#c0392b;margin-bottom:0.75rem">not enough cash (need ¥${(s.rent+s.bond).toLocaleString()})</div>`;
+  if(canAct&&iss&&!enoughSale)warnHtml=`<div style="font-size:11px;color:#c0392b;margin-bottom:0.75rem">not enough cash (need ¥${(s.salePrice+s.rent+s.bond).toLocaleString()})</div>`;
+  if(myTakenSite)warnHtml=`<div style="font-size:11px;color:#666;margin-bottom:0.75rem">you already have a location</div>`;
+
+  let btnHtml=`<button class="btn" onclick="closeModal()">close</button>`;
+  if(canAct&&!myTakenSite){
+    if(isl&&enoughLease)btnHtml+=`<button class="btn primary" onclick="takeSite(window._modalSite,'lease')">sign lease ↗</button>`;
+    if(iss&&enoughSale)btnHtml+=`<button class="btn primary" onclick="takeSite(window._modalSite,'sale')">buy business ↗</button>`;
+  }
+
+  document.getElementById("modal-container").innerHTML=`
+  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">${s.food?s.food.name:"Shop"}
+      ${isl?'<span class="tag tag-lease">for lease</span>':""}
+      ${iss?'<span class="tag tag-sale">for sale</span>':""}
+    </div>
+    <div class="modal-grid">${fieldsHtml}</div>
+    ${costHtml}${warnHtml}
+    <div class="modal-actions">${btnHtml}</div>
+  </div></div>`;
+}
+
+function closeModal(){document.getElementById("modal-container").innerHTML="";}
+
+function takeSite(s,type){
+  const cost=type==="lease"?(s.rent+s.bond):(s.salePrice+s.rent+s.bond);
+  money-=cost;myTakenSite=s;
+  closeModal();updateHUD();renderStreets();
+  showForecastModal(s);
+  showToast((type==="lease"?"Lease signed":"Business purchased")+" — ¥"+cost.toLocaleString()+" paid");
+}
+
+function showForecastModal(s){
+  const daily=s.forecastRevenue?Math.round(s.forecastRevenue):0;
+  const monthly=daily*30;
+  const foodCost=Math.round(monthly*(s.food.materialCost/myBiz.avgSpend));
+  const StaffCost= Math.round(monthly*0.25);
+  const profit=monthly-s.rent-foodCost-StaffCost;
+  document.getElementById("modal-container").innerHTML=`
+  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">📊 monthly forecast — ${s.food?s.food.name:""}</div>
+    <div class="forecast-box">
+      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">based on ${MONTHS[time.getMonth()]} foot traffic</div>
+      <div class="frow"><span>est. daily revenue</span><span>¥${daily.toLocaleString()}</span></div>
+      <div class="frow"><span>monthly revenue</span><span>¥${monthly.toLocaleString()}</span></div>
+      <div class="frow"><span>monthly rent</span><span style="color:#c0392b">−¥${s.rent.toLocaleString()}</span></div>
+      <div class="frow"><span>est. food costs</span><span style="color:#c0392b">−¥${foodCost.toLocaleString()}</span></div>
+      <div class="frow"><span>est. net profit</span><span style="color:${profit>0?"#2d7a1f":"#c0392b"}">¥${profit.toLocaleString()}</span></div>
+    </div>
+    <div class="modal-actions"><button class="btn primary" onclick="closeModal()">let's go!</button></div>
+  </div></div>`;
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+function updateHUD(){
+  document.getElementById("hud-money").textContent="¥"+money.toLocaleString();
+  document.getElementById("hud-month").textContent=MONTHS[time.getMonth()]+" "+time.getFullYear();
+  document.getElementById("hud-status").textContent=myTakenSite?"Open for business":"Searching";
+  const mv=document.getElementById("hud-money");
+  mv.className="hud-value "+(money<10000?"red":money<30000?"amber":"green");
+}
+
+window.addEventListener("resize",()=>{if(streetData)renderStreets();});
+regenerate();
+</script>
+</body>
+</html>
