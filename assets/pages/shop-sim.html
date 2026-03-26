@@ -428,6 +428,66 @@
     .toast.show {
       opacity: 1;
     }
+
+
+    .street-road-visual {
+      position: relative;
+      width: 100%;
+      background-color: #484848;
+      /* 深色沥青 */
+      margin: 12px 0;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+
+      /* 默认：绘制白色虚线分道 */
+      background-image:
+        repeating-linear-gradient(to bottom,
+          transparent 0,
+          transparent calc(var(--lane-h) - 1px),
+          rgba(255, 255, 255, 0.25) calc(var(--lane-h) - 1px),
+          rgba(255, 255, 255, 0.25) var(--lane-h)),
+        linear-gradient(to right,
+          #484848 0, #484848 15px,
+          transparent 15px, transparent 35px);
+      background-size: 100% 100%, 35px 100%;
+      background-repeat: no-repeat, repeat-x;
+    }
+
+    /* 只有非单车道才显示中间双黄线 */
+    .street-road-visual:not(.road-single)::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      transform: translateY(-50%);
+      background: #ffc107;
+      -webkit-mask: linear-gradient(to bottom,
+          #fff 0, #fff 2px,
+          transparent 2px, transparent 3px,
+          #fff 3px, #fff 5px);
+      mask: linear-gradient(to bottom,
+          #fff 0, #fff 2px,
+          transparent 2px, transparent 3px,
+          #fff 3px, #fff 5px);
+      z-index: 5;
+    }
+
+    /* 两侧路沿线（路肩）- 始终存在 */
+    .street-road-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-top: 2px solid rgba(255, 255, 255, 0.6);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+
+    /* 单车道特殊处理：彻底移除中间的背景图（虚线） */
+    .street-road-visual.road-single {
+      background-image: none !important;
+    }
   </style>
 </head>
 
@@ -440,7 +500,7 @@
       </div>
       <div class="hud-card">
         <div class="hud-label">日期</div>
-        <div class="hud-value" id="hud-month">1 Jan 2025</div>
+        <div class="hud-value" id="hud-month"></div>
       </div>
       <div class="hud-card">
         <div class="hud-label">商圈类型</div>
@@ -451,14 +511,11 @@
         <div class="hud-value" id="hud-status">搜索中</div>
       </div>
     </div>
-
     <div class="controls">
       <button class="mode-btn active" id="btn-player" onclick="setMode('player')">玩家视角</button>
       <button class="mode-btn" id="btn-god" onclick="setMode('god')">上帝视角</button>
-      
       <button class="regen-btn" onclick="regenerate(1)">↻ 重新找店(-70生活费)</button>
     </div>
-
     <div class="legend">
       <div class="legend-item">
         <div class="legend-swatch" style="background:#e6f1fb;border-color:#185fa5"></div>招租
@@ -473,111 +530,329 @@
         <div class="legend-swatch" style="background:#fff;border-color:#bbb"></div>正常经营铺位
       </div>
     </div>
-
     <div id="streets-container"></div>
   </div>
-
   <div id="modal-container"></div>
   <div class="toast" id="toast"></div>
 
   <script>
     const FoodLibrary = [
-      { name: "高档中餐", dineIn: true, takeway: 0,  grossMargin:0.6, revPerStaff:500,Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2] },
-      { name: "小吃摊", dineIn: false, takeway: 0.1,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1) },
-      { name: "面馆", dineIn: true, takeway: 0.2, grossMargin:0.58, revPerStaff:900,Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1) },
-      { name: "小炒店", dineIn: true, takeway: 0.15, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
-      { name: "烧烤", dineIn: true, takeway: 0.1, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2] },
-      { name: "麻辣烫", dineIn: true, takeway: 0.3, grossMargin:0.55, revPerStaff:750,Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: new Array(12).fill(1) },
-      { name: "奶茶", dineIn: false, takeway: 0.6, grossMargin:0.60, revPerStaff:1400,Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85] },
-      { name: "火锅", dineIn: true, takeway: 0.02, grossMargin:0.62, revPerStaff:800,Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2] },
-      { name: "猪脚饭", dineIn: true, takeway: 0.2, grossMargin:0.48, revPerStaff:1100,Attraction: { Single: 1.1, Couple: 0.1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1) },
-      { name: "汉堡", dineIn: true, takeway: 0.65,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: 0.7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1) }
+      { name: "高档中餐", dineIn: true, takeway: 0, grossMargin: 0.60, revPerStaff: 500, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2], minArea: 100 },
+      { name: "小吃摊", dineIn: false, takeway: 0.1, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1), minArea: 0 },
+      { name: "面馆", dineIn: true, takeway: 0.2, grossMargin: 0.58, revPerStaff: 900, Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1), minArea: 0 },
+      { name: "小炒店", dineIn: true, takeway: 0.15, grossMargin: 0.60, revPerStaff: 600, Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1], minArea: 0 },
+      { name: "烧烤", dineIn: true, takeway: 0.1, grossMargin: 0.60, revPerStaff: 600, Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2], minArea: 80 },
+      { name: "麻辣烫", dineIn: true, takeway: 0.3, grossMargin: 0.55, revPerStaff: 750, Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: new Array(12).fill(1), minArea: 0 },
+      { name: "奶茶", dineIn: false, takeway: 0.6, grossMargin: 0.60, revPerStaff: 1400, Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85], minArea: 0 },
+      { name: "火锅", dineIn: true, takeway: 0.02, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2], minArea: 80 },
+      { name: "猪脚饭", dineIn: true, takeway: 0.2, grossMargin: 0.48, revPerStaff: 1100, Attraction: { Single: 1.1, Couple: .1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1), minArea: 0 },
+      { name: "汉堡", dineIn: true, takeway: 0.65, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: 1.2, Couple: .7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1), minArea: 0 },
     ];
+
+    const RetailLibrary = [
+      { name: "服装店", icon: "👗" }, { name: "书店", icon: "📚" }, { name: "家电店", icon: "📺" },
+      { name: "便利店", icon: "🛒" }, { name: "药店", icon: "💊" }, { name: "文具店", icon: "✏️" },
+      { name: "鞋店", icon: "👟" }, { name: "手机店", icon: "📱" },
+    ];
+
     const StreetLibrary = [
       { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 150, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
-      { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
+      { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: .05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
       { name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 480, monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95] },
       { name: "步行街", demand: { Single: .15, Couple: .35, Family: .35, Catchup: .05, FineDining: .10 }, typicalFlow: 300, monthFactor: [.85, 1.25, .9, 1.0, 1.1, 1.15, 1.25, 1.25, 1.05, .95, .9, .9] },
       { name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 280, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
       { name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 500, monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3] },
-      { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 1600, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] }
+      { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 1600, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] },
     ];
-    const frontageList = [4, 4, 4, 4, 4, 5, 5, 5,6, 6, 6, 8, 8,9,9,10,10,10, 12, 12, 15,18,20];
-    const depthList = [6, 6,6,6,7,7,8, 8, 9,10,11, 12,15];
+
+    const frontageList = [4, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 8, 8, 9, 9, 10, 10, 10, 12, 12, 15, 18, 20];
+    const depthList = [6, 6, 6, 6, 7, 7, 8, 8, 9, 10, 11, 12, 15];
     const MONTHS = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-    const TYPE_ICONS = { "shop": "🏪", "school": "🏫", "factory": "🏭", "residential": "🏠", "写字楼": "🏢", "车站": "🚉", "景点": "🗺️" };
-    const SHOPNAME = ["太牛牛", "驾驶本", "不好吃不要钱", "钱塘", "老桂林", "今天不减肥", "碳水快乐屋", "米杀手", "深夜续命", "打工", "一口上头", "沽名", "米雪", "刘师傅", "来都来了", "先吃再说", "旺发", "吃撑算我的", "这就开饭", "真香警告", "锅里有点东西", "老板不在", "厨子很忙", "火候随缘", "盐多点没事", "辣到报警", "隔壁更贵", "陈记", "老赵家", "阿强", "老成都", "老街坊", "家常味", "邻里香", "顺口来", "福来顺", "好再来", "聚味轩", "食为先", "味之源", "香满屋", "百味堂", "一品香", "口口香", "饭点儿", "三碗不过", "有点味", "简单吃点", "常来坐坐", "鲜牛肉", "吃完再减肥"]
-    const GETINRATE = 0.3
-    const dailyExpense = 70
-    let money = 100000, myBiz = { reputation: 1, renovation: 1, avgSpend: 30 };
+    const TYPE_ICONS = { shop: "🏪", school: "🏫", residential: "🏠", 写字楼: "🏢", 车站: "🚉", 景点: "🗺️" };
+    const SHOPNAME = ["太牛牛", "驾驶本", "不好吃不要钱", "钱塘", "老桂林", "今天不减肥", "碳水快乐屋", "米杀手", "深夜续命", "打工", "一口上头", "沽名", "米雪", "刘师傅", "来都来了", "先吃再说", "旺发", "吃撑算我的", "这就开饭", "真香警告", "锅里有点东西", "老板不在", "厨子很忙", "火候随缘", "盐多点没事", "辣到报警", "隔壁更贵", "陈记", "老赵家", "阿强", "老成都", "老街坊", "家常味", "邻里香", "顺口来", "福来顺", "好再来", "聚味轩", "食为先", "味之源", "香满屋", "百味堂", "一品香", "口口香", "饭点儿", "三碗不过", "有点味", "简单吃点", "常来坐坐", "鲜牛肉", "吃完再减肥"];
+
+    // GETINRATE reduced from 0.3; distMult averages ~1.5x so 0.20 keeps total range similar
+    const GETINRATE = 0.20;
+    const dailyExpense = 70;
+
+    let money = 100000, myBiz = { reputation: 1, renovation: 1 };
     let time = new Date(2025, 5, 1);
-    let mode = "player", currentStreet = null, streetData = null, myTakenSite = null;
+    let mode = "player", currentStreet = null, streetData = null, myTakenSites = [];
+
     function pick(arr) { return arr[Math.random() * arr.length | 0]; }
     function rDE() { const x = Math.random(); return x < .5 ? .5 * Math.pow(2 * x, 2) : 1 - .5 * Math.pow(2 * (1 - x), 2); }
+    function pickDistinct(max, n) {
+      const a = Array.from({ length: max }, (_, i) => i);
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+      return a.slice(0, n);
+    }
 
-    function generateSiteType(name) {
+    // ── Distance → entry multiplier  (range 0.5..2.0, max/min ratio ≤ 4x) ──────
+    function chanceOfGettingIn(dist) {
+      const a = 10;
+      return 0.5 + 1.5 / (1 + Math.pow(dist / a, 2));
+    }
+
+    // ── Lane generation (75% ≤ 2 lanes, max 6) ──────────────────────────────────
+    function generateLanes() {
       const r = Math.random();
-      if (name === "学校商圈") { if (r < .05) return "车站"; if (r < .15) return "school"; }
-      else if (name === "步行街") { if (r < .18) return "车站"; }
-      else if (name === "小区底商") { if (r < .55) return "shop"; if (r < .80) return "residential"; if (r < .90) return "school"; if (r < .97) return "写字楼"; return "车站"; }
-      else if (name === "办公楼商圈") { if (r < .15) return "车站"; if (r < .85) return "写字楼"; }
-      else if (name === "车站") { if (r < .40) return "shop"; if (r < .85) return "车站"; if (r < .93) return "写字楼"; return "景点"; }
-      else if (name === "风景区") { if (r < .30) return "shop"; if (r < .90) return "景点"; return "车站"; }
+      if (r < 0.40) return 1;
+      if (r < 0.75) return 2;
+      if (r < 0.87) return 3;
+      if (r < 0.94) return 4;
+      if (r < 0.97) return 5;
+      return 6;
+    }
+    // Probability a customer from the opposite side actually crosses (1 lane = 1.0)
+    function crossProb(lanes) { return Math.max(0.1, 1 - (lanes - 1) * 0.08); }
+
+    // ── Which site types are "sources" for a given street ────────────────────────
+    function getSourceTypes(stName) {
+      if (stName === "中小学商圈" || stName === "大学商圈") return ["school"];
+      if (stName === "火车站") return ["车站"];
+      if (stName === "办公楼商圈") return ["写字楼"];
+      if (stName === "小区底商") return ["residential"];
+      return [];
+    }
+
+    // ── Combined distMult for a shop given all sources on both sides ─────────────
+    // Each source contributes chanceOfGettingIn(slotDist).
+    // If source is on the OPPOSITE side, its contribution is scaled by crossProb(lanes)
+    // (customers from that source must cross the road to reach this shop).
+    // Final distMult = average of all source contributions.
+    function calcDistMult(shopSlot, shopSide, sources, lanes) {
+      if (sources.length === 0) return chanceOfGettingIn(5); // no dominant source → neutral
+      let total = 0;
+      for (const src of sources) {
+        const slotDist = Math.abs(shopSlot - src.slotIndex);
+        const sameSide = shopSide === src.side;
+        const crossFactor = sameSide ? 1.0 : crossProb(lanes);
+        total += chanceOfGettingIn(slotDist) * crossFactor;
+      }
+      return total / sources.length; // normalise so a single perfect source still → 2.0
+    }
+
+    // ── Mandatory overrides per side ─────────────────────────────────────────────
+    // Returns { A: [{index,type,minFrontage},...], B: [...] }
+    function getMandatoryOverrides(stName) {
+      const A = [], B = [];
+      function randSide() { return Math.random() < 0.5 ? A : B; }
+
+      if (stName === "中小学商圈") {
+        const count = Math.random() < 0.5 ? 1 : 2;
+        pickDistinct(6, count).forEach(i => randSide().push({ index: i, type: "school", minFrontage: 8 }));
+      }
+      if (stName === "大学商圈") {
+        const count = Math.random() < 0.5 ? 1 : 2;
+        pickDistinct(6, count).forEach(i => randSide().push({ index: i, type: "school", minFrontage: 15 }));
+      }
+      if (stName === "火车站") {
+        randSide().push({ index: Math.floor(Math.random() * 6), type: "车站", minFrontage: 15 });
+      }
+      if (stName === "风景区") {
+        randSide().push({ index: Math.floor(Math.random() * 6), type: "景点", minFrontage: 15 });
+      }
+      return { A, B };
+    }
+
+    // ── Per-site type generator (non-overridden slots) ───────────────────────────
+    // counters shared across both sides: { residential, office }
+    function generateSiteType(stName, counters) {
+      const r = Math.random();
+      if (stName === "中小学商圈" || stName === "大学商圈") {
+        return r < .05 ? "车站" : "shop";
+      }
+      if (stName === "步行街") {
+        return r < .08 ? "车站" : "shop";
+      }
+      if (stName === "小区底商") {
+        if (r < .50) return "shop";
+        if (r < .72 && counters.residential < 3) { counters.residential++; return "residential"; }
+        if (r < .85) return "写字楼";
+        return "车站";
+      }
+      if (stName === "办公楼商圈") {
+        // max 2 写字楼 total across both sides
+        if (r < .12) return "车站";
+        if (r < .80 && counters.office < 2) { counters.office++; return "写字楼"; }
+        return "shop";
+      }
+      if (stName === "火车站") {
+        if (r < .45) return "shop";
+        if (r < .80) return "写字楼";
+        return "景点";
+      }
+      if (stName === "风景区") {
+        return r < .40 ? "shop" : "景点";
+      }
       return "shop";
     }
-    function frontageBuff(x) { return Math.pow(x / 4, .67); }
 
-    function forecastCustomers(site, food, street) {
-      const mo = time.getMonth();
-      const base = GETINRATE * frontageBuff(site.frontage) * site.naturalFlow * street.monthFactor[mo] * food.monthFactor[mo];
-      const d = street.demand, a = food.Attraction;
-      const maxcapacity = calcMaxCapacity(site)
-      return Math.min(maxcapacity, myBiz.reputation * myBiz.renovation * base * (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining));
+    function frontageBuff(x) { return Math.pow(x / 4, .67); }
+    function pickFood(area) {
+      const ok = FoodLibrary.filter(f => area >= (f.minArea || 0));
+      return ok.length ? pick(ok) : FoodLibrary[2]; // fallback: 面馆
     }
 
+    // ── Core customer forecast ────────────────────────────────────────────────────
+    function forecastCustomers(site, food, street) {
+      const mo = time.getMonth();
+      const base = GETINRATE * site.distMult * frontageBuff(site.frontage)
+        * site.naturalFlow * street.monthFactor[mo] * food.monthFactor[mo];
+      const d = street.demand, a = food.Attraction;
+      const cap = calcMaxCapacity(site);
+      return Math.min(cap,
+        myBiz.reputation * myBiz.renovation * base *
+        (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining)
+      );
+    }
+
+    function calcMaxCapacity(s) {
+      if (!s.food) return 0;
+      return s.food.dineIn ? (s.area * 0.611 / 1.5) * 8 : (s.area * 0.411) * 20;
+    }
+
+    // ── Street generation ─────────────────────────────────────────────────────────
     function generateStreet(st) {
       const baseFlow = st.typicalFlow * .3 + st.typicalFlow * .7 * rDE();
       const depth = pick(depthList);
-      const streetPricePerSqm = Math.round((50 + baseFlow / 8 + Math.random() * 20));
-      //rentcalc 租金计算
+      const priceSqm = Math.round(50 + baseFlow / 8 + Math.random() * 20);
+      const lanes = generateLanes();
+      const sourceTypes = getSourceTypes(st.name);
 
-
-      function genSite() {
-
-        const reno = Math.floor(rDE() * 100);
-        const frontage = pick(frontageList);
-        const area = depth * frontage;
-        const priceVariance = 0.8 + Math.random() * 0.3;
-        const rent = Math.round(area * streetPricePerSqm * priceVariance / 100) * 100;
-        const sType = generateSiteType(st.name);
-        const isShop = sType === "shop";
-        const forlease = isShop && Math.random() < .2;
-        const forsale = isShop && !forlease && Math.random() < .1;
-        const bondMonths = Math.floor(Math.random() * 3) + 1;
-        const flow = Math.ceil(baseFlow * (1 + (Math.random() - .5) * .2));
-        const food = isShop ? pick(FoodLibrary) : undefined;
-        const name = food ? pick(SHOPNAME) + food.name : sType;
-        const salePrice = forsale ? Math.round(rent * (3 + Math.random() * 12)) : 0;
-        const s = { frontage, depth, area, name, rent, bond: rent * bondMonths, bondMonths, salePrice, type: sType, naturalFlow: flow, smokeFree: Math.random() < .2, renovationCompletion: reno, storey: Math.random() < .1 ? 3 : Math.random() < .2 ? 2 : 1, food, forlease, forsale };
-        if (food) s.forecastRevenue = forecastCustomers(s, food, st) * (food.materialCost / food.grossMargin);
-        return s;
+      // --- 1. 严格定义必选铺位集合 ---
+      let mandatory = [];
+      if (st.name === "中小学商圈") {
+        const count = Math.random() < 0.5 ? 1 : 2;
+        for (let i = 0; i < count; i++) mandatory.push({ sType: "school", minW: 8 });
+      } else if (st.name === "大学商圈") {
+        const count = Math.random() < 0.5 ? 1 : 2;
+        for (let i = 0; i < count; i++) mandatory.push({ sType: "school", minW: 15 });
+      } else if (st.name === "火车站") {
+        mandatory.push({ sType: "车站", minW: 15 });
+      } else if (st.name === "风景区") {
+        mandatory.push({ sType: "景点", minW: 15 });
+      } else if (st.name === "小区底商") {
+        const count = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < count; i++) mandatory.push({ sType: "residential", minW: 12 });
       }
-      return { street: st, depth, streetA: Array.from({ length: 6 }, genSite), streetB: Array.from({ length: 6 }, genSite) };
+
+      let rawA = [], rawB = [];
+      let counters = { residential: 0, office: 0 };
+
+      function pickFrontage(min = 0) {
+        const ok = frontageList.filter(w => w >= min);
+        return ok.length ? pick(ok) : min;
+      }
+
+      // --- 2. 核心修复：必选铺位首先分配 ---
+      mandatory.forEach(m => {
+        const targetSide = Math.random() < 0.5 ? rawA : rawB;
+        targetSide.push({ sType: m.sType, frontage: pickFrontage(m.minW) });
+      });
+
+      // --- 3. 填充 A 侧 ---
+      const targetNumA = 6 + Math.floor(Math.random() * 3);
+      while (rawA.length < targetNumA) {
+        let sType = generateSiteType(st.name, counters);
+        // 关键：如果已经生成了必选类型，随机填充时强制转为 shop，防止重复或冲突
+        if (["车站", "景点", "school", "residential"].includes(sType)) sType = "shop";
+        rawA.push({ sType, frontage: pickFrontage() });
+      }
+      const totalW_A = rawA.reduce((sum, s) => sum + s.frontage, 0);
+
+      // --- 4. 填充 B 侧并对齐长度 ---
+      while (true) {
+        const currentW_B = rawB.reduce((sum, s) => sum + s.frontage, 0);
+        if (currentW_B > totalW_A * 0.95 && rawB.length >= 4) break;
+        let sType = generateSiteType(st.name, counters);
+        if (["车站", "景点", "school", "residential"].includes(sType)) sType = "shop";
+        rawB.push({ sType, frontage: pickFrontage() });
+      }
+
+      // --- 5. 统一编号并获取客源坐标 ---
+      const processRaw = (list, side) => list.map((s, i) => ({ ...s, slotIndex: i, side }));
+      const finalRawA = processRaw(rawA, 'A');
+      const finalRawB = processRaw(rawB, 'B');
+      const allRaw = [...finalRawA, ...finalRawB];
+      const sources = allRaw.filter(r => sourceTypes.includes(r.sType)).map(r => ({ slotIndex: r.slotIndex, side: r.side }));
+
+      // --- 6. 实例化对象 (修复 type 丢失) ---
+// --- 实例化对象 (修复转让费与类型判定) ---
+  function buildSite(raw) {
+    const area = depth * raw.frontage;
+    // 这里的 type 统一使用 raw 传进来的原始类型
+    const siteType = raw.sType; 
+    const isShop = siteType === "shop";
+    
+    // 修正点 1: 只要是铺位，就有可能处于“转让”状态
+    // 如果你希望学校/车站也能转让，就把 isShop 去掉；通常建议保留 isShop
+    const isForSale = isShop && Math.random() < 0.15; 
+    const isForLease = isShop && !isForSale && Math.random() < 0.25;
+
+    const flow = Math.ceil(baseFlow * (1 + (Math.random() - .5) * .2));
+    const distMult = calcDistMult(raw.slotIndex, raw.side, sources, lanes);
+    const rent = Math.round(area * priceSqm * (0.8 + Math.random() * 0.3) / 100) * 100;
+    
+    let food, retail, name;
+    if (isShop) {
+      if (Math.random() < 0.3) {
+        retail = pick(RetailLibrary);
+        name = retail.name;
+      } else {
+        food = pickFood(area);
+        name = pick(SHOPNAME) + food.name;
+      }
+    } else {
+      name = siteType === "school" ? "学校" : siteType;
     }
 
+    // 修正点 2: 确保计算出的 salePrice 与 forsale 属性同步
+    const calculatedSalePrice = isForSale ? Math.round(rent * (5 + Math.random() * 10)) : 0;
+
+    const obj = {
+      ...raw,
+      type: siteType, 
+      depth, area, name, rent,
+      bond: rent * (Math.floor(Math.random() * 3) + 1),
+      bondMonths: Math.floor(Math.random() * 3) + 1,
+      // 关键修复：这里的 salePrice 必须与状态挂钩
+      salePrice: calculatedSalePrice,
+      naturalFlow: flow,
+      distMult,
+      food, retail,
+      forlease: isForLease,
+      forsale: isForSale,
+      smokeFree: Math.random() < .2,
+      renovationCompletion: Math.floor(rDE() * 100),
+      storey: Math.random() < .1 ? 3 : Math.random() < .2 ? 2 : 1,
+      _sources: sources, _lanes: lanes
+    };
+
+    if (isShop && food) obj.forecastRevenue = forecastCustomers(obj, food, st)*(food.materialCost/(1-food.grossMargin));
+    return obj;
+  }
+
+      return {
+        street: st, depth, lanes,
+        streetA: finalRawA.map(buildSite),
+        streetB: finalRawB.map(buildSite),
+      };
+    }
+
+
+
+
+
+    // ── App state mutations ───────────────────────────────────────────────────────
     function regenerate(n) {
-      if (money < dailyExpense) {
-        alert("资金不足，无法继续寻找店铺了。请重开或者考虑贷款。");
-        return;
-      }
+      if (money < dailyExpense) { alert("资金不足，无法继续寻找店铺了。"); return; }
       if (n > 0) { money -= dailyExpense * n; }
       time.setDate(time.getDate() + 1);
-      myTakenSite = null;
+      myTakenSite = [];
       const st = pick(StreetLibrary);
-
       streetData = generateStreet(st);
       currentStreet = st;
-
       document.getElementById("hud-street").textContent = st.name;
       renderStreets();
       updateHUD();
@@ -590,6 +865,7 @@
       renderStreets();
     }
 
+    // ── Render ────────────────────────────────────────────────────────────────────
     function renderStreets() {
       if (!streetData) return;
       const c = document.getElementById("streets-container");
@@ -598,8 +874,33 @@
       const containerW = c.parentElement.offsetWidth || window.innerWidth - 48;
       const scale = Math.max(1, (containerW - 4) / totalFrontage);
       const depthPx = Math.max(60, Math.min(120, streetData.depth * scale * 0.55));
+
       c.appendChild(renderRow(streetData.streetA, "Side A", scale, depthPx));
-      const div = document.createElement("div"); div.className = "street-divider"; div.textContent = "— 马路 —"; c.appendChild(div);
+
+      // Road divider with lane info
+
+      // --- 在 renderStreets 函数内部 ---
+      const lanes = streetData.lanes;
+      const roadVisual = document.createElement("div");
+      roadVisual.className = "street-road-visual";
+
+      // 动态高度：单车道设为 45px，多车道按比例增加（最高 80px）
+      const totalHeight = lanes === 1 ? 45 : Math.min(80, 50 + (lanes * 5));
+      roadVisual.style.height = totalHeight + "px";
+
+      // 设置单车道高度变量供 CSS 使用
+      const laneH = totalHeight / lanes;
+      roadVisual.style.setProperty('--lane-h', laneH + "px");
+
+      // 如果是单车道，添加特殊标识类
+      if (lanes <= 1) {
+        roadVisual.classList.add("road-single");
+      }
+
+      c.appendChild(roadVisual);
+
+
+
       c.appendChild(renderRow(streetData.streetB, "Side B", scale, depthPx));
     }
 
@@ -607,237 +908,236 @@
       const wrap = document.createElement("div"); wrap.className = "street-section";
       const lbl = document.createElement("div"); lbl.className = "section-label"; lbl.textContent = label; wrap.appendChild(lbl);
       const row = document.createElement("div"); row.className = "street-row";
-      sites.forEach((s) => {
-        const b = document.createElement("div");
-        b.className = "site-block";
+
+      sites.forEach(s => {
+        const b = document.createElement("div"); b.className = "site-block";
         const isShop = s.type === "shop";
-        if (s === myTakenSite) { b.classList.add("taken"); }
-        else if (isShop && s.forlease) b.classList.add("forlease");
+        const isMine = myTakenSites.includes(s); // 检查是否在已购列表中
+
+        if (isMine) b.classList.add("taken");
+
+        if (isShop && s.forlease) b.classList.add("forlease");
         else if (isShop && s.forsale) b.classList.add("forsale");
-        else if (!isShop) b.classList.add("not-shop");
-        if (!isShop || s === myTakenSite) b.classList.add("not-interactive");
+        else if (!isShop) b.classList.add("not-shop"); // 这里的 not-shop 对应 CSS 里的灰色背景
+
+        // 移除 .not-interactive 限制，让玩家可以随时点击查看自己的店
+        if (!isShop) b.classList.add("not-interactive");
+
         const w = Math.round(s.frontage * scale);
         b.style.width = w + "px";
         b.style.height = Math.round(depthPx) + "px";
         b.style.minWidth = w + "px";
 
         const icon = document.createElement("div"); icon.className = "site-icon";
-        icon.textContent = s === myTakenSite ? "✅" : TYPE_ICONS[s.type]+(s.food?.name||'') || "🏪";
+        icon.textContent = isMine ? "✅" : (s.retail ? s.retail.icon : (TYPE_ICONS[s.type] || "🏪") + (s.food ? s.food.name : ""));
         b.appendChild(icon);
 
         const info = document.createElement("div"); info.className = "site-info";
-        if (s === myTakenSite) { info.textContent = "MINE"; }
-        else if (mode === "god" && isShop) { info.innerHTML = "¥" + s.rent + "/mo<br>" + s.frontage + "×" + s.depth + "m"; }
-        else if (mode === "player" && isShop) {
+        if (isMine) {
+          info.textContent = "已入驻";
+        } else if (mode === "god" && isShop) {
+          info.innerHTML = "¥" + s.rent + "/mo<br>" + s.frontage + "×" + s.depth + "m";
+        } else if (mode === "player" && isShop) {
           if (s.forlease) info.innerHTML = "¥" + s.rent + "/mo";
-          else if (s.forsale) info.innerHTML = "for sale";
-        } else if (mode === "god") { info.textContent = s.type; }
+          else if (s.forsale) info.textContent = "转让中";
+        }
         b.appendChild(info);
 
-        if (w > 32 && isShop) {
-          if (s.forlease) { const bdg = document.createElement("div"); bdg.className = "site-badge badge-L"; bdg.textContent = "L"; b.appendChild(bdg); }
-          if (s.forsale) { const bdg = document.createElement("div"); bdg.className = "site-badge badge-S"; bdg.textContent = "S"; b.appendChild(bdg); }
-        }
-        if (isShop && s !== myTakenSite) { b.onclick = () => showSiteModal(s); }
+        if (isShop) b.onclick = () => showSiteModal(s);
         row.appendChild(b);
       });
       wrap.appendChild(row);
       return wrap;
     }
 
-function calcMaxCapacity(s){
-  //翻台上限
-  if (!s.food) return 0;
-
-  if (s.food.dineIn){
-    return (s.area * 0.611 / 1.5) * 8;
-  } else {
-    return (s.area * 0.411 / 1) * 20;
-  }
-}
-
+    // ── Modal ─────────────────────────────────────────────────────────────────────
     function showSiteModal(s) {
       window._modalSite = s;
+
+      const isMine = myTakenSites.includes(s);
       const isl = s.forlease, iss = s.forsale, god = mode === "god";
       const canAffordLease = money >= (s.rent + s.bond);
       const canAffordSale = money >= (s.salePrice + s.bond);
-      const canAct = (isl || iss) && !myTakenSite;
+
+      // 如果是自己的店，只显示信息，不显示签约按钮
+      const canAct = (isl || iss) && !isMine;
+
+
+
       const enoughLease = isl && canAffordLease;
       const enoughSale = iss && canAffordSale;
+      const isRetail = !!s.retail;
 
       let fieldsHtml = `
-    <div class="mf"><div class="mf-label">面宽</div><div class="mf-value">${s.frontage}m</div></div>
-    <div class="mf"><div class="mf-label">进深</div><div class="mf-value">${s.depth}m</div></div>
-    <div class="mf"><div class="mf-label">面积</div><div class="mf-value">${s.area}m²</div></div>
-    <div class="mf"><div class="mf-label">层数</div><div class="mf-value">${s.storey}</div></div>
-    <div class="mf"><div class="mf-label">装修程度</div><div class="mf-value">${s.renovationCompletion}%</div></div>
-`;
+        <div class="mf"><div class="mf-label">面宽</div><div class="mf-value">${s.frontage}m</div></div>
+        <div class="mf"><div class="mf-label">进深</div><div class="mf-value">${s.depth}m</div></div>
+        <div class="mf"><div class="mf-label">面积</div><div class="mf-value">${s.area}m²</div></div>
+        <div class="mf"><div class="mf-label">层数</div><div class="mf-value">${s.storey}</div></div>
+        <div class="mf"><div class="mf-label">装修程度</div><div class="mf-value">${s.renovationCompletion}%</div></div>
+        <div class="mf"><div class="mf-label">业态</div><div class="mf-value">${isRetail ? "零售" : "餐饮"}</div></div>`;
       if (iss) fieldsHtml += `<div class="mf"><div class="mf-label">转让费</div><div class="mf-value">¥${s.salePrice.toLocaleString()}</div></div>`;
-      if (god) fieldsHtml += `<div class="mf"><div class="mf-label">人流量</div><div class="mf-value">${s.naturalFlow.toLocaleString()}/day</div></div>
-    <div class="mf"><div class="mf-label">禁油烟</div><div class="mf-value">${s.smokeFree ? "是" : "否"}</div></div>
-    <div class="mf"><div class="mf-label">月租金</div><div class="mf-value">¥${s.rent.toLocaleString()}</div></div>
-    <div class="mf"><div class="mf-label">押金 (${s.bondMonths}mo)</div><div class="mf-value">¥${s.bond.toLocaleString()}</div></div>`;
-      if (god && s.forecastRevenue) fieldsHtml += `<div class="mf"><div class="mf-label">评估结果：预计每日营业额</div><div class="mf-value">¥${Math.round(s.forecastRevenue).toLocaleString()}</div></div>`;
 
-      if (god && s.forecastRevenue) {
+      if (god) {
+        const lanes = s._lanes;
+        const sources = s._sources;
+        const srcStr = sources.length === 0 ? "无主客源"
+          : sources.map(src => `Side${src.side}-槽${src.slotIndex}`).join("、");
 
-        const frontage = frontageBuff(s.frontage);
-        const naturalFlow = s.naturalFlow;
-        const streetFactor = currentStreet.monthFactor[time.getMonth()];
-        const foodFactor = s.food.monthFactor[time.getMonth()];
-        const base = GETINRATE * frontage * naturalFlow * streetFactor * foodFactor;
-
-        const d = currentStreet.demand;
-        const a = s.food.Attraction;
-
-        const single = d.Single * a.Single;
-        const couple = d.Couple * a.Couple;
-        const family = d.Family * a.Family;
-        const catchup = d.Catchup * a.Catchup;
-        const fineDining = d.FineDining * a.FineDining;
-        const demandTotal = single + couple + family + catchup + fineDining;
-
-
-        const maxcapacity = calcMaxCapacity(s)
-
+        // Per-source contribution breakdown
+        let srcRows = "";
+        for (const src of sources) {
+          const slotDist = Math.abs(s.slotIndex - src.slotIndex);
+          const sameSide = s.side === src.side;
+          const cp = sameSide ? 1.0 : crossProb(lanes);
+          const contrib = chanceOfGettingIn(slotDist) * cp;
+          const crossNote = sameSide ? "同侧" : `对侧 ×${cp.toFixed(2)}`;
+          srcRows += `<br/>Side${src.side}槽${src.slotIndex}: 格距${slotDist} ${crossNote} → ${contrib.toFixed(3)}`;
+        }
 
         fieldsHtml += `
-    <div class="mf">
-      <div class="mf-label">基础流量计算</div>
-      <div class="mf-value">
-      ${GETINRATE}* 固定<br/>  
-        <div class="mf-value">
-        门头系数: ${frontage.toFixed(3)}<br/>
-        自然流量: ${naturalFlow.toFixed(3)}<br/>
-        街道月份: ${streetFactor.toFixed(3)}<br/>
-        餐饮月份: ${foodFactor.toFixed(3)}
-      </div>
-        <br/>基础流量= <b>${base.toFixed(3)}</b>
-      </div>
-    </div>
+        <div class="mf"><div class="mf-label">街道人流量</div><div class="mf-value">${s.naturalFlow.toLocaleString()}/day</div></div>
+        <div class="mf"><div class="mf-label">禁油烟</div><div class="mf-value">${s.smokeFree ? "是" : "否"}</div></div>
+        <div class="mf"><div class="mf-label">月租金</div><div class="mf-value">¥${s.rent.toLocaleString()}</div></div>
+        <div class="mf"><div class="mf-label">押金 (${s.bondMonths}mo)</div><div class="mf-value">¥${s.bond.toLocaleString()}</div></div>
+        <div class="mf full"><div class="mf-label">主客源</div><div class="mf-value">${srcStr}${srcRows}<br/><b>综合动线系数 = ${s.distMult.toFixed(3)}</b></div></div>`;
 
-    <div class="mf">
-      <div class="mf-label">商圈构成 × 吸引力</div>
-      <div class="mf-value">
-        单人: ${d.Single.toFixed(2)} × ${a.Single.toFixed(2)} = ${single.toFixed(2)}<br/>
-        情侣: ${d.Couple.toFixed(2)} × ${a.Couple.toFixed(2)} = ${couple.toFixed(2)}<br/>
-        家庭: ${d.Family.toFixed(2)} × ${a.Family.toFixed(2)} = ${family.toFixed(2)}<br/>
-        聚会: ${d.Catchup.toFixed(2)} × ${a.Catchup.toFixed(2)} = ${catchup.toFixed(2)}<br/>
-        宴请: ${d.FineDining.toFixed(2)} × ${a.FineDining.toFixed(2)} = ${fineDining.toFixed(2)}<br/>
-        <br/>
-        人群适配: <b>${demandTotal.toFixed(2)}</b>
-      </div>
-    </div>
-
-
-    <div class="mf">
-      <div class="mf-label">商家系数-后期经营变动</div>
-      <div class="mf-value">
-        口碑: ${myBiz.reputation.toFixed(3)}<br/>
-        装修: ${myBiz.renovation.toFixed(3)}<br/>
-        <br/>
-        合计 <b>${myBiz.reputation * myBiz.renovation.toFixed(3)}</b>
-      </div>
-    </div>
-
-
-    <div class="mf">
+        if (s.forecastRevenue) {
+          fieldsHtml += `<div class="mf"><div class="mf-label">评估：预计日营业额</div><div class="mf-value">¥${Math.round(s.forecastRevenue).toLocaleString()}</div></div>`;
+          const mo = time.getMonth();
+          const fb = frontageBuff(s.frontage);
+          const sf = currentStreet.monthFactor[mo];
+          const ff = s.food.monthFactor[mo];
+          const base = GETINRATE * s.distMult * fb * s.naturalFlow * sf * ff;
+          const d = currentStreet.demand, a = s.food.Attraction;
+          const dt = d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining;
+          const cap = calcMaxCapacity(s);
+          fieldsHtml += `
+          <div class="mf full"><div class="mf-label">流量计算</div><div class="mf-value">
+            ${GETINRATE} × 动线系数 ${s.distMult.toFixed(3)} × 门头${fb.toFixed(3)} × 自然流量${s.naturalFlow} × 街道月份${sf.toFixed(2)} × 餐饮月份${ff.toFixed(2)}<br/>
+            <b>基础流量 = ${base.toFixed(2)}</b>
+          </div></div>
+          <div class="mf full"><div class="mf-label">人群适配 / 承载</div><div class="mf-value">
+            单${d.Single.toFixed(2)}×${a.Single.toFixed(2)} 情${d.Couple.toFixed(2)}×${a.Couple.toFixed(2)} 家${d.Family.toFixed(2)}×${a.Family.toFixed(2)} 聚${d.Catchup.toFixed(2)}×${a.Catchup.toFixed(2)} 宴${d.FineDining.toFixed(2)}×${a.FineDining.toFixed(2)}<br/>
+            <b>适配系数 ${dt.toFixed(3)}</b> &nbsp;·&nbsp; 最大承载 ${cap.toFixed(0)} 人次
+          </div></div>
+          
+              <div class="mf">
       <div class="mf-label">预估每日营业额</div>
       <div class="mf-value">
-        <br/>基础流量= <b>${base.toFixed(3)}</b>
-        <br/>*人群适配: <b>${demandTotal.toFixed(2)}</b>
+        <br/>基础流量= <b>${base.toFixed(2)}</b>
+        <br/>*人群适配: <b>${dt.toFixed(2)}</b>
         <br/>*后续经营: <b>${myBiz.reputation * myBiz.renovation.toFixed(2)}</b>
-        <br/>&& <=店铺最大承载量: <b>${maxcapacity.toFixed(0)}</b><br/>
+        <br/>=进店消费人数: <b>${(base*dt*myBiz.reputation * myBiz.renovation).toFixed(0)}</b>
+        <br/>&& <=店铺最大承载量: <b>${cap.toFixed(0)}</b><br/>
         <br/>*客单价: <b>${(s.food.materialCost / s.food.grossMargin).toFixed(0)}</b>
-        =${ (s.food.materialCost / s.food.grossMargin *Math.min(maxcapacity,myBiz.reputation * myBiz.renovation * (base * (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining)))).toFixed(0)}</div>
+        =${(s.food.materialCost / s.food.grossMargin * Math.min(cap, myBiz.reputation *myBiz.renovation * (base * (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining)))).toFixed(0)}</div>
     </div>
-  `;
-      }
+          `;
 
+
+        }
+        if (isRetail) {
+          fieldsHtml += `<div class="mf full"><div class="mf-label">备注</div><div class="mf-value">零售铺，暂无经营数据</div></div>`;
+        }
+      }
 
       let costHtml = "";
       if (isl && canAct) {
         costHtml = `<div class="forecast-box">
-      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">租赁建店费用</div>
-      <div class="frow"><span>首月租金</span><span>¥${s.rent.toLocaleString()}</span></div>
-      <div class="frow"><span>押金 (${s.bondMonths} months)</span><span>¥${s.bond.toLocaleString()}</span></div>
-      <div class="frow"><span>建店租金合计</span><span>¥${(s.rent + s.bond).toLocaleString()}</span></div>
-    </div>`;
+          <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">租赁建店费用</div>
+          <div class="frow"><span>首月租金</span><span>¥${s.rent.toLocaleString()}</span></div>
+          <div class="frow"><span>押金 (${s.bondMonths}mo)</span><span>¥${s.bond.toLocaleString()}</span></div>
+          <div class="frow"><span>合计</span><span>¥${(s.rent + s.bond).toLocaleString()}</span></div>
+        </div>`;
       } else if (iss && canAct) {
         costHtml = `<div class="forecast-box">
-      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">转让建店费用</div>
-      <div class="frow"><span>店铺转让费</span><span>¥${s.salePrice.toLocaleString()}</span></div>
-      <div class="frow"><span>首月租金</span><span>¥${s.rent.toLocaleString()}</span></div>
-      <div class="frow"><span>押金 (${s.bondMonths} months)</span><span>¥${s.bond.toLocaleString()}</span></div>
-      <div class="frow"><span>建店租金合计</span><span>¥${(s.salePrice + s.rent + s.bond).toLocaleString()}</span></div>
-    </div>
-    <div class="modal-note">转让费只是转让设备+店铺+租约 -- 租金每月 ¥${s.rent.toLocaleString()}需要正常支付</div>`;
+          <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">转让建店费用</div>
+          <div class="frow"><span>转让费</span><span>¥${s.salePrice.toLocaleString()}</span></div>
+          <div class="frow"><span>首月租金</span><span>¥${s.rent.toLocaleString()}</span></div>
+          <div class="frow"><span>押金 (${s.bondMonths}mo)</span><span>¥${s.bond.toLocaleString()}</span></div>
+          <div class="frow"><span>合计</span><span>¥${(s.salePrice + s.rent + s.bond).toLocaleString()}</span></div>
+        </div>
+        <div class="modal-note">转让费只是转让设备+店铺+租约 — 每月租金 ¥${s.rent.toLocaleString()} 正常支付</div>`;
       }
 
       let warnHtml = "";
-      if (canAct && isl && !enoughLease) warnHtml = `<div style="font-size:11px;color:#c0392b;margin-bottom:0.75rem">钱不够了 (需要 ¥${(s.rent + s.bond).toLocaleString()})</div>`;
-      if (canAct && iss && !enoughSale) warnHtml = `<div style="font-size:11px;color:#c0392b;margin-bottom:0.75rem">钱不够了 (需要 ¥${(s.salePrice + s.rent + s.bond).toLocaleString()})</div>`;
-      if (myTakenSite) warnHtml = `<div style="font-size:11px;color:#666;margin-bottom:0.75rem">you already have a location</div>`;
+      if (isMine) warnHtml = `<div style="font-size:11px;color:#2d7a1f;margin-bottom:.75rem">✨ 这是您的店铺之一</div>`;
+      else if (isl && !canAffordLease) warnHtml = `<div style="font-size:11px;color:#c0392b;margin-bottom:.75rem">资金不足 (需 ¥${(s.rent + s.bond).toLocaleString()})</div>`;
+      else if (iss && !canAffordSale) warnHtml = `<div style="font-size:11px;color:#c0392b;margin-bottom:.75rem">资金不足 (需 ¥${(s.salePrice + s.rent + s.bond).toLocaleString()})</div>`;
 
-      let btnHtml = `<button class="btn" onclick="closeModal()">❌</button>`;
-      let btnCallHtml = `<button id="call-result-btn" class="btn" onclick="callresult(${Math.round(s.forecastRevenue)})">连麦求助(-￥199)</button>`;
+
+      const frev = s.forecastRevenue ? Math.round(s.forecastRevenue) : 0;
+      const callBtn = frev ? `<button id="call-result-btn" class="btn" onclick="callresult(${frev})">连麦求助(-¥199)</button>` : "";
+      let btnHtml = `<button class="btn" onclick="closeModal()">关闭</button>`;
       if (canAct) {
-        if (isl && enoughLease) btnHtml +=btnCallHtml+ `<button class="btn primary" onclick="takeSite(window._modalSite,'lease')">签租赁合同 ✍️</button>`;
-        if (iss && enoughSale) btnHtml +=btnCallHtml+ `<button class="btn primary" onclick="takeSite(window._modalSite,'sale')">签店铺转让合同 ✍️</button>`;
+        if (isl && canAffordLease) btnHtml +=callBtn+ `<button class="btn primary" onclick="takeSite(window._modalSite,'lease')">签租赁合同 ✍️</button>`;
+        if (iss && canAffordSale) btnHtml += callBtn+`<button class="btn primary" onclick="takeSite(window._modalSite,'sale')">签转让合同 ✍️</button>`;
       }
 
       document.getElementById("modal-container").innerHTML = `
-  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-title">${s.name || "Shop"}
-      ${isl ? '<span class="tag tag-lease">for lease</span>' : ""}
-      ${iss ? '<span class="tag tag-sale">for sale</span>' : ""}
-    </div>
-    <div class="modal-grid">${fieldsHtml}</div>
-    ${costHtml}${warnHtml}
-    <div class="modal-actions">${btnHtml}</div>
-  </div></div>`;
+        <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+          <div class="modal-title">${s.name || "Shop"}
+            ${isl ? '<span class="tag tag-lease">for lease</span>' : ""}
+            ${iss ? '<span class="tag tag-sale">for sale</span>' : ""}
+          </div>
+          <div class="modal-grid">${fieldsHtml}</div>
+          ${costHtml}${warnHtml}
+          <div class="modal-actions">${btnHtml}</div>
+        </div></div>`;
     }
 
     function callresult(rev) {
-      document.getElementById("call-result-btn").innerHTML = `预估每日营业额 ¥${rev.toLocaleString()} (未来根据数人数情况的准确度而加入误差)`;
-      document.getElementById("call-result-btn").onclick = null;
-      money -= 199;
-      updateHUD();
+      const btn = document.getElementById("call-result-btn");
+      if (btn) { btn.textContent = `预估日营业额 ¥${rev.toLocaleString()} (含误差)`; btn.onclick = null; }
+      money -= 199; updateHUD();
     }
     function closeModal() { document.getElementById("modal-container").innerHTML = ""; }
 
     function takeSite(s, type) {
       const cost = type === "lease" ? (s.rent + s.bond) : (s.salePrice + s.rent + s.bond);
-      money -= cost; myTakenSite = s;
-      closeModal(); updateHUD(); renderStreets();
+      money -= cost;
+      myTakenSites.push(s); // 添加到数组
+      closeModal();
+      updateHUD();
+      renderStreets();
       showForecastModal(s);
-      showToast((type === "lease" ? "租下铺子" : "接手店铺") + " — ¥" + cost.toLocaleString() + " 已支付");
+      showToast("成功拿下新店！支付 ¥" + cost.toLocaleString());
     }
 
     function showForecastModal(s) {
+      if (s.retail) {
+        document.getElementById("modal-container").innerHTML = `
+          <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <div class="modal-title">🏪 ${s.name}</div>
+            <div class="forecast-box"><div style="font-size:13px;color:#666">零售业态暂无经营数据预测，祝生意兴隆！</div></div>
+            <div class="modal-actions"><button class="btn primary" onclick="closeModal()">let's go!</button></div>
+          </div></div>`;
+        return;
+      }
       const daily = s.forecastRevenue ? Math.round(s.forecastRevenue) : 0;
       const monthly = daily * 30;
-      const foodCost = Math.round(monthly * (1-s.food.grossMargin));
-      const StaffCost = Math.max(Math.ceil(daily/s.food.revPerStaff)*4000,4000);
-      const utilityCost = 1000+Math.round(monthly * 0.015);
-      const profit = monthly - s.rent - foodCost - StaffCost-utilityCost;
+      const foodCost = Math.round(monthly * (1 - s.food.grossMargin));
+      const staffCost = Math.max(Math.ceil(daily / s.food.revPerStaff) * 4000, 4000);
+      const utilityCost = 1000 + Math.round(monthly * 0.015);
+      const profit = monthly - s.rent - foodCost - staffCost - utilityCost;
       document.getElementById("modal-container").innerHTML = `
-  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-title">📊 未来营业情况预测 — ${s.name}</div>
-    <div class="forecast-box">
-      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">根据 ${MONTHS[time.getMonth()]} 人流量</div>
-      <div class="frow"><span>预估日营业额</span><span>¥${daily.toLocaleString()}</span></div>
-      <div class="frow"><span>预估月营业额</span><span>¥${monthly.toLocaleString()}</span></div>
-      <div class="frow"><span>月租金</span><span style="color:#c0392b">−¥${s.rent.toLocaleString()}</span></div>
-      <div class="frow"><span>预估月食材成本</span><span style="color:#c0392b">−¥${foodCost.toLocaleString()}</span></div>
-      <div class="frow"><span>人力工资粗略</span><span style="color:#c0392b">−¥${StaffCost.toLocaleString()}</span></div>
-      <div class="frow"><span>水电成本粗略</span><span style="color:#c0392b">−¥${utilityCost.toLocaleString()}</span></div>
-      <div class="frow"><span>预估月净利润</span><span style="color:${profit > 0 ? "#2d7a1f" : "#c0392b"}">¥${profit.toLocaleString()}</span></div>
-    </div>
-    <div class="modal-actions"><button class="btn primary" onclick="closeModal()">let's go!</button></div>
-  </div></div>`;
+        <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+          <div class="modal-title">📊 营业预测 — ${s.name}</div>
+          <div class="forecast-box">
+            <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:7px">根据 ${MONTHS[time.getMonth()]} 人流量</div>
+            <div class="frow"><span>预估日营业额</span><span>¥${daily.toLocaleString()}</span></div>
+            <div class="frow"><span>预估月营业额</span><span>¥${monthly.toLocaleString()}</span></div>
+            <div class="frow"><span>月租金</span><span style="color:#c0392b">−¥${s.rent.toLocaleString()}</span></div>
+            <div class="frow"><span>预估月食材</span><span style="color:#c0392b">−¥${foodCost.toLocaleString()}</span></div>
+            <div class="frow"><span>人力工资</span><span style="color:#c0392b">−¥${staffCost.toLocaleString()}</span></div>
+            <div class="frow"><span>水电</span><span style="color:#c0392b">−¥${utilityCost.toLocaleString()}</span></div>
+            <div class="frow"><span>预估月净利润</span><span style="color:${profit > 0 ? "#2d7a1f" : "#c0392b"}">¥${profit.toLocaleString()}</span></div>
+          </div>
+          <div class="modal-actions"><button class="btn primary" onclick="closeModal()">let's go!</button></div>
+        </div></div>`;
     }
 
     function showToast(msg) {
@@ -848,14 +1148,13 @@ function calcMaxCapacity(s){
     function updateHUD() {
       document.getElementById("hud-money").textContent = "¥" + money.toLocaleString();
       document.getElementById("hud-month").textContent = time.getDate() + " " + MONTHS[time.getMonth()] + " " + time.getFullYear();
-      document.getElementById("hud-status").textContent = myTakenSite ? "已经拿店" : "找铺子";
+      document.getElementById("hud-status").textContent = myTakenSites.length > 0 ? `已持有 ${myTakenSites.length} 家店` : "找铺子";
       const mv = document.getElementById("hud-money");
       mv.className = "hud-value " + (money < 10000 ? "red" : money < 30000 ? "amber" : "green");
     }
 
     window.addEventListener("resize", () => { if (streetData) renderStreets(); });
-    regenerate();
-
+    regenerate(0);
   </script>
 </body>
 
