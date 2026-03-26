@@ -453,8 +453,9 @@
     </div>
 
     <div class="controls">
-      <button class="mode-btn active" id="btn-god" onclick="setMode('god')">上帝视角</button>
-      <button class="mode-btn" id="btn-player" onclick="setMode('player')">玩家视角</button>
+      <button class="mode-btn active" id="btn-player" onclick="setMode('player')">玩家视角</button>
+      <button class="mode-btn" id="btn-god" onclick="setMode('god')">上帝视角</button>
+      
       <button class="regen-btn" onclick="regenerate(1)">↻ 重新找店(-70生活费)</button>
     </div>
 
@@ -480,37 +481,37 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const SampleFood = [
-      { name: "高档中餐", dineIn: true, takeway: 0, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2] },
-      { name: "小吃摊", dineIn: false, takeway: 0.1, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1) },
-      { name: "面馆", dineIn: true, takeway: 0.2, Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1) },
-      { name: "小炒店", dineIn: true, takeway: 0.15, Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
-      { name: "烧烤", dineIn: true, takeway: 0.1, Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2] },
-      { name: "麻辣烫", dineIn: true, takeway: 0.3, Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: new Array(12).fill(1) },
-      { name: "奶茶", dineIn: false, takeway: 0.6, Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85] },
-      { name: "火锅", dineIn: true, takeway: 0.02, Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2] },
-      { name: "猪脚饭", dineIn: true, takeway: 0.2, Attraction: { Single: 1.1, Couple: 0.1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1) },
-      { name: "汉堡", dineIn: true, takeway: 0.65, Attraction: { Single: 1.2, Couple: 0.7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1) }
+    const FoodLibrary = [
+      { name: "高档中餐", dineIn: true, takeway: 0,  grossMargin:0.6, revPerStaff:500,Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2] },
+      { name: "小吃摊", dineIn: false, takeway: 0.1,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1) },
+      { name: "面馆", dineIn: true, takeway: 0.2, grossMargin:0.58, revPerStaff:900,Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1) },
+      { name: "小炒店", dineIn: true, takeway: 0.15, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
+      { name: "烧烤", dineIn: true, takeway: 0.1, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2] },
+      { name: "麻辣烫", dineIn: true, takeway: 0.3, grossMargin:0.55, revPerStaff:750,Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: new Array(12).fill(1) },
+      { name: "奶茶", dineIn: false, takeway: 0.6, grossMargin:0.60, revPerStaff:1400,Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85] },
+      { name: "火锅", dineIn: true, takeway: 0.02, grossMargin:0.62, revPerStaff:800,Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2] },
+      { name: "猪脚饭", dineIn: true, takeway: 0.2, grossMargin:0.48, revPerStaff:1100,Attraction: { Single: 1.1, Couple: 0.1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1) },
+      { name: "汉堡", dineIn: true, takeway: 0.65,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: 0.7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1) }
     ];
-    const SampleStreets = [
-      { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 1500, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
-      { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 3000, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
-      { name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 4600, monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95] },
-      { name: "步行街", demand: { Single: .15, Couple: .35, Family: .35, Catchup: .05, FineDining: .10 }, typicalFlow: 30000, monthFactor: [.85, 1.25, .9, 1.0, 1.1, 1.15, 1.25, 1.25, 1.05, .95, .9, .9] },
-      { name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 2800, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
-      { name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 50000, monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3] },
-      { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 16000, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] }
+    const StreetLibrary = [
+      { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 150, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
+      { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
+      { name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 480, monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95] },
+      { name: "步行街", demand: { Single: .15, Couple: .35, Family: .35, Catchup: .05, FineDining: .10 }, typicalFlow: 300, monthFactor: [.85, 1.25, .9, 1.0, 1.1, 1.15, 1.25, 1.25, 1.05, .95, .9, .9] },
+      { name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 280, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
+      { name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 500, monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3] },
+      { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 1600, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] }
     ];
     const frontageList = [4, 4, 4, 4, 4, 5, 5, 5,6, 6, 6, 8, 8,9,9,10,10,10, 12, 12, 15,18,20];
     const depthList = [6, 6,6,6,7,7,8, 8, 9,10,11, 12,15];
     const MONTHS = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
     const TYPE_ICONS = { "shop": "🏪", "school": "🏫", "factory": "🏭", "residential": "🏠", "写字楼": "🏢", "车站": "🚉", "景点": "🗺️" };
-    const SHOPNAME = ["好再来", "驾驶本", "不好吃不要钱", "钱塘", "老桂林", "今天不减肥", "碳水快乐屋", "米杀手", "深夜续命", "打工", "一口上头", "沽名", "米雪", "刘师傅", "来都来了", "先吃再说", "旺发", "吃撑算我的", "这就开饭", "真香警告", "锅里有点东西", "老板不在", "厨子很忙", "火候随缘", "盐多点没事", "辣到报警", "隔壁更贵", "陈记", "老赵家", "阿强", "老成都", "老街坊", "家常味", "邻里香", "顺口来", "福来顺", "好再来", "聚味轩", "食为先", "味之源", "香满屋", "百味堂", "一品香", "口口香", "饭点儿", "三碗不过", "有点味", "简单吃点", "常来坐坐", "鲜牛肉", "吃完再减肥"]
-    const GETINRATE = 0.03
+    const SHOPNAME = ["太牛牛", "驾驶本", "不好吃不要钱", "钱塘", "老桂林", "今天不减肥", "碳水快乐屋", "米杀手", "深夜续命", "打工", "一口上头", "沽名", "米雪", "刘师傅", "来都来了", "先吃再说", "旺发", "吃撑算我的", "这就开饭", "真香警告", "锅里有点东西", "老板不在", "厨子很忙", "火候随缘", "盐多点没事", "辣到报警", "隔壁更贵", "陈记", "老赵家", "阿强", "老成都", "老街坊", "家常味", "邻里香", "顺口来", "福来顺", "好再来", "聚味轩", "食为先", "味之源", "香满屋", "百味堂", "一品香", "口口香", "饭点儿", "三碗不过", "有点味", "简单吃点", "常来坐坐", "鲜牛肉", "吃完再减肥"]
+    const GETINRATE = 0.3
     const dailyExpense = 70
     let money = 100000, myBiz = { reputation: 1, renovation: 1, avgSpend: 30 };
-    let time = new Date(2025, 0, 1);
-    let mode = "god", currentStreet = null, streetData = null, myTakenSite = null;
+    let time = new Date(2025, 5, 1);
+    let mode = "player", currentStreet = null, streetData = null, myTakenSite = null;
     function pick(arr) { return arr[Math.random() * arr.length | 0]; }
     function rDE() { const x = Math.random(); return x < .5 ? .5 * Math.pow(2 * x, 2) : 1 - .5 * Math.pow(2 * (1 - x), 2); }
 
@@ -537,8 +538,8 @@
     function generateStreet(st) {
       const baseFlow = st.typicalFlow * .3 + st.typicalFlow * .7 * rDE();
       const depth = pick(depthList);
-      const streetPricePerSqm = Math.round((50 + baseFlow / 80 + Math.random() * 20));
-      //rent 租金计算
+      const streetPricePerSqm = Math.round((50 + baseFlow / 8 + Math.random() * 20));
+      //rentcalc 租金计算
 
 
       function genSite() {
@@ -554,11 +555,11 @@
         const forsale = isShop && !forlease && Math.random() < .1;
         const bondMonths = Math.floor(Math.random() * 3) + 1;
         const flow = Math.ceil(baseFlow * (1 + (Math.random() - .5) * .2));
-        const food = isShop ? pick(SampleFood) : undefined;
+        const food = isShop ? pick(FoodLibrary) : undefined;
         const name = food ? pick(SHOPNAME) + food.name : sType;
         const salePrice = forsale ? Math.round(rent * (3 + Math.random() * 12)) : 0;
         const s = { frontage, depth, area, name, rent, bond: rent * bondMonths, bondMonths, salePrice, type: sType, naturalFlow: flow, smokeFree: Math.random() < .2, renovationCompletion: reno, storey: Math.random() < .1 ? 3 : Math.random() < .2 ? 2 : 1, food, forlease, forsale };
-        if (food) s.forecastRevenue = forecastCustomers(s, food, st) * (food.materialCost / 0.6);
+        if (food) s.forecastRevenue = forecastCustomers(s, food, st) * (food.materialCost / food.grossMargin);
         return s;
       }
       return { street: st, depth, streetA: Array.from({ length: 6 }, genSite), streetB: Array.from({ length: 6 }, genSite) };
@@ -572,7 +573,7 @@
       if (n > 0) { money -= dailyExpense * n; }
       time.setDate(time.getDate() + 1);
       myTakenSite = null;
-      const st = pick(SampleStreets);
+      const st = pick(StreetLibrary);
 
       streetData = generateStreet(st);
       currentStreet = st;
@@ -649,9 +650,9 @@ function calcMaxCapacity(s){
   if (!s.food) return 0;
 
   if (s.food.dineIn){
-    return (s.area * 0.6 / 1.5) * 8;
+    return (s.area * 0.611 / 1.5) * 8;
   } else {
-    return (s.area * 0.4 / 1) * 20;
+    return (s.area * 0.411 / 1) * 20;
   }
 }
 
@@ -676,7 +677,7 @@ function calcMaxCapacity(s){
     <div class="mf"><div class="mf-label">禁油烟</div><div class="mf-value">${s.smokeFree ? "是" : "否"}</div></div>
     <div class="mf"><div class="mf-label">月租金</div><div class="mf-value">¥${s.rent.toLocaleString()}</div></div>
     <div class="mf"><div class="mf-label">押金 (${s.bondMonths}mo)</div><div class="mf-value">¥${s.bond.toLocaleString()}</div></div>`;
-      if (god && s.forecastRevenue) fieldsHtml += `<div class="mf"><div class="mf-label">预估每日营业额</div><div class="mf-value">¥${Math.round(s.forecastRevenue).toLocaleString()}</div></div>`;
+      if (god && s.forecastRevenue) fieldsHtml += `<div class="mf"><div class="mf-label">评估结果：预计每日营业额</div><div class="mf-value">¥${Math.round(s.forecastRevenue).toLocaleString()}</div></div>`;
 
       if (god && s.forecastRevenue) {
 
@@ -747,8 +748,8 @@ function calcMaxCapacity(s){
         <br/>*人群适配: <b>${demandTotal.toFixed(2)}</b>
         <br/>*后续经营: <b>${myBiz.reputation * myBiz.renovation.toFixed(2)}</b>
         <br/>&& <=店铺最大承载量: <b>${maxcapacity.toFixed(0)}</b><br/>
-        <br/>*客单价: <b>${(s.food.materialCost / 0.6).toFixed(0)}</b>
-        =${ (s.food.materialCost / 0.6*Math.min(maxcapacity,myBiz.reputation * myBiz.renovation * (base * (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining)))).toFixed(0)}</div>
+        <br/>*客单价: <b>${(s.food.materialCost / s.food.grossMargin).toFixed(0)}</b>
+        =${ (s.food.materialCost / s.food.grossMargin *Math.min(maxcapacity,myBiz.reputation * myBiz.renovation * (base * (d.Single * a.Single + d.Couple * a.Couple + d.Family * a.Family + d.Catchup * a.Catchup + d.FineDining * a.FineDining)))).toFixed(0)}</div>
     </div>
   `;
       }
@@ -779,9 +780,10 @@ function calcMaxCapacity(s){
       if (myTakenSite) warnHtml = `<div style="font-size:11px;color:#666;margin-bottom:0.75rem">you already have a location</div>`;
 
       let btnHtml = `<button class="btn" onclick="closeModal()">❌</button>`;
-      if (canAct && !myTakenSite) {
-        if (isl && enoughLease) btnHtml += `<button class="btn primary" onclick="takeSite(window._modalSite,'lease')">签租赁合同 ✍️</button>`;
-        if (iss && enoughSale) btnHtml += `<button class="btn primary" onclick="takeSite(window._modalSite,'sale')">签店铺转让合同 ✍️</button>`;
+      let btnCallHtml = `<button id="call-result-btn" class="btn" onclick="callresult(${Math.round(s.forecastRevenue)})">连麦求助(-￥199)</button>`;
+      if (canAct) {
+        if (isl && enoughLease) btnHtml +=btnCallHtml+ `<button class="btn primary" onclick="takeSite(window._modalSite,'lease')">签租赁合同 ✍️</button>`;
+        if (iss && enoughSale) btnHtml +=btnCallHtml+ `<button class="btn primary" onclick="takeSite(window._modalSite,'sale')">签店铺转让合同 ✍️</button>`;
       }
 
       document.getElementById("modal-container").innerHTML = `
@@ -797,6 +799,12 @@ function calcMaxCapacity(s){
   </div></div>`;
     }
 
+    function callresult(rev) {
+      document.getElementById("call-result-btn").innerHTML = `预估每日营业额 ¥${rev.toLocaleString()} (未来根据数人数情况的准确度而加入误差)`;
+      document.getElementById("call-result-btn").onclick = null;
+      money -= 199;
+      updateHUD();
+    }
     function closeModal() { document.getElementById("modal-container").innerHTML = ""; }
 
     function takeSite(s, type) {
@@ -810,9 +818,9 @@ function calcMaxCapacity(s){
     function showForecastModal(s) {
       const daily = s.forecastRevenue ? Math.round(s.forecastRevenue) : 0;
       const monthly = daily * 30;
-      const foodCost = Math.round(monthly * (0.6));
-      const StaffCost = Math.max(Math.ceil(daily/800)*4000,4000);
-      const utilityCost = 1000+Math.round(monthly * 0.02);
+      const foodCost = Math.round(monthly * (1-s.food.grossMargin));
+      const StaffCost = Math.max(Math.ceil(daily/s.food.revPerStaff)*4000,4000);
+      const utilityCost = 1000+Math.round(monthly * 0.015);
       const profit = monthly - s.rent - foodCost - StaffCost-utilityCost;
       document.getElementById("modal-container").innerHTML = `
   <div class="modal-bg" onclick="if(event.target===this)closeModal()">
@@ -824,7 +832,7 @@ function calcMaxCapacity(s){
       <div class="frow"><span>预估月营业额</span><span>¥${monthly.toLocaleString()}</span></div>
       <div class="frow"><span>月租金</span><span style="color:#c0392b">−¥${s.rent.toLocaleString()}</span></div>
       <div class="frow"><span>预估月食材成本</span><span style="color:#c0392b">−¥${foodCost.toLocaleString()}</span></div>
-      <div class="frow"><span>人力成本粗略</span><span style="color:#c0392b">−¥${StaffCost.toLocaleString()}</span></div>
+      <div class="frow"><span>人力工资粗略</span><span style="color:#c0392b">−¥${StaffCost.toLocaleString()}</span></div>
       <div class="frow"><span>水电成本粗略</span><span style="color:#c0392b">−¥${utilityCost.toLocaleString()}</span></div>
       <div class="frow"><span>预估月净利润</span><span style="color:${profit > 0 ? "#2d7a1f" : "#c0392b"}">¥${profit.toLocaleString()}</span></div>
     </div>
@@ -847,6 +855,7 @@ function calcMaxCapacity(s){
 
     window.addEventListener("resize", () => { if (streetData) renderStreets(); });
     regenerate();
+
   </script>
 </body>
 
