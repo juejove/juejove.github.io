@@ -2799,64 +2799,89 @@
             return nm;
           });
 
-          if (!hasTables) return;
+if(!hasTables)return;
 
-          setTables(prev => {
-            const next = prev.map(t => ({ ...t }));
-            setQueue(q => {
-              let rem = [...q].map(p => ({ ...p, waitedMin: p.waitedMin + SIM_SPEED }));
-              const imp = rem.filter(p => p.waitedMin > 20);
-              imp.forEach(p => {
-                addLog(`${timeStr(simMin)} ${p.emoji}×${p.size} 等太久，改外卖离开`);
-                // waited too long — converts to takeaway for non-dineIn, leaves for dineIn
-                if (!selectedFood.dineIn) {
-                  const spend = p.size * selectedFood.materialCost / (1 - selectedFood.grossMargin);
-                  setRevenue(rv => { revenueRef.current = rv + spend; return rv + spend; });
-                  setServed(s => { servedRef.current = s + p.size; return s + p.size; });
-                } else {
-                  setLeftWithout(s => s + 1);
-                }
-              });
-              rem = rem.filter(p => p.waitedMin <= 20);
-              rem = rem.filter(party => {
-                const compat = next.filter(t => t.state === 'empty' && SEAT_ACCEPTS[t.zone]?.includes(party.type) && t.capacity >= party.size);
-                if (compat.length === 0) return true;
-                compat.sort((a, b) => a.capacity - b.capacity);
-                const table = compat[0];
-                table.state = 'ordering'; table.party = party; table.timer = 1; // Req 4: min 1 min to order
-                addLog(`${timeStr(simMin)} ${party.emoji} ${party.type}×${party.size} 入座 ${table.label}`);
-                return false;
-              });
-              return rem;
-            });
-            next.forEach(t => {
-              if (t.state === 'empty' || t.state === 'done') return;
-              t.timer = Math.max(0, t.timer - SIM_SPEED);
-              if (t.timer === 0) {
-                if (t.state === 'ordering') {
-                  t.state = 'waiting'; t.timer = calcPrepTime();
-                  addLog(`${timeStr(simMin)} 🍳 ${t.label} 出餐 ~${t.timer}分钟`);
-                } else if (t.state === 'waiting') {
-                  t.state = 'eating'; t.timer = DINE_TIME(selectedFood);
-                  addLog(`${timeStr(simMin)} 🍽️ ${t.label} 用餐 ~${t.timer}分钟`);
-                } else if (t.state === 'eating') {
-                  t.state = 'checkout'; t.timer = Math.max(1, calcCheckoutTime());
-                } else if (t.state === 'checkout') {
-                  if (!t.party) {           // ← ADD THIS GUARD
-                    t.state = 'empty'; t.timer = 0;
-                    return;
-                  }
-                  const spend = t.party.size * selectedFood.materialCost / (1 - selectedFood.grossMargin);
-                  setRevenue(rv => { revenueRef.current = rv + spend; return rv + spend; });
-                  setServed(s => { servedRef.current = s + t.party.size; return s + t.party.size; });
-                  addLog(`${timeStr(simMin)} 💰 ${t.label} ¥${Math.round(spend)} (${t.party.size}人)`);
-                  t.state = 'empty'; t.party = null; t.timer = 0;
-                }
-              }
-            });
+setQueue(currentQueue => {
+  const stillWaiting = [];
+  const newlyImpatient = [];
 
-            return next;
-          });
+  setTables(prev => {
+    const next = prev.map(t => ({ ...t }));
+
+    for (const party of currentQueue) {
+      if (!party) continue;
+      const waited = party.waitedMin + SIM_SPEED;
+      if (waited > 20) {
+        newlyImpatient.push({ ...party, waitedMin: waited });
+        continue;
+      }
+      const compat = next.filter(t =>
+        t.state === 'empty' &&
+        SEAT_ACCEPTS[t.zone]?.includes(party.type) &&
+        t.capacity >= party.size
+      );
+      if (compat.length === 0) {
+        stillWaiting.push({ ...party, waitedMin: waited });
+      } else {
+        compat.sort((a, b) => a.capacity - b.capacity);
+        const table = compat[0];
+        table.state = 'ordering';
+        table.party = { ...party, waitedMin: waited };
+        table.timer = 1;
+        addLog(`${timeStr(simMin)} ${party.emoji} ${party.type}×${party.size} 入座 ${table.label}`);
+      }
+    }
+
+    newlyImpatient.forEach(p => {
+      if (!p) return;
+      addLog(`${timeStr(simMin)} ${p.emoji}×${p.size} 等太久离开`);
+      if (!selectedFood.dineIn) {
+        const spend = p.size * selectedFood.materialCost / (1 - selectedFood.grossMargin);
+        setRevenue(rv => { revenueRef.current = rv + spend; return rv + spend; });
+        setServed(s => { servedRef.current = s + p.size; return s + p.size; });
+      } else {
+        setLeftWithout(s => s + 1);
+      }
+    });
+
+    next.forEach(t => {
+      if (t.state === 'empty' || t.state === 'done') return;
+      t.timer = Math.max(0, t.timer - SIM_SPEED);
+      if (t.timer > 0) return;
+
+      if (t.state === 'ordering') {
+        t.state = 'waiting';
+        t.timer = calcPrepTime();
+        addLog(`${timeStr(simMin)} 🍳 ${t.label} 出餐 ~${t.timer}分钟`);
+      } else if (t.state === 'waiting') {
+        t.state = 'eating';
+        t.timer = DINE_TIME(selectedFood);
+        addLog(`${timeStr(simMin)} 🍽️ ${t.label} 用餐 ~${t.timer}分钟`);
+      } else if (t.state === 'eating') {
+        t.state = 'checkout';
+        t.timer = Math.max(1, calcCheckoutTime());
+      } else if (t.state === 'checkout') {
+        if (!t.party || !t.party.size) {
+          t.state = 'empty';
+          t.party = null;
+          t.timer = 0;
+          return;
+        }
+        const spend = t.party.size * selectedFood.materialCost / (1 - selectedFood.grossMargin);
+        setRevenue(rv => { revenueRef.current = rv + spend; return rv + spend; });
+        setServed(s => { servedRef.current = s + t.party.size; return s + t.party.size; });
+        addLog(`${timeStr(simMin)} 💰 ${t.label} ¥${Math.round(spend)} (${t.party.size}人)`);
+        t.state = 'empty';
+        t.party = null;
+        t.timer = 0;
+      }
+    });
+
+    return next;
+  });
+
+  return stillWaiting;
+});
         }, TICK_MS);
         return () => clearInterval(interval);
       }, [running, simMin, dineInProb, hasTables, assignment, dayEnded, calcPrepTime, calcCheckoutTime]);
