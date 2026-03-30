@@ -1,5 +1,5 @@
 window.AppData = {
-     FoodLibrary : [
+     FOOD_LIBRARY : [
       { name: "高档中餐", dineIn: true, takeway: 0,  grossMargin:0.6, revPerStaff:500,Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2] },
       { name: "小吃摊", dineIn: false, takeway: 0.1,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1) },
       { name: "面馆", dineIn: true, takeway: 0.2, grossMargin:0.58, revPerStaff:900,Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1) },
@@ -11,7 +11,7 @@ window.AppData = {
       { name: "猪脚饭", dineIn: true, takeway: 0.2, grossMargin:0.48, revPerStaff:1100,Attraction: { Single: 1.1, Couple: 0.1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1) },
       { name: "汉堡", dineIn: true, takeway: 0.65,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: 0.7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1) }
     ],
-     StreetLibrary : [
+     STREET_LIBRARY : [
       { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 150, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
       { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
       { name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 480, monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95] },
@@ -19,6 +19,11 @@ window.AppData = {
       { name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 280, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
       { name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 500, monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3] },
       { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 1600, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] }
+    ],
+      RETAIL_LIBRARY : [
+      { name: "服装店", icon: "👗" }, { name: "书店", icon: "📚" }, { name: "家电店", icon: "📺" },
+      { name: "便利店", icon: "🛒" }, { name: "药店", icon: "💊" }, { name: "文具店", icon: "✏️" },
+      { name: "鞋店", icon: "👟" }, { name: "手机店", icon: "📱" },
     ],
      SHOP_NAMES : [
       "太牛牛", "驾驶本", "不好吃不要钱", "钱塘", "老桂林", "今天不减肥", "碳水快乐屋", "米杀手",
