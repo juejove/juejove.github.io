@@ -1,16 +1,25 @@
 window.AppData = {
-     FOOD_LIBRARY : [
-      { name: "高档中餐", dineIn: true, takeway: 0,  grossMargin:0.6, revPerStaff:500,Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2] },
-      { name: "小吃摊", dineIn: false, takeway: 0.1,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: new Array(12).fill(1) },
-      { name: "面馆", dineIn: true, takeway: 0.2, grossMargin:0.58, revPerStaff:900,Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: new Array(12).fill(1) },
-      { name: "小炒店", dineIn: true, takeway: 0.15, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
-      { name: "烧烤", dineIn: true, takeway: 0.1, grossMargin:0.6, revPerStaff:600,Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2] },
-      { name: "麻辣烫", dineIn: true, takeway: 0.3, grossMargin:0.55, revPerStaff:750,Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: new Array(12).fill(1) },
-      { name: "奶茶", dineIn: false, takeway: 0.6, grossMargin:0.60, revPerStaff:1400,Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85] },
-      { name: "火锅", dineIn: true, takeway: 0.02, grossMargin:0.62, revPerStaff:800,Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2] },
-      { name: "猪脚饭", dineIn: true, takeway: 0.2, grossMargin:0.48, revPerStaff:1100,Attraction: { Single: 1.1, Couple: 0.1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: new Array(12).fill(1) },
-      { name: "汉堡", dineIn: true, takeway: 0.65,grossMargin:0.62, revPerStaff:800, Attraction: { Single: 1.2, Couple: 0.7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: new Array(12).fill(1) }
-    ],
+FOOD_LIBRARY:[
+  { name: "高档中餐", preparing:12, equip: 150000, smoke: true, standardKitchen: 25, dineIn: true, takeway: 0, grossMargin: 0.60, revPerStaff: 500, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2], minArea: 100 },
+
+  { name: "小吃摊", preparing:2, equip: 5000, smoke: true, standardKitchen: 3, dineIn: false, takeway: 0.1, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: 1.2, Couple: .7, Family: .5, Catchup: .6, FineDining: 0 }, materialCost: 8, monthFactor: Array(12).fill(1), minArea: 0 },
+
+  { name: "面馆", preparing:5, equip: 30000, smoke: false, standardKitchen: 8, dineIn: true, takeway: 0.2, grossMargin: 0.58, revPerStaff: 900, Attraction: { Single: 1, Couple: .6, Family: .6, Catchup: .4, FineDining: .1 }, materialCost: 12, monthFactor: Array(12).fill(1), minArea: 0 },
+
+  { name: "小炒店", preparing:8, equip: 90000, smoke: true, standardKitchen: 15, dineIn: true, takeway: 0.15, grossMargin: 0.60, revPerStaff: 600, Attraction: { Single: .6, Couple: .8, Family: 1, Catchup: .7, FineDining: .2 }, materialCost: 25, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1], minArea: 0 },
+
+  { name: "烧烤", preparing:10, equip: 30000, smoke: true, standardKitchen: 12, dineIn: true, takeway: 0.1, grossMargin: 0.60, revPerStaff: 600, Attraction: { Single: .8, Couple: .9, Family: .5, Catchup: 1.2, FineDining: .3 }, materialCost: 30, monthFactor: [.1, .1, .3, .6, 1, 1.5, 1.4, 1.4, .8, .5, .3, .2], minArea: 80 },
+
+  { name: "麻辣烫", preparing:7, equip: 40000, smoke: false, standardKitchen: 8, dineIn: true, takeway: 0.3, grossMargin: 0.55, revPerStaff: 750, Attraction: { Single: .7, Couple: .6, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 15, monthFactor: Array(12).fill(1), minArea: 0 },
+
+  { name: "奶茶",   preparing:3, equip: 50000, smoke: false, standardKitchen: 4, dineIn: false, takeway: 0.6, grossMargin: 0.60, revPerStaff: 1400, Attraction: { Single: 1.1, Couple: 1.5, Family: .7, Catchup: 1, FineDining: .6 }, materialCost: 5, monthFactor: [.8, .8, .85, .9, 1, 1.1, 1.2, 1.25, 1.1, 1, .9, .85], minArea: 0 },
+
+  { name: "火锅", preparing:8, equip: 80000, smoke: true, standardKitchen: 10, dineIn: true, takeway: 0.02, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: .05, Couple: .5, Family: .4, Catchup: .8, FineDining: 1.1 }, materialCost: 40, monthFactor: [1.2, 1.1, 1, 1, 1, 1.1, 1.1, 1.1, 1, 1, 1.1, 1.2], minArea: 80 },
+
+  { name: "猪脚饭",     preparing:3, equip: 15000, smoke: true, standardKitchen: 6, dineIn: true, takeway: 0.2, grossMargin: 0.48, revPerStaff: 1100, Attraction: { Single: 1.1, Couple: .1, Family: .2, Catchup: .05, FineDining: 0 }, materialCost: 10, monthFactor: Array(12).fill(1), minArea: 0 },
+
+  { name: "汉堡",     preparing:5, equip: 40000, smoke: true, standardKitchen: 15, dineIn: true, takeway: 0.65, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: 1.2, Couple: .7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: Array(12).fill(1), minArea: 0 },
+],
      STREET_LIBRARY : [
       { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 150, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
       { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
