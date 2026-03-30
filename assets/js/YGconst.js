@@ -21,13 +21,42 @@ FOOD_LIBRARY:[
   { name: "汉堡",     preparing:5, equip: 40000, smoke: true, standardKitchen: 15, dineIn: true, takeway: 0.65, grossMargin: 0.62, revPerStaff: 800, Attraction: { Single: 1.2, Couple: .7, Family: .8, Catchup: .4, FineDining: 0 }, materialCost: 16, monthFactor: Array(12).fill(1), minArea: 0 },
 ],
      STREET_LIBRARY : [
-      { name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 150, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
-      { name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: 0.05 }, typicalFlow: 300, monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1] },
-      { name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 480, monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95] },
-      { name: "步行街", demand: { Single: .15, Couple: .35, Family: .35, Catchup: .05, FineDining: .10 }, typicalFlow: 300, monthFactor: [.85, 1.25, .9, 1.0, 1.1, 1.15, 1.25, 1.25, 1.05, .95, .9, .9] },
-      { name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 280, monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1] },
-      { name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 500, monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3] },
-      { name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 1600, monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8] }
+      {
+        name: "中小学商圈", demand: { Single: .05, Couple: .10, Family: .8, Catchup: .05, FineDining: 0 }, typicalFlow: 1500,
+        weekdayFactor: [1.2, 1.2, 1.2, 1.2, 1.4, .4, .4], monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1]
+      },
+      {
+        name: "重点高中商圈", demand: { Single: .55, Couple: .10, Family: .3, Catchup: .05, FineDining: 0 }, typicalFlow: 2800,
+        weekdayFactor: [0.25, 0.25, 0.25, 0.25, 2.5, 2, 1.5], monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1]
+      },
+      {
+        name: "普通高中商圈", demand: { Single: .4, Couple: .35, Family: .1, Catchup: .15, FineDining: 0 }, typicalFlow: 2200,
+        weekdayFactor: [.7, .7, .7, .7, 1.2, 1.8, 1.6], monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1]
+      },
+      {
+        name: "大学商圈", demand: { Single: .45, Couple: .3, Family: .05, Catchup: .15, FineDining: .05 }, typicalFlow: 7000,
+        weekdayFactor: [.7, .7, .7, .7, 1, 1.8, 1.6], monthFactor: [.95, .1, .3, 1.1, .95, .9, .1, .1, 1.25, 1.15, 1.05, 1]
+      },
+      {
+        name: "办公楼商圈", demand: { Single: .55, Couple: .05, Family: .05, Catchup: .25, FineDining: .10 }, typicalFlow: 4800,
+        weekdayFactor: [1.35, 1.35, 1.35, 1.35, 1.35, .2, .2], monthFactor: [.9, .25, .9, 1.0, 1.1, 1.15, 1.1, 1.15, 1.05, .95, .9, .95]
+      },
+      {
+        name: "步行街", demand: { Single: .15, Couple: .35, Family: .35, Catchup: .05, FineDining: .10 }, typicalFlow: 3000,
+        weekdayFactor: [.9, .9, .9, .9, 1, 1.2, 1.2], monthFactor: [.85, 1.25, .9, 1.0, 1.1, 1.15, 1.25, 1.25, 1.05, .95, .9, .9]
+      },
+      {
+        name: "小区底商", demand: { Single: .25, Couple: .2, Family: .4, Catchup: .1, FineDining: .05 }, typicalFlow: 2800,
+        weekdayFactor: [.95, .95, .95, .95, 1.05, 1.1, 1.1], monthFactor: [1, 1, 1, 1, 1.05, 1.05, 1.05, 1.05, 1, 1, 1, 1]
+      },
+      {
+        name: "火车站", demand: { Single: .7, Couple: .15, Family: .05, Catchup: .08, FineDining: .02 }, typicalFlow: 5000,
+        weekdayFactor: [.95, .95, .95, .95, 1, 1.35, 1.35], monthFactor: [1.1, 1.2, .95, 1, 1, 1, 1.05, 1.05, 1, 1.1, 1.2, 1.3]
+      },
+      {
+        name: "风景区", demand: { Single: .2, Couple: .35, Family: .3, Catchup: .1, FineDining: .05 }, typicalFlow: 16000,
+        weekdayFactor: [.6, .6, .6, .6, .8, 1.9, 1.8], monthFactor: [.7, .8, .95, 1.1, 1.2, 1.4, 1.5, 1.5, 1.3, 1.1, .9, .8]
+      },
     ],
       RETAIL_LIBRARY : [
       { name: "服装店", icon: "👗" }, { name: "书店", icon: "📚" }, { name: "家电店", icon: "📺" },
