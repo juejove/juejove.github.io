@@ -333,7 +333,7 @@
       const baseFlow = st.typicalFlow * 0.3 + st.typicalFlow * 0.7 * rDE();
       const streetAllowOutShop = Math.random() < 0.65;
       const depth = pick(DEPTH_LIST);
-      const priceSqm = Math.round(40 + baseFlow / 20 + Math.random() * 20);
+      const rentperSqm = Math.round(40 + baseFlow / 40 + Math.random() * 20);
       const lanes = generateLanes();
       const sourceTypes = getSourceTypes(st.name);
 
@@ -406,7 +406,7 @@
 
         const flow = Math.ceil(baseFlow * (1 + (Math.random() - 0.5) * 0.2));
         const distMult = calcDistMult(raw.slotIndex, raw.side, sources, lanes);
-        const rent = Math.round(area * priceSqm * (0.8 + Math.random() * 0.3) / 100) * 100;
+        const rent = Math.round(area * rentperSqm * (0.8 + Math.random() * 0.3) / 100) * 100;
 
         let food, retail, name;
         if (isShop) {
@@ -542,11 +542,13 @@
       );
     }
 
+const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
     // ── HUD ──────────────────────────────────────────────────────
     function HUD({ mode, money, setMoney, time, streetName, takenCount, energy, setEnergy, playerValue, setPlayerValue, loan, onLoan, myShops }) {
       const mo = time.getMonth();
       const moneyClass = money < 10000 ? 'red' : money < 30000 ? 'amber' : 'green';
-      const dateStr = `${time.getDate()} ${MONTHS[mo]} ${time.getFullYear()}`;
+      const dateStr = `${weekdays[time.getDay()]} - ${time.getDate()} ${MONTHS[mo]} ${time.getFullYear()}`;
       const statusStr = takenCount > 0 ? `已持有 ${takenCount} 家店` : '找铺子';
       const isGodMode = mode === 'god';
 
@@ -579,6 +581,8 @@
               <div className="hud-card"><div className="hud-label">精力</div><div className={`hud-value ${moneyClass}`}>{energy}</div></div>
               <div className="hud-card"><div className="hud-label">调查</div><div className="hud-value">{playerValue.investigate}</div></div>
               <div className="hud-card"><div className="hud-label">营销</div><div className="hud-value">{playerValue.market}</div></div>
+              <div className="hud-card"><div className="hud-label">厨艺</div><div className="hud-value">{playerValue.cook}</div></div>
+              <div className="hud-card"><div className="hud-label">服务</div><div className="hud-value">{playerValue.service}</div></div>
             </>
           )}
 
