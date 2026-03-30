@@ -2347,10 +2347,10 @@
         if (isSourceSite) {
           const sourceCount = [...(streetData?.streetA || []), ...(streetData?.streetB || [])]
             .filter(s => ['school', 'residential', '写字楼', '车站', '景点'].includes(s.type)).length;
-          const totalFlow = Math.round(streetData.street.typicalFlow * 1.26);
+          const totalFlow = Math.round(streetData.street.typicalFlow * (sourceCount>1 ?  1+0.2*sourceCount : 1));
           const flowPerSource = Math.round(totalFlow / Math.max(sourceCount, 1));
 
-          allHighMessages.push(`📍 ${site.name} 日均人流约${flowPerSource.toLocaleString()}人`);
+          //allHighMessages.push(`📍 ${site.name} 日均人流约${flowPerSource.toLocaleString()}人`);
 
           const weekendFactorSum = currentStreet.weekdayFactor?.[5]||1 + currentStreet.weekdayFactor?.[6]||1;
           const weekendPercent = Math.round(weekendFactorSum / 7 * 100);
@@ -2358,7 +2358,14 @@
           if (site.type === 'school') {
             const studentCount = flowPerSource * 30 / 31;
             const teacherCount = Math.ceil(studentCount / 30);
-            allMediumMessages.push(`👨‍🎓 学生数: ${studentCount.toLocaleString()}人`);
+            
+            const schoolType= pick(['小学', '初中']);
+            const classAmount = Math.floor(Math.random() * 7) + 3;
+            const grades=schoolType==='小学' ? 6 : 3;
+            const studentperClass = Math.ceil(studentCount / classAmount*grades);;
+            allHighMessages.push(`🏫 该学校为${schoolType}`);
+            allMediumMessages.push(`👨‍🎓 每个年级班级数: ${classAmount.toLocaleString()}班`);
+            allMediumMessages.push(`👨‍🎓 每个年级大概人数: ${studentperClass.toLocaleString()}人`);
             allMediumMessages.push(`👨‍🏫 老师数: 约${teacherCount}人`);
             allMediumMessages.push(`🗓️ 周末人流量占比: ${weekendPercent}%`);
             allLowMessages = gossip_LIBRARY_source.school
