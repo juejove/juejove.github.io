@@ -2,7 +2,7 @@ window.AppData = {
 FOOD_LIBRARY:[
 
 
-  { name: "包子", minCook:10, learning:3000, preparing:2, equip: 250000, smoke: false, standardKitchen: 8,kitchenAreaPP:4, dineIn: false, takeway: 0.4, grossMargin: 0.60, revPerStaff: 500, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [0.95, 0.9, 1, 1, 1, 0.9, 0.9, 1, 1, 1, 0.95, 0.95], minArea: 15 },
+  { name: "包子", minCook:10, learning:3000, preparing:2, equip: 2500, smoke: false, standardKitchen: 8,kitchenAreaPP:4, dineIn: false, takeway: 0.4, grossMargin: 0.60, revPerStaff: 500, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [0.95, 0.9, 1, 1, 1, 0.9, 0.9, 1, 1, 1, 0.95, 0.95], minArea: 15 },
 
   { name: "高档中餐", minCook:16, learning:15000, preparing:12, equip: 150000, smoke: true, standardKitchen: 25,kitchenAreaPP:7, dineIn: true, takeway: 0, grossMargin: 0.60, revPerStaff: 500, Attraction: { Single: .1, Couple: .9, Family: 1.2, Catchup: .8, FineDining: 1.5 }, materialCost: 80, monthFactor: [1.1, 1.1, 1, 1, 1, 1.05, 1.05, 1, 1, 1, 1.1, 1.2], minArea: 100 },
 
