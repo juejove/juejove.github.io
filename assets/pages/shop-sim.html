@@ -2034,6 +2034,8 @@
           setMyShops(shops => shops.map(sh => sh === shopConfig ? { ...sh, openDays: openDays + 1 } : sh));
         }
 
+        
+
         // Reset simulation for next day
         resetSim();
       };
@@ -2278,8 +2280,8 @@
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 260 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>桌位状态</div>
-            {!isDineIn && <div style={{ padding: 10, background: '#e8f5e9', borderRadius: 6, fontSize: 12, color: '#2d7a1f' }}>外卖/打包店，客人不就坐</div>}
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>桌位状态  {!isDineIn ? ' - 外卖/打包店，客人不就坐' : ''}</div>
+           
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {tables.map(t => (
                 <div key={t.id} style={{ width: 88, padding: '6px 8px', borderRadius: 6, fontSize: 11, background: stateColor[t.state] || '#f5f5f5', border: `1.5px solid ${t.state === 'empty' ? '#ddd' : '#aaa'}` }}>
@@ -3021,7 +3023,6 @@
                 setMyShops(ms => [...ms, shopConfig]);
                 setRecruitModal(null);
                 setActiveShopConfig(shopConfig);
-                setLoanModal(true);
                 showToast(`🎉 恭喜开店！${recruitModal.site.name} 正式营业！`);
               }}
               onSkip={() => {
@@ -3029,7 +3030,6 @@
                 setMyShops(ms => [...ms, shopConfig]);
                 setRecruitModal(null);
                 setActiveShopConfig(shopConfig);
-                setLoanModal(true);
                 showToast(`🎉 恭喜开店！${recruitModal.site.name} 正式营业！`);
               }}
             />
