@@ -21,7 +21,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { FOOD_LIBRARY, RETAIL_LIBRARY, STREET_LIBRARY ,SHOP_NAMES ,gossip_LIBRARY, gossip_LIBRARY_source  } = window.AppData;
+    const { FOOD_LIBRARY, RETAIL_LIBRARY, STREET_LIBRARY, SHOP_NAMES, gossip_LIBRARY, gossip_LIBRARY_source } = window.AppData;
 
     /**
      * @typedef {Object} FoodItem
@@ -133,55 +133,55 @@
     // ============================================================
     const RENO_BASE_PER_SQM = 400;
     const LAYOUT_COST = {
-      empty:   0,
-      front:   300,
+      empty: 0,
+      front: 300,
       kitchen: 480,
-      single:  240,
-      table4:  270,
-      sofa:    360,
-      round:   300,
-      vip:     420,
+      single: 240,
+      table4: 270,
+      sofa: 360,
+      round: 300,
+      vip: 420,
     };
     const ZONE_COLORS = {
-      empty:'#f5f5f5', front:'#ffd54f', kitchen:'#ef9a9a', single:'#a5d6a7',
-      table4:'#80cbc4', sofa:'#80deea', round:'#ce93d8', vip:'#ffab91'
+      empty: '#f5f5f5', front: '#ffd54f', kitchen: '#ef9a9a', single: '#a5d6a7',
+      table4: '#80cbc4', sofa: '#80deea', round: '#ce93d8', vip: '#ffab91'
     };
     const ZONE_INFO = {
-      empty:  { label:'清空(橡皮)', color:'#f5f5f5', w:1, h:1, seats:0, maxPeople:0, minW:1, minH:1, seatGroups:[] },
-      front:  { label:'前台/收银', color:'#ffd54f', w:2, h:1, seats:0, maxPeople:0, minW:2, minH:1, seatGroups:[] },
-      kitchen:{ label:'后厨',      color:'#ef9a9a', w:1, h:1, seats:0, maxPeople:0, minW:1, minH:1, seatGroups:[] },
-      single: { label:'单人位',    color:'#a5d6a7', w:1, h:1, seats:1, maxPeople:1,  minW:1, minH:1, seatGroups:['Single'] },
-      table4: { label:'四人小桌',  color:'#80cbc4', w:2, h:2, seats:4, maxPeople:4,  minW:2, minH:2, seatGroups:['Single','Couple','Family','Catchup'] },
-      sofa:   { label:'沙发卡座',  color:'#80deea', w:2, h:3, seats:4, maxPeople:4,  minW:2, minH:3, seatGroups:['Couple','Family','Catchup'] },
-      round:  { label:'大圆桌',    color:'#ce93d8', w:3, h:3, seats:10, maxPeople:10, minW:3, minH:3, seatGroups:['Family','Catchup','FineDining'] },
-      vip:    { label:'包间',      color:'#ffab91', w:4, h:4, seats:15, maxPeople:15, minW:4, minH:4, seatGroups:['Family','Catchup','FineDining'] },
+      empty: { label: '清空(橡皮)', color: '#f5f5f5', w: 1, h: 1, seats: 0, maxPeople: 0, minW: 1, minH: 1, seatGroups: [] },
+      front: { label: '前台/收银', color: '#ffd54f', w: 2, h: 1, seats: 0, maxPeople: 0, minW: 2, minH: 1, seatGroups: [] },
+      kitchen: { label: '后厨', color: '#ef9a9a', w: 1, h: 1, seats: 0, maxPeople: 0, minW: 1, minH: 1, seatGroups: [] },
+      single: { label: '单人位', color: '#a5d6a7', w: 1, h: 1, seats: 1, maxPeople: 1, minW: 1, minH: 1, seatGroups: ['Single'] },
+      table4: { label: '四人小桌', color: '#80cbc4', w: 2, h: 2, seats: 4, maxPeople: 4, minW: 2, minH: 2, seatGroups: ['Single', 'Couple', 'Family', 'Catchup'] },
+      sofa: { label: '沙发卡座', color: '#80deea', w: 2, h: 3, seats: 4, maxPeople: 4, minW: 2, minH: 3, seatGroups: ['Couple', 'Family', 'Catchup'] },
+      round: { label: '大圆桌', color: '#ce93d8', w: 3, h: 3, seats: 10, maxPeople: 10, minW: 3, minH: 3, seatGroups: ['Family', 'Catchup', 'FineDining'] },
+      vip: { label: '包间', color: '#ffab91', w: 4, h: 4, seats: 15, maxPeople: 15, minW: 4, minH: 4, seatGroups: ['Family', 'Catchup', 'FineDining'] },
     };
 
     // ============================================================
     // FRANCHISE BRAND POOL
     // ============================================================
     const FRANCHISE_BRANDS = [
-      { name:'味道工坊',   fee:15000 }, { name:'老家厨房',   fee:28000 },
-      { name:'粮食局',     fee:50000 }, { name:'香天下',     fee:80000 },
-      { name:'城市烟火',   fee:12000 }, { name:'小锅物语',   fee:20000 },
-      { name:'九宫格联盟', fee:100000 },{ name:'街坊联名',   fee:10000 },
-      { name:'食鲜团',     fee:35000 }, { name:'大口吃',     fee:22000 },
-      { name:'轻食联盟',   fee:18000 }, { name:'川湘帮',     fee:60000 },
+      { name: '味道工坊', fee: 15000 }, { name: '老家厨房', fee: 28000 },
+      { name: '粮食局', fee: 50000 }, { name: '香天下', fee: 80000 },
+      { name: '城市烟火', fee: 12000 }, { name: '小锅物语', fee: 20000 },
+      { name: '九宫格联盟', fee: 100000 }, { name: '街坊联名', fee: 10000 },
+      { name: '食鲜团', fee: 35000 }, { name: '大口吃', fee: 22000 },
+      { name: '轻食联盟', fee: 18000 }, { name: '川湘帮', fee: 60000 },
     ];
 
     // ============================================================
     // STAFF POOL
     // ============================================================
     const generateStaffPool = () => {
-      const firstNames = ['老王','小李','阿明','大强','小花','阿芳','大毛','小云','老陈','阿龙','小红','大海'];
+      const firstNames = ['老王', '小李', '阿明', '大强', '小花', '阿芳', '大毛', '小云', '老陈', '阿龙', '小红', '大海'];
       const pool = [];
       for (let i = 0; i < 6; i++) {
-        const name = firstNames[Math.floor(Math.random()*firstNames.length)] + (i+1);
-        const salary = 3000 + Math.floor(rDE()*5000);
-        const cook    = Math.max(1, Math.round(1 + rDE()*9));
-        const service = Math.max(1, Math.round(1 + rDE()*9));
-        const market  = Math.max(1, Math.round(1 + rDE()*9));
-        const age = 20 + Math.floor(Math.random()*30);
+        const name = firstNames[Math.floor(Math.random() * firstNames.length)] + (i + 1);
+        const salary = 3000 + Math.floor(rDE() * 5000);
+        const cook = Math.max(1, Math.round(1 + rDE() * 9));
+        const service = Math.max(1, Math.round(1 + rDE() * 9));
+        const market = Math.max(1, Math.round(1 + rDE() * 9));
+        const age = 20 + Math.floor(Math.random() * 30);
         const traits = [];
         if (cook >= 7) traits.push('食量惊人');
         if (service >= 7) traits.push('话很多');
@@ -190,7 +190,7 @@
         if (salary > 7000) traits.push('要价不低');
         const maxVal = Math.max(cook, service, market);
         const topAttr = cook === maxVal ? '🍳厨艺最强' : service === maxVal ? '😊待客最强' : '📣营销最强';
-        const stamina = 60 + Math.floor(Math.random()*41);
+        const stamina = 60 + Math.floor(Math.random() * 41);
         pool.push({ name, salary, cook, service, market, age, traits: traits.join('·') || '普通', topAttr, stamina, satisfaction: 8 });
       }
       return pool;
@@ -206,7 +206,7 @@
     // ============================================================
     // SECTION 3: GAME PARAMETERS
     // ============================================================
-    const GETINRATE = 0.040;
+    const GETINRATE = 0.020;
     const DAILY_EXPENSE = 70;
     const INITIAL_MONEY = 100000;
     const INITIAL_ENERGY = 100;
@@ -475,7 +475,7 @@
           }
           site.forecastCustomers = forecastCustomers(site, food, st, biz, time)
           site.currentRevenue = baseRevenue;
-          site.forecastRev =forecastCustomers(site, food, st, biz, time)
+          site.forecastRev = forecastCustomers(site, food, st, biz, time)
             * (food.materialCost / (1 - food.grossMargin));
         }
         return site;
@@ -542,10 +542,10 @@
       );
     }
 
-const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
     // ── HUD ──────────────────────────────────────────────────────
-    function HUD({ mode, money, setMoney, time, streetName, takenCount, energy, setEnergy, playerValue, setPlayerValue, loan, onLoan, myShops }) {
+    function HUD({ mode, money, setMoney, time, streetName, takenCount, energy, setEnergy, playerValue, setPlayerValue, loan, onLoan, myShops, onSleep }) {
       const mo = time.getMonth();
       const moneyClass = money < 10000 ? 'red' : money < 30000 ? 'amber' : 'green';
       const dateStr = `${weekdays[time.getDay()]} - ${time.getDate()} ${MONTHS[mo]} ${time.getFullYear()}`;
@@ -554,10 +554,10 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
 
       let salaryInfo = null;
       if (myShops && myShops.length > 0) {
-        const allStaff = myShops.flatMap(s => s.hiredStaff||[]);
-        const totalMonthly = allStaff.reduce((s,h)=>s+h.salary,0);
+        const allStaff = myShops.flatMap(s => s.hiredStaff || []);
+        const totalMonthly = allStaff.reduce((s, h) => s + h.salary, 0);
         if (totalMonthly > 0) {
-          const gameStartMs = new Date(2025,5,1).getTime();
+          const gameStartMs = new Date(2025, 5, 1).getTime();
           const daysSinceStart = Math.floor((time.getTime() - gameStartMs) / 86400000);
           const daysUntilPay = 30 - (daysSinceStart % 30);
           salaryInfo = { daysUntilPay, totalMonthly };
@@ -587,33 +587,38 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
           )}
 
           <div className="hud-card"><div className="hud-label">日期</div><div className="hud-value">{dateStr}</div></div>
-          <div className="hud-card"><div className="hud-label">商圈</div><div className="hud-value amber">{streetName||'—'}</div></div>
+          <div className="hud-card"><div className="hud-label">商圈</div><div className="hud-value amber">{streetName || '—'}</div></div>
           <div className="hud-card"><div className="hud-label">进度</div><div className="hud-value">{statusStr}</div></div>
 
           {salaryInfo && (
             <div className="hud-card" style={{ background: salaryInfo.daysUntilPay <= 3 ? '#fff3cd' : undefined }}>
               <div className="hud-label">发薪倒计时</div>
-              <div className="hud-value" style={{ fontSize:13, color: salaryInfo.daysUntilPay<=3?'#a06000':undefined }}>
+              <div className="hud-value" style={{ fontSize: 13, color: salaryInfo.daysUntilPay <= 3 ? '#a06000' : undefined }}>
                 {salaryInfo.daysUntilPay}天后
-                <div style={{ fontSize:10, color:'#888' }}>¥{salaryInfo.totalMonthly.toLocaleString()}/月</div>
+                <div style={{ fontSize: 10, color: '#888' }}>¥{salaryInfo.totalMonthly.toLocaleString()}/月</div>
               </div>
             </div>
           )}
 
           {loan && loan.daysLeft > 0 && (
-            <div className="hud-card" style={{ background:'#ffeaea' }}>
+            <div className="hud-card" style={{ background: '#ffeaea' }}>
               <div className="hud-label">贷款还款</div>
-              <div className="hud-value" style={{ fontSize:12, color:'#c0392b' }}>
+              <div className="hud-value" style={{ fontSize: 12, color: '#c0392b' }}>
                 ¥{Math.round(loan.dailyPayment)}/天
-                <div style={{ fontSize:10, color:'#888' }}>{loan.daysLeft}天剩余</div>
+                <div style={{ fontSize: 10, color: '#888' }}>{loan.daysLeft}天剩余</div>
               </div>
             </div>
           )}
           {!loan && onLoan && (
-            <div className="hud-card" style={{ cursor:'pointer', background:'#f0f7ff' }} onClick={onLoan}>
+            <div className="hud-card" style={{ cursor: 'pointer', background: '#f0f7ff' }} onClick={onLoan}>
               <div className="hud-label">贷款</div>
-              <div className="hud-value" style={{ fontSize:12, color:'#185fa5' }}>申请贷款</div>
+              <div className="hud-value" style={{ fontSize: 12, color: '#185fa5' }}>申请贷款</div>
             </div>
+          )}
+          {onSleep && (
+            <button className="btn" onClick={onSleep} style={{ marginTop: 8, width: '100%', background: '#5c6bc0', color: 'white' }}>
+              🛏️ 睡觉（-¥{70}生活费，+{15}精力，开始新的一天）
+            </button>
           )}
         </div>
       );
@@ -1067,7 +1072,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                     最小厨房：{f.standardKitchen}m² | 设备：¥{f.equip.toLocaleString()}
                   </div>
                   <div style={{ fontSize: 11, color: '#888' }}>
-                    出餐时间：{f.preparing}分钟/人 | 毛利：{Math.round(f.grossMargin*100)}%
+                    出餐时间：{f.preparing}分钟/人 | 毛利：{Math.round(f.grossMargin * 100)}%
                   </div>
                 </div>
               ))}
@@ -1101,9 +1106,9 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
     }
 
     // ── Modal: Franchise Selection ─────────────────────────────────
-    function FranchiseModal({ site, selectedFood, money, setMoney, onConfirm, onCancel }) {
+    function FranchiseModal({ site, selectedFood, money, setMoney, learnedFoodTech, setLearnedFoodTech, onConfirm, onCancel }) {
       const [brands] = useState(() => {
-        const shuffled = [...FRANCHISE_BRANDS].sort(() => Math.random()-0.5);
+        const shuffled = [...FRANCHISE_BRANDS].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, 5).map(b => {
           const boost = 0.05 + rDE() * 1.95;
           return { ...b, boost: parseFloat(boost.toFixed(2)) };
@@ -1111,12 +1116,20 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       });
       const [selected, setSelected] = useState(null);
 
+      if (!selectedFood) {
+        return null;
+      }
+
+      const alreadyLearned = learnedFoodTech?.includes(selectedFood.name);
+      const learningCost = alreadyLearned ? 0 : Number(selectedFood.learning || 0);
+      const canAffordLearning = alreadyLearned || money >= learningCost;
+
       return (
         <div className="modal-bg">
           <div className="modal" style={{ maxWidth: 520 }}>
             <div className="modal-title">🏷️ 是否选择加盟品牌？</div>
             <p style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
-              加盟后可获得品牌加持（+5%~+200%客流），但需要缴纳加盟费。加持效果两极分化——可能非常强，也可能基本没用。
+              加盟可获得品牌加持，也会永久保留{selectedFood.name}的制作技术；不加盟则需支付学习费 ¥{learningCost.toLocaleString()} 仍可掌握技术（永久保留）。（+5%~+200%客流），但不加盟后加持不稳定。
             </p>
 
             <div className="franchise-grid">
@@ -1147,7 +1160,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                 style={{ borderStyle: 'dashed' }}
               >
                 <strong>🚫 不加盟，独立经营</strong>
-                <div style={{ fontSize: 11, color: '#888' }}>无额外费用</div>
+                <div style={{ fontSize: 11, color: '#888' }}>需支付学习费 ¥{learningCost.toLocaleString()}</div>
               </div>
             </div>
 
@@ -1157,15 +1170,32 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                 {money < selected.fee && <span style={{ color: '#c0392b' }}> （资金不足！）</span>}
               </div>
             )}
+            {selected === 'none' && (
+              <div style={{ background: '#fff3cd', padding: '10px', borderRadius: 6, marginBottom: 10, fontSize: 12 }}>
+                <strong>学习费 ¥{learningCost.toLocaleString()}</strong> {alreadyLearned ? '（已学过，免费）' : '将立即扣除'}，<span style={{ color: '#2d7a1f' }}>技术永久保留</span>
+                {!canAffordLearning && <span style={{ color: '#c0392b' }}> （资金不足！）</span>}
+              </div>
+            )}
 
             <div className="modal-actions">
               <button className="btn" onClick={onCancel}>← 返回</button>
               <button
                 className="btn primary"
-                disabled={!selected || (selected !== 'none' && money < selected.fee)}
+                disabled={!selected || (selected !== 'none' && money < selected.fee) || (selected === 'none' && !canAffordLearning)}
                 onClick={() => {
-                  if (selected !== 'none') setMoney(m => m - selected.fee);
-                  onConfirm(selected === 'none' ? null : selected);
+                  if (selected !== 'none') {
+                    setMoney(m => m - selected.fee);
+                  } else if (!alreadyLearned && learningCost > 0) {
+                    setMoney(m => m - learningCost);
+                  }
+
+                  // 标记全局已学技术（加盟也算学会）
+                  setLearnedFoodTech(prev => {
+                    if (prev.includes(selectedFood.name)) return prev;
+                    return [...prev, selectedFood.name];
+                  });
+
+                  onConfirm(selected === 'none' ? null : selected, true);
                 }}
               >
                 确认，去装修布局 →
@@ -1177,7 +1207,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
     }
 
     // ── Modal: Renovation & Floor Plan ───────────────────────────
-    function FloorplanView({ shopData, money, setMoney, onConfirm, onCancel, readOnly=false }) {
+    function FloorplanView({ shopData, money, setMoney, onConfirm, onCancel, readOnly = false }) {
       const { site, selectedFood, franchise } = shopData;
       const gridW = site.frontage;
       const gridH = site.depth;
@@ -1205,29 +1235,60 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const doorW = Math.max(1, Math.round(gridW * 0.3));
       const doorStart = Math.floor((gridW - doorW) / 2);
 
-      const countZone = (z, src=cells) => {
+      const countZone = (z, src = cells) => {
         let count = 0;
         src.forEach(row => row.forEach(c => { if (c === z) count++; }));
         return count;
       };
 
-      const countTables = (z, src=cells) => {
+      const countTables = (z, src = cells) => {
         const info = ZONE_INFO[z];
         if (!info || info.seats === 0) return 0;
         const cells_count = countZone(z, src);
         return Math.floor(cells_count / (info.minW * info.minH));
       };
 
+      // Validation: Check if a cell touches corridor (empty space)
+      const touchesCorridor = (r, c, w = 1, h = 1) => {
+        for (let dr = -1; dr <= h; dr++) {
+          for (let dc = -1; dc <= w; dc++) {
+            if (dr === -1 || dr === h || dc === -1 || dc === w) {
+              const nr = r + dr, nc = c + dc;
+              if (nr >= 0 && nr < cells.length && nc >= 0 && nc < cells[0].length) {
+                if (!cells[nr][nc] || cells[nr][nc] === 'empty') return true;
+              }
+            }
+          }
+        }
+        return false;
+      };
+
+      // Validation: Check door clearance
+
+      const doorRow = gridH - 1;
+      const isDoorClear = () => {
+        for (let c = doorStart; c < doorStart + doorW; c++) {
+          if (cells[doorRow] && cells[doorRow][c]) return false;
+          if (cells[doorRow + 1] && cells[doorRow + 1][c]) return false;
+        }
+        return true;
+      };
+      const doorClearWarning = !isDoorClear();
+
+
       const kitchenArea = countZone('kitchen');
       const kitchenOk = kitchenArea >= selectedFood.standardKitchen;
-      const chefs = Math.max(1, Math.floor(kitchenArea / selectedFood.standardKitchen));
-      const areaRatio = kitchenArea / (selectedFood.standardKitchen * chefs);
-      const actualPrepTime = areaRatio >= 1 ? selectedFood.preparing : Math.round(selectedFood.preparing / areaRatio);
+      const chefs = kStaff.length;
+      const requiredAreaForChefs = selectedFood.kitchenAreaPP * chefs;
+      const recommendedArea = Math.max(selectedFood.standardKitchen, requiredAreaForChefs);
+      const areaRatio = kitchenArea / requiredAreaForChefs;
+      const efficiency = Math.min(1, kitchenArea / recommendedArea);
+      const actualPrepTime = areaRatio >= 1 ? selectedFood.preparing : Math.round(selectedFood.preparing * areaRatio);
 
       const frontArea = countZone('front');
       const frontStaff = Math.floor(frontArea / (ZONE_INFO.front.w * ZONE_INFO.front.h));
 
-      const seatZones = ['single','table4','sofa','round','vip'];
+      const seatZones = ['single', 'table4', 'sofa', 'round', 'vip'];
       const seatSummary = {};
       let totalSeats = 0;
       seatZones.forEach(z => {
@@ -1289,46 +1350,46 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const zoneList = Object.entries(ZONE_INFO);
 
       return (
-        <div style={{ userSelect:'none' }} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-            <div style={{ fontSize:15, fontWeight:600 }}>
+        <div style={{ userSelect: 'none' }} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>
               📐 空间布局 — {site.name}
-              {franchise && <span style={{ color:'#2d7a1f', fontSize:12, marginLeft:8 }}>🏷️ {franchise.name} +{Math.round(franchise.boost*100)}%</span>}
+              {franchise && <span style={{ color: '#2d7a1f', fontSize: 12, marginLeft: 8 }}>🏷️ {franchise.name} +{Math.round(franchise.boost * 100)}%</span>}
             </div>
             <button className="btn" onClick={onCancel}>← 返回街道</button>
           </div>
 
-          <div style={{ fontSize:11, color:'#888', marginBottom:8 }}>
-            {gridW}m × {gridH}m 室内{hasOutdoor?` + ${gridW}m × ${outdoorH}m 外摆区`:''} | 品类：{selectedFood.name} | 装修完成度：{existingReno}%
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 8 }}>
+            {gridW}m × {gridH}m 室内{hasOutdoor ? ` + ${gridW}m × ${outdoorH}m 外摆区` : ''} | 品类：{selectedFood.name} | 装修完成度：{existingReno}%
           </div>
 
           {!readOnly && (
-            <div style={{ background:'#f6f6f6', borderRadius:6, padding:'8px 12px', marginBottom:8, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
-              <span style={{ fontSize:12, fontWeight:500 }}>装修</span>
-              <span style={{ fontSize:11, color:'#666' }}>基础补全：¥{Math.round(baseRenoNeeded).toLocaleString()}</span>
-              <span style={{ fontSize:11, color:'#888' }}>+¥0/m²</span>
-              <input type="range" style={{ flex:1, minWidth:100 }} min={0} max={400} step={25}
+            <div style={{ background: '#f6f6f6', borderRadius: 6, padding: '8px 12px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, fontWeight: 500 }}>装修</span>
+              <span style={{ fontSize: 11, color: '#666' }}>基础补全：¥{Math.round(baseRenoNeeded).toLocaleString()}</span>
+              <span style={{ fontSize: 11, color: '#888' }}>+¥0/m²</span>
+              <input type="range" style={{ flex: 1, minWidth: 100 }} min={0} max={400} step={25}
                 value={renoExtra} onChange={e => setRenoExtra(Number(e.target.value))} />
-              <span style={{ fontSize:11 }}>+¥{renoExtra}/m²</span>
-              <span style={{ fontSize:12 }}>系数 <strong>{renoCoeff.toFixed(2)}x</strong></span>
-              <span style={{ fontSize:12 }}>装修费 <strong>¥{Math.round(totalRenoCost).toLocaleString()}</strong></span>
+              <span style={{ fontSize: 11 }}>+¥{renoExtra}/m²</span>
+              <span style={{ fontSize: 12 }}>系数 <strong>{renoCoeff.toFixed(2)}x</strong></span>
+              <span style={{ fontSize: 12 }}>装修费 <strong>¥{Math.round(totalRenoCost).toLocaleString()}</strong></span>
             </div>
           )}
 
-          <div style={{ display:'flex', gap:12, alignItems:'flex-start' }}>
-            <div style={{ flexShrink:0 }}>
-              <div style={{ display:'flex', marginBottom:2, marginLeft:0 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ display: 'flex', marginBottom: 2, marginLeft: 0 }}>
                 {Array(gridW).fill(0).map((_, c) => (
-                  <div key={c} style={{ width:CELL_PX, textAlign:'center', fontSize:11, fontWeight:700, color:'#222' }}>{c+1}</div>
+                  <div key={c} style={{ width: CELL_PX, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#222' }}>{c + 1}</div>
                 ))}
               </div>
               {Array(fullH).fill(0).map((_, r) => {
                 const isOutdoor = r >= gridH;
                 const isLastIndoorRow = r === gridH - 1;
                 return (
-                  <div key={r} style={{ display:'flex', alignItems:'center' }}>
-                    <div style={{ width:20, textAlign:'right', fontSize:11, fontWeight:700, color:'#222', marginRight:2, flexShrink:0 }}>
-                      {r+1}
+                  <div key={r} style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ width: 20, textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#222', marginRight: 2, flexShrink: 0 }}>
+                      {r + 1}
                     </div>
                     {Array(gridW).fill(0).map((_, c) => {
                       const cell = cells[r]?.[c];
@@ -1337,63 +1398,63 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                       const borderBottom = isLastIndoorRow && !isDoor ? '3px solid #222' : undefined;
                       const borderTop = r === 0 ? '3px solid #222' : undefined;
                       const borderLeft = c === 0 ? '3px solid #222' : undefined;
-                      const borderRight = c === gridW-1 ? '3px solid #222' : undefined;
-                      const doorStyle = isDoor ? { borderBottom:'2px solid #90caf9' } : {};
+                      const borderRight = c === gridW - 1 ? '3px solid #222' : undefined;
+                      const doorStyle = isDoor ? { borderBottom: '2px solid #90caf9' } : {};
                       let bg = cell ? ZONE_INFO[cell].color : (isOutdoor ? '#e8f5e9' : '#fff');
                       if (inPreview && selectedZone) bg = selectedZone === 'empty' ? '#fff' : ZONE_INFO[selectedZone]?.color + 'aa';
                       return (
                         <div key={c}
                           style={{
-                            width:CELL_PX, height:CELL_PX, background:bg,
-                            border:'1.5px dashed #aaa',
+                            width: CELL_PX, height: CELL_PX, background: bg,
+                            border: '1.5px dashed #aaa',
                             borderTop: borderTop || '1.5px dashed #aaa',
                             borderLeft: borderLeft || '1.5px dashed #aaa',
                             borderRight: borderRight || '1.5px dashed #aaa',
                             borderBottom: borderBottom || '1.5px dashed #aaa',
                             ...doorStyle,
                             cursor: readOnly ? 'default' : 'crosshair',
-                            boxSizing:'border-box',
-                            position:'relative',
+                            boxSizing: 'border-box',
+                            position: 'relative',
                           }}
                           onMouseDown={e => handleMouseDown(r, c, e)}
                           onMouseEnter={() => handleMouseEnter(r, c)}
-                          title={cell ? ZONE_INFO[cell].label : (isOutdoor?'外摆区':'')}
+                          title={cell ? ZONE_INFO[cell].label : (isOutdoor ? '外摆区' : '')}
                         />
                       );
                     })}
                     {isLastIndoorRow && (
-                      <div style={{ fontSize:9, color:'#90caf9', marginLeft:4 }}>← 大门({doorW}m)</div>
+                      <div style={{ fontSize: 9, color: '#90caf9', marginLeft: 4 }}>← 大门({doorW}m)</div>
                     )}
                   </div>
                 );
               })}
               {hasOutdoor && (
-                <div style={{ fontSize:10, color:'#81c784', marginTop:2, marginLeft:18 }}>↑ 外摆区 ({gridW}×{outdoorH}m)</div>
+                <div style={{ fontSize: 10, color: '#81c784', marginTop: 2, marginLeft: 18 }}>↑ 外摆区 ({gridW}×{outdoorH}m)</div>
               )}
             </div>
 
-            <div style={{ flex:1, minWidth:180 }}>
+            <div style={{ flex: 1, minWidth: 180 }}>
               {!readOnly && (
-                <div style={{ marginBottom:8 }}>
-                  <div style={{ fontSize:11, fontWeight:600, color:'#444', marginBottom:4 }}>涂色类型：</div>
-                  <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#444', marginBottom: 4 }}>涂色类型：</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {zoneList.map(([z, info]) => (
-                      <div key={z} style={{ display:'flex', gap:4, alignItems:'center' }}>
+                      <div key={z} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                         <button
-                          className={`zone-btn${selectedZone===z?' selected':''}`}
-                          style={{ borderLeft:`4px solid ${info.color}`, flex:1, fontSize:11, padding:'4px 6px' }}
-                          onClick={() => setSelectedZone(z===selectedZone ? null : z)}
+                          className={`zone-btn${selectedZone === z ? ' selected' : ''}`}
+                          style={{ borderLeft: `4px solid ${info.color}`, flex: 1, fontSize: 11, padding: '4px 6px' }}
+                          onClick={() => setSelectedZone(z === selectedZone ? null : z)}
                         >
                           {info.label}
-                          {info.seats>0 && <span style={{ color:'#888', fontSize:10 }}> {info.w}×{info.h}m</span>}
+                          {info.seats > 0 && <span style={{ color: '#888', fontSize: 10 }}> {info.w}×{info.h}m</span>}
                         </button>
-                        {selectedZone===z && (
+                        {selectedZone === z && (
                           <button onClick={() => setSelectedZone(null)}
-                            style={{ fontSize:10, padding:'2px 6px', background:'#fee', border:'1px solid #fcc', borderRadius:4, cursor:'pointer' }}>✕</button>
+                            style={{ fontSize: 10, padding: '2px 6px', background: '#fee', border: '1px solid #fcc', borderRadius: 4, cursor: 'pointer' }}>✕</button>
                         )}
                       </div>
                     ))}
-                    <button className="zone-btn" style={{ fontSize:11, padding:'4px 6px' }}
+                    <button className="zone-btn" style={{ fontSize: 11, padding: '4px 6px' }}
                       onClick={() => setCells(Array(fullH).fill(null).map(() => Array(gridW).fill(null)))}>
                       🗑️ 全部清空
                     </button>
@@ -1401,59 +1462,61 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                 </div>
               )}
 
-              <div style={{ background: kitchenOk?'#eaf3de':'#ffeaea', padding:'6px 8px', borderRadius:5, fontSize:11,
-                color: kitchenOk?'#2d7a1f':'#c0392b', marginBottom:6 }}>
+              <div style={{
+                background: kitchenOk ? '#eaf3de' : '#ffeaea', padding: '6px 8px', borderRadius: 5, fontSize: 11,
+                color: kitchenOk ? '#2d7a1f' : '#c0392b', marginBottom: 6
+              }}>
                 {kitchenOk
-                  ? `✅ 厨房${kitchenArea}m²，${chefs}厨师，出餐${actualPrepTime}分钟/人`
-                  : `⚠️ 厨房需≥${selectedFood.standardKitchen}m²（当前${kitchenArea}m²）`}
+                  ? `✅ 厨房${kitchenArea}m²，最多容纳${chefs}厨师，出餐${actualPrepTime}分钟/人`
+                  : `⚠️ 厨房推荐面积≥${Math.max(selectedFood.standardKitchen, selectedFood.kitchenAreaPP * chefs)}m²（当前${kitchenArea}m²）`}
               </div>
 
-              <div style={{ background:'#f6f6f6', padding:'6px 8px', borderRadius:5, fontSize:11, marginBottom:6 }}>
+              <div style={{ background: '#f6f6f6', padding: '6px 8px', borderRadius: 5, fontSize: 11, marginBottom: 6 }}>
                 前台：{frontArea}m²，可配{frontStaff}名前台
               </div>
 
-              <div style={{ background:'#f6f6f6', padding:'8px', borderRadius:5, fontSize:11, marginBottom:6 }}>
-                <div style={{ fontWeight:600, marginBottom:4 }}>座位统计</div>
+              <div style={{ background: '#f6f6f6', padding: '8px', borderRadius: 5, fontSize: 11, marginBottom: 6 }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>座位统计</div>
                 {seatZones.map(z => {
                   const tables = countTables(z);
                   const cells_z = countZone(z);
                   const info = ZONE_INFO[z];
                   const fullTables = countTables(z);
                   return cells_z > 0 ? (
-                    <div key={z} style={{ color:'#444', marginBottom:2, display:'flex', justifyContent:'space-between' }}>
-                      <span style={{ display:'inline-block', width:8, height:8, background:info.color, borderRadius:2, marginRight:4, flexShrink:0 }}/>
-                      <span style={{ flex:1 }}>{info.label}</span>
-                      <span style={{ color:'#666' }}>{fullTables}桌 · {fullTables*info.seats}座</span>
+                    <div key={z} style={{ color: '#444', marginBottom: 2, display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ display: 'inline-block', width: 8, height: 8, background: info.color, borderRadius: 2, marginRight: 4, flexShrink: 0 }} />
+                      <span style={{ flex: 1 }}>{info.label}</span>
+                      <span style={{ color: '#666' }}>{fullTables}桌 · {fullTables * info.seats}座</span>
                     </div>
                   ) : null;
                 })}
-                <div style={{ fontWeight:600, marginTop:4, borderTop:'1px solid #e0e0e0', paddingTop:4 }}>
+                <div style={{ fontWeight: 600, marginTop: 4, borderTop: '1px solid #e0e0e0', paddingTop: 4 }}>
                   合计：{totalSeats} 座
                 </div>
               </div>
 
               {!readOnly && (
-                <div style={{ background:'#f6f6f6', padding:'8px', borderRadius:5, fontSize:11, marginBottom:8 }}>
+                <div style={{ background: '#f6f6f6', padding: '8px', borderRadius: 5, fontSize: 11, marginBottom: 8 }}>
                   <div>布局造价：¥{layoutCost.toLocaleString()}</div>
                   <div>装修费：¥{Math.round(totalRenoCost).toLocaleString()}</div>
-                  <div style={{ fontWeight:600 }}>合计：¥{totalCost.toLocaleString()}
-                    {money < totalCost && <span style={{ color:'#c0392b' }}> 资金不足</span>}
+                  <div style={{ fontWeight: 600 }}>合计：¥{totalCost.toLocaleString()}
+                    {money < totalCost && <span style={{ color: '#c0392b' }}> 资金不足</span>}
                   </div>
-                  <div style={{ color:'#888', marginTop:4 }}>
-                    装修施工约需 <strong>{Math.max(1, Math.ceil(totalCost/3000))}</strong> 天（房租照付）
+                  <div style={{ color: '#888', marginTop: 4 }}>
+                    装修施工约需 <strong>{Math.max(1, Math.ceil(totalCost / 3000))}</strong> 天（房租照付）
                   </div>
                 </div>
               )}
 
               {readOnly && (
-                <div style={{ background:'#fff3cd', border:'1px solid #ffc107', padding:'8px', borderRadius:5, fontSize:11, marginBottom:8 }}>
-                  <div style={{ fontWeight:600, marginBottom:4 }}>🔨 重装修</div>
-                  <div style={{ color:'#666', marginBottom:6 }}>在原装修基础上+¥3000，施工3天（房租照付），装修系数重置</div>
-                  <button className="btn" style={{ fontSize:11, width:'100%' }}
+                <div style={{ background: '#fff3cd', border: '1px solid #ffc107', padding: '8px', borderRadius: 5, fontSize: 11, marginBottom: 8 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>🔨 重装修</div>
+                  <div style={{ color: '#666', marginBottom: 6 }}>在原装修基础上+¥3000，施工3天（房租照付），装修系数重置</div>
+                  <button className="btn" style={{ fontSize: 11, width: '100%' }}
                     onClick={() => {
-                      if (money < 3000) { alert('资金不足，无法重装修'); return; }
-                      setMoney(m=>m-3000);
-                      if(onConfirm) onConfirm(cells, seatSummary, totalSeats, Math.min(2.0, (renoCoeff||1)+0.3), 3000, countZone('kitchen'), frontStaff);
+                      if (!ensureMoney(3000)) return;
+                      setMoney(m => m - 3000);
+                      if (onConfirm) onConfirm(cells, seatSummary, totalSeats, Math.min(2.0, (renoCoeff || 1) + 0.3), 3000, countZone('kitchen'), frontStaff);
                     }}>
                     支付¥3000重装修（+3天停业）
                   </button>
@@ -1462,7 +1525,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
 
               {!readOnly && (
                 <button className="btn primary" disabled={money < totalCost}
-                  style={{ width:'100%' }}
+                  style={{ width: '100%' }}
                   onClick={() => {
                     setMoney(m => m - totalCost);
                     onConfirm(cells, seatSummary, totalSeats, renoCoeff, totalCost, countZone('kitchen'), frontStaff);
@@ -1480,40 +1543,42 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
     function RecruitModal({ site, onConfirm, onSkip }) {
       const [pool] = useState(() => generateStaffPool());
       const [hired, setHired] = useState([]);
-      const toggle = (staff) => setHired(prev => prev.includes(staff) ? prev.filter(s=>s!==staff) : [...prev,staff]);
-      const totalSalary = hired.reduce((s,h)=>s+h.salary,0);
+      const toggle = (staff) => setHired(prev => prev.includes(staff) ? prev.filter(s => s !== staff) : [...prev, staff]);
+      const totalSalary = hired.reduce((s, h) => s + h.salary, 0);
       return (
         <div className="modal-bg">
-          <div className="modal" style={{ maxWidth:560 }}>
+          <div className="modal" style={{ maxWidth: 560 }}>
             <div className="modal-title">👥 招募员工 — {site.name}</div>
-            <p style={{ fontSize:12, color:'#666', marginBottom:12 }}>
+            <p style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
               点击选择员工。开店后在模拟界面安排岗位分工（含老板本人）。
             </p>
             <div className="staff-grid">
-              {pool.map((s,i) => (
+              {pool.map((s, i) => (
                 <div key={i}
-                  style={{ border:hired.includes(s)?'2px solid #185fa5':'1.5px solid #ddd',
-                    background:hired.includes(s)?'#e6f1fb':'#fff', cursor:'pointer', borderRadius:6, padding:10 }}
-                  onClick={()=>toggle(s)}>
-                  <div style={{ fontWeight:600, fontSize:13 }}>{s.name}</div>
-                  <div style={{ fontSize:11, color:'#888' }}>{s.age}岁 · {s.traits}</div>
-                  <div style={{ fontSize:13, color:'#c0392b', fontWeight:500, margin:'4px 0' }}>月薪 ¥{s.salary.toLocaleString()}</div>
-                  <div style={{ fontSize:11, color:'#185fa5', fontWeight:600 }}>{s.topAttr}</div>
-                  <div style={{ display:'flex', gap:8, marginTop:4, fontSize:10, color:'#666' }}>
+                  style={{
+                    border: hired.includes(s) ? '2px solid #185fa5' : '1.5px solid #ddd',
+                    background: hired.includes(s) ? '#e6f1fb' : '#fff', cursor: 'pointer', borderRadius: 6, padding: 10
+                  }}
+                  onClick={() => toggle(s)}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{s.name}</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>{s.age}岁 · {s.traits}</div>
+                  <div style={{ fontSize: 13, color: '#c0392b', fontWeight: 500, margin: '4px 0' }}>月薪 ¥{s.salary.toLocaleString()}</div>
+                  <div style={{ fontSize: 11, color: '#185fa5', fontWeight: 600 }}>{s.topAttr}</div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4, fontSize: 10, color: '#666' }}>
                     <span>耐力 {s.stamina}</span><span>满意度 {s.satisfaction}/10</span>
                   </div>
                 </div>
               ))}
             </div>
-            {hired.length>0 && (
-              <div style={{ fontSize:12, background:'#f6f6f6', padding:'8px', borderRadius:6, marginBottom:8 }}>
+            {hired.length > 0 && (
+              <div style={{ fontSize: 12, background: '#f6f6f6', padding: '8px', borderRadius: 6, marginBottom: 8 }}>
                 已选 {hired.length} 人 · 月薪合计 ¥{totalSalary.toLocaleString()}
               </div>
             )}
             <div className="modal-actions">
               <button className="btn" onClick={onSkip}>暂不招人</button>
-              <button className="btn primary" onClick={()=>onConfirm(hired)}>
-                {hired.length>0?`雇佣 ${hired.length} 人，完成开店！`:'跳过'}
+              <button className="btn primary" onClick={() => onConfirm(hired)}>
+                {hired.length > 0 ? `雇佣 ${hired.length} 人，完成开店！` : '跳过'}
               </button>
             </div>
           </div>
@@ -1522,19 +1587,26 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
     }
 
     // ── Staff Assignment Modal ─────────────────────────────────────
-    function StaffAssignModal({ allStaff, initialAssignment, onConfirm, onCancel }) {
+    function StaffAssignModal({ allStaff, initialAssignment, onConfirm, onCancel, selectedFood }) {
       const [assignment, setAssignment] = useState(() =>
-        initialAssignment || { kitchen:[], front:[], market:[] }
+        initialAssignment || { kitchen: [], front: [], market: [] }
       );
       const zones = [
-        { key:'kitchen', label:'🍳 后厨', color:'#ffebee', border:'#ef9a9a', desc:'厨艺越高，出餐越快' },
-        { key:'front',   label:'😊 前厅', color:'#e8f5e9', border:'#a5d6a7', desc:'接待、点单、结账' },
-        { key:'market',  label:'📣 营销', color:'#e3f2fd', border:'#90caf9', desc:'吸引顾客与口碑' },
+        { key: 'kitchen', label: '🍳 后厨', color: '#ffebee', border: '#ef9a9a', desc: '厨艺越高，出餐越快' },
+        { key: 'front', label: '😊 前厅', color: '#e8f5e9', border: '#a5d6a7', desc: '接待、点单、结账' },
+        { key: 'market', label: '📣 营销', color: '#e3f2fd', border: '#90caf9', desc: '吸引顾客与口碑' },
       ];
       const toggleAssign = (name, zone) => {
         setAssignment(prev => {
           const inZone = prev[zone].includes(name);
-          return { ...prev, [zone]: inZone ? prev[zone].filter(n=>n!==name) : [...prev[zone], name] };
+          if (!inZone && zone === 'kitchen' && selectedFood) {
+            const staff = allStaff.find(s => s.name === name);
+            if (staff && staff.cook < selectedFood.minCook) {
+              alert(`${name} 的厨艺 (${staff.cook}) 不足，无法进入后厨（需要 ${selectedFood.minCook}）`);
+              return prev;
+            }
+          }
+          return { ...prev, [zone]: inZone ? prev[zone].filter(n => n !== name) : [...prev[zone], name] };
         });
       };
       const kitchenOk = assignment.kitchen.length > 0;
@@ -1542,45 +1614,47 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const canStart = kitchenOk && frontOk;
       return (
         <div className="modal-bg">
-          <div className="modal" style={{ maxWidth:640 }}>
+          <div className="modal" style={{ maxWidth: 640 }}>
             <div className="modal-title">🏢 安排岗位分工</div>
-            <p style={{ fontSize:12, color:'#666', marginBottom:10 }}>
+            <p style={{ fontSize: 12, color: '#666', marginBottom: 10 }}>
               每人可同时分配到多个区域。<strong>后厨和前厅各至少一人</strong>才能开始营业。老板本人也算人力。
             </p>
-            <div style={{ display:'flex', gap:10, marginBottom:12, flexWrap:'wrap' }}>
-              {zones.map(z=>(
-                <div key={z.key} style={{ flex:1, minWidth:160, background:z.color, border:`2px solid ${z.border}`, borderRadius:8, padding:'8px 10px' }}>
-                  <div style={{ fontWeight:700, fontSize:13, marginBottom:2 }}>{z.label}</div>
-                  <div style={{ fontSize:10, color:'#666', marginBottom:8 }}>{z.desc}</div>
-                  <div style={{ display:'flex', flexWrap:'wrap', gap:4, minHeight:30 }}>
-                    {assignment[z.key].map(name=>(
-                      <div key={name} style={{ background:'#fff', border:'1px solid #ccc', borderRadius:12, padding:'2px 8px', fontSize:11, cursor:'pointer' }}
-                        onClick={()=>toggleAssign(name, z.key)}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+              {zones.map(z => (
+                <div key={z.key} style={{ flex: 1, minWidth: 160, background: z.color, border: `2px solid ${z.border}`, borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{z.label}</div>
+                  <div style={{ fontSize: 10, color: '#666', marginBottom: 8 }}>{z.desc}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, minHeight: 30 }}>
+                    {assignment[z.key].map(name => (
+                      <div key={name} style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 12, padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}
+                        onClick={() => toggleAssign(name, z.key)}>
                         {name} ✕
                       </div>
                     ))}
-                    {assignment[z.key].length===0 && <span style={{ fontSize:10, color:'#bbb' }}>点击人员添加</span>}
+                    {assignment[z.key].length === 0 && <span style={{ fontSize: 10, color: '#bbb' }}>点击人员添加</span>}
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ fontSize:12, fontWeight:600, marginBottom:6 }}>全体人员（点击按钮分配岗位）</div>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:12 }}>
-              {allStaff.map((s,i)=>{
-                const satColor = s.satisfaction>=7?'#2d7a1f':s.satisfaction>=5?'#a06000':'#c0392b';
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>全体人员（点击按钮分配岗位）</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+              {allStaff.map((s, i) => {
+                const satColor = s.satisfaction >= 7 ? '#2d7a1f' : s.satisfaction >= 5 ? '#a06000' : '#c0392b';
                 return (
-                  <div key={i} style={{ border:'1.5px solid #ddd', borderRadius:8, padding:'8px 10px', background:'#fafafa', minWidth:140 }}>
-                    <div style={{ fontWeight:600, fontSize:12 }}>{s.name}{s.isBoss?' 👑':''}</div>
-                    <div style={{ fontSize:10, color:'#888', marginBottom:4 }}>{s.topAttr} · <span style={{ color:satColor }}>满意度{s.satisfaction}/10</span></div>
-                    <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-                      {zones.map(z=>{
+                  <div key={i} style={{ border: '1.5px solid #ddd', borderRadius: 8, padding: '8px 10px', background: '#fafafa', minWidth: 140 }}>
+                    <div style={{ fontWeight: 600, fontSize: 12 }}>{s.name}{s.isBoss ? ' 👑' : ''}</div>
+                    <div style={{ fontSize: 10, color: '#888', marginBottom: 4 }}>{s.topAttr} · <span style={{ color: satColor }}>满意度{s.satisfaction}/10</span></div>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {zones.map(z => {
                         const active = assignment[z.key].includes(s.name);
                         return (
                           <button key={z.key}
-                            onClick={()=>toggleAssign(s.name, z.key)}
-                            style={{ fontSize:9, padding:'2px 6px', borderRadius:10,
-                              background:active?z.border:'#eee', border:`1px solid ${active?z.border:'#ccc'}`,
-                              color:active?'#333':'#888', cursor:'pointer' }}>
+                            onClick={() => toggleAssign(s.name, z.key)}
+                            style={{
+                              fontSize: 9, padding: '2px 6px', borderRadius: 10,
+                              background: active ? z.border : '#eee', border: `1px solid ${active ? z.border : '#ccc'}`,
+                              color: active ? '#333' : '#888', cursor: 'pointer'
+                            }}>
                             {z.label.split(' ')[0]}
                           </button>
                         );
@@ -1591,13 +1665,13 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
               })}
             </div>
             {!canStart && (
-              <div style={{ background:'#ffeaea', border:'1px solid #f88', borderRadius:6, padding:'8px', fontSize:12, color:'#c0392b', marginBottom:8 }}>
+              <div style={{ background: '#ffeaea', border: '1px solid #f88', borderRadius: 6, padding: '8px', fontSize: 12, color: '#c0392b', marginBottom: 8 }}>
                 ⚠️ 后厨和前厅各至少需要一人才能开业
               </div>
             )}
-            <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button className="btn" onClick={onCancel}>取消</button>
-              <button className="btn primary" disabled={!canStart} onClick={()=>onConfirm(assignment)}>
+              <button className="btn primary" disabled={!canStart} onClick={() => onConfirm(assignment)}>
                 确认分工，开始营业 ▶
               </button>
             </div>
@@ -1611,38 +1685,48 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
     const TICK_MS = Math.round(60000 / 720);
 
     const PARTY_TYPES = [
-      { type:'Single',    emoji:'🧍' },
-      { type:'Couple',    emoji:'👫' },
-      { type:'Family',    emoji:'👨‍👩‍👧‍👦' },
-      { type:'Catchup',   emoji:'👥' },
-      { type:'FineDining',emoji:'🥂' },
+      { type: 'Single', emoji: '🧍' },
+      { type: 'Couple', emoji: '👫' },
+      { type: 'Family', emoji: '👨‍👩‍👧‍👦' },
+      { type: 'Catchup', emoji: '👥' },
+      { type: 'FineDining', emoji: '🥂' },
     ];
-    const GROUP_AVG_SIZE = { Single:1, Couple:2, Family:4, Catchup:4, FineDining:10 };
+    const GROUP_AVG_SIZE = { Single: 1, Couple: 2, Family: 4, Catchup: 4, FineDining: 10 };
 
     const SEAT_ACCEPTS = {
       single: ['Single'],
-      table4: ['Single','Couple','Family','Catchup'],
-      sofa:   ['Couple','Family','Catchup'],
-      round:  ['Family','Catchup','FineDining'],
-      vip:    ['Family','Catchup','FineDining'],
+      table4: ['Single', 'Couple', 'Family', 'Catchup'],
+      sofa: ['Couple', 'Family', 'Catchup'],
+      round: ['Family', 'Catchup', 'FineDining'],
+      vip: ['Family', 'Catchup', 'FineDining'],
     };
 
     const DINE_TIME = (food) => {
-      const base = food.preparing<=3?15:food.preparing<=6?20:food.preparing<=10?30:45;
-      return base + Math.floor(Math.random()*15);
+      const base = food.preparing <= 3 ? 15 : food.preparing <= 6 ? 20 : food.preparing <= 10 ? 30 : 45;
+      return base + Math.floor(Math.random() * 15);
     };
 
-    function SimulationView({ shopConfig, currentStreet, time, onBack, money, setMoney, energy, setEnergy, loan, setLoan, setMyShops }) {
+    function SimulationView({ shopConfig, currentStreet, time, onBack, money, setMoney, energy, setEnergy, loan, setLoan, setMyShops, onSleep }) {
       const { site, selectedFood, franchise, seatSummary, cells, hiredStaff } = shopConfig;
-      const isDineIn = selectedFood.dineIn;
+      const baseIsDineIn = selectedFood.dineIn;
+      const isDineIn = baseIsDineIn || Math.random() < 0.25;
+      const [unitPrice, setUnitPrice] = useState(() => {
+        const basePrice = selectedFood.materialCost / (1 - selectedFood.grossMargin);
+        return Math.round(basePrice);
+      });
+      const [priceSliderValue, setPriceSliderValue] = useState(50);
+      const currentGrossMargin = (unitPrice - selectedFood.materialCost) / unitPrice;
+      const priceCoefficient = 1 - (currentGrossMargin - selectedFood.grossMargin) * 2;
 
       const buildTables = () => {
         const tables = [];
         if (!seatSummary) return tables;
-        Object.entries(seatSummary).forEach(([zone,v]) => {
-          for (let i=0;i<v.tables;i++) {
-            tables.push({ id:`${zone}_${i}`, zone, label:`${ZONE_INFO[zone].label}${i+1}`,
-              capacity:ZONE_INFO[zone].seats, state:'empty', party:null, timer:0 });
+        Object.entries(seatSummary).forEach(([zone, v]) => {
+          for (let i = 0; i < v.tables; i++) {
+            tables.push({
+              id: `${zone}_${i}`, zone, label: `${ZONE_INFO[zone].label}${i + 1}`,
+              capacity: ZONE_INFO[zone].seats, state: 'empty', party: null, timer: 0
+            });
           }
         });
         return tables;
@@ -1652,6 +1736,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const [queue, setQueue] = useState([]);
       const [simMin, setSimMin] = useState(600);
       const [running, setRunning] = useState(false);
+      const [isOpen, setIsOpen] = useState(false);
       const [log, setLog] = useState([]);
       const [revenue, setRevenue] = useState(0);
       const [served, setServed] = useState(0);
@@ -1663,9 +1748,11 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       // CHANGE 1: Only show assignment modal if no assignment has been set yet (first time)
       // Assignment is stored outside so it persists between view switches
       const [staffState, setStaffState] = useState(() => {
-        const boss = { name:'老板(我)', salary:0, cook:5, service:5, market:5, age:0,
-          traits:'', topAttr:'💼综合', stamina:80, satisfaction:10, isBoss:true };
-        return [boss, ...(hiredStaff||[]).map(s=>({...s}))];
+        const boss = {
+          name: '老板(我)', salary: 0, cook: 5, service: 5, market: 5, age: 0,
+          traits: '', topAttr: '💼综合', stamina: 80, satisfaction: 10, isBoss: true
+        };
+        return [boss, ...(hiredStaff || []).map(s => ({ ...s }))];
       });
       const [raiseModal, setRaiseModal] = useState(null);
 
@@ -1673,27 +1760,29 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const [assignment, setAssignment] = useState(shopConfig.savedAssignment || null);
       const [showAssignModal, setShowAssignModal] = useState(!shopConfig.savedAssignment);
 
-      const franchiseBoost = franchise?(1+franchise.boost):1;
+      const franchiseBoost = franchise ? (1 + franchise.boost) : 1;
+      const openDays = Number.isFinite(shopConfig.openDays) ? shopConfig.openDays : 0;
+      const openingBonus = openDays >= 30 ? 1 : Math.max(1, 1.8 - (openDays * (0.8 / 30)));
 
       const dayOfWeek = time.getDay();
-      const streetWeekdayFactor = currentStreet?(currentStreet.weekdayFactor?.[dayOfWeek]||1):1;
-      const currentRenoCoeff = shopConfig.renoCoeff||1;
-      const bizBoost = { reputation:1, renovation:currentRenoCoeff };
+      const streetWeekdayFactor = currentStreet ? (currentStreet.weekdayFactor?.[dayOfWeek] || 1) : 1;
+      const currentRenoCoeff = shopConfig.renoCoeff || 1;
+      const bizBoost = { reputation: 1, renovation: currentRenoCoeff };
       const forecastedCustomers = currentStreet
-        ? forecastCustomers(site,selectedFood,currentStreet,bizBoost,time)*streetWeekdayFactor*franchiseBoost : 50;
+        ? forecastCustomers(site, selectedFood, currentStreet, bizBoost, time) * streetWeekdayFactor * franchiseBoost * openingBonus : 50;
       const dailyCustomers = Math.max(1, forecastedCustomers);
-      const peakArrivalRate = dailyCustomers/720;
+      const peakArrivalRate = dailyCustomers / 720;
 
       const computeGroupWeights = () => {
-        if (!currentStreet) return {Single:1,Couple:0.5,Family:0.25,Catchup:0.25,FineDining:0.1};
-        const d=currentStreet.demand, a=selectedFood.Attraction;
-        const raw={};let sumP=0;
-        ['Single','Couple','Family','Catchup','FineDining'].forEach(t=>{
-          const pf=(d[t]||0)*(a[t]||0); raw[t]=pf; sumP+=pf;
+        if (!currentStreet) return { Single: 1, Couple: 0.5, Family: 0.25, Catchup: 0.25, FineDining: 0.1 };
+        const d = currentStreet.demand, a = selectedFood.Attraction;
+        const raw = {}; let sumP = 0;
+        ['Single', 'Couple', 'Family', 'Catchup', 'FineDining'].forEach(t => {
+          const pf = (d[t] || 0) * (a[t] || 0); raw[t] = pf; sumP += pf;
         });
-        const w={};
-        ['Single','Couple','Family','Catchup','FineDining'].forEach(t=>{
-          w[t]=sumP>0?(raw[t]/sumP)/GROUP_AVG_SIZE[t]:0;
+        const w = {};
+        ['Single', 'Couple', 'Family', 'Catchup', 'FineDining'].forEach(t => {
+          w[t] = sumP > 0 ? (raw[t] / sumP) / GROUP_AVG_SIZE[t] : 0;
         });
         return w;
       };
@@ -1712,7 +1801,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
 
       const flushDisplay = () => {
         const s = simRef.current;
-        setTables([...s.tables.map(t=>({...t}))]);
+        setTables([...s.tables.map(t => ({ ...t }))]);
         setQueue([...s.queue]);
         setSimMin(s.simMin);
         setRevenue(s.revenue);
@@ -1722,403 +1811,475 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
         servedRef.current = s.served;
       };
 
-      const timeStr = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+      const timeStr = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
       const addLog = (msg) => {
-        simRef.current.log = [{msg}, ...simRef.current.log].slice(0, 60);
+        simRef.current.log = [{ msg }, ...simRef.current.log].slice(0, 60);
       };
 
       const spawnParty = () => {
-        const keys=['Single','Couple','Family','Catchup','FineDining'];
-        const wts=keys.map(k=>groupWeights[k]||0);
-        const total=wts.reduce((a,b)=>a+b,0);
-        let r=Math.random()*total, chosenType='Single';
-        for(let i=0;i<keys.length;i++){r-=wts[i];if(r<=0){chosenType=keys[i];break;}}
-        const pt=PARTY_TYPES.find(p=>p.type===chosenType)||PARTY_TYPES[0];
+        const keys = ['Single', 'Couple', 'Family', 'Catchup', 'FineDining'];
+        const wts = keys.map(k => groupWeights[k] || 0);
+        const total = wts.reduce((a, b) => a + b, 0);
+        let r = Math.random() * total, chosenType = 'Single';
+        for (let i = 0; i < keys.length; i++) { r -= wts[i]; if (r <= 0) { chosenType = keys[i]; break; } }
+        const pt = PARTY_TYPES.find(p => p.type === chosenType) || PARTY_TYPES[0];
         let size;
-        if(chosenType==='Single')size=1;
-        else if(chosenType==='Couple')size=2;
-        else if(chosenType==='Family')size=2+Math.floor(Math.random()*5);
-        else if(chosenType==='Catchup')size=2+Math.floor(Math.random()*5);
-        else if(chosenType==='FineDining')size=5+Math.floor(Math.random()*11);
-        else size=1;
-        return {id:Date.now()+Math.random(),type:chosenType,size,emoji:pt.emoji,arrivedAt:simRef.current.simMin,waitedMin:0};
+        if (chosenType === 'Single') size = 1;
+        else if (chosenType === 'Couple') size = 2;
+        else if (chosenType === 'Family') size = 2 + Math.floor(Math.random() * 5);
+        else if (chosenType === 'Catchup') size = 2 + Math.floor(Math.random() * 5);
+        else if (chosenType === 'FineDining') size = 5 + Math.floor(Math.random() * 11);
+        else size = 1;
+        return { id: Date.now() + Math.random(), type: chosenType, size, emoji: pt.emoji, arrivedAt: simRef.current.simMin, waitedMin: 0 };
       };
 
       const tickSim = React.useCallback(() => {
         const s = simRef.current;
-        if(s.dayEnded) return;
+        if (s.dayEnded) return;
         s.simMin += SIM_SPEED;
 
         // Day end at 22:00
-        if(s.simMin >= 22*60){
-          s.simMin = 22*60;
+        if (s.simMin >= 22 * 60) {
+          s.simMin = 22 * 60;
           s.dayEnded = true;
           setDayEnded(true);
-          const dailyRent=Math.round(site.rent/30);
-          const totalMonthly=(hiredStaff||[]).reduce((a,h)=>a+h.salary,0);
-          const staffSalaryDaily=Math.round(totalMonthly/30);
-          const loanDeduction=loan?loan.dailyPayment:0;
-          // CHANGE 3: Water/electricity = 33 base + 1.5% of revenue
-          const utilityDaily = Math.round(33 + s.revenue * 0.015);
-          // CHANGE 3: Boss energy cost = revenue / 200
-          const bossEnergyDrain = Math.round(s.revenue / 200);
+          const dailyRent = Math.round(site.rent / 30);
+          const totalMonthly = (hiredStaff || []).reduce((a, h) => a + h.salary, 0);
+          const staffSalaryDaily = Math.round(totalMonthly / 30);
+          const loanDeduction = loan ? loan.dailyPayment : 0;
+
+          const utilityDaily = Math.round(site.area / 2 + s.revenue * 0.015);
+          // CHANGE 3: Boss energy cost = revenue / 200, only if open
+          const bossEnergyDrain = isOpen ? Math.round(s.revenue / 200) : 0;
           setDaySummary({ dailyRent, staffSalaryDaily, loanDeduction, utilityDaily, bossEnergyDrain });
-          const dailyDecay=Math.pow(0.96,1/30);
-          if(setMyShops)setMyShops(shops=>shops.map(sh=>
-            sh===shopConfig?{...sh,renoCoeff:Math.max(0.1,(sh.renoCoeff||1)*dailyDecay)}:sh
+          const dailyDecay = Math.pow(0.96, 1 / 30);
+          if (setMyShops) setMyShops(shops => shops.map(sh =>
+            sh === shopConfig ? { ...sh, renoCoeff: Math.max(0.1, (sh.renoCoeff || 1) * dailyDecay) } : sh
           ));
-          setStaffState(prev=>{
-            const perStaff=Math.ceil(s.served/Math.max(1,prev.filter(x=>!x.isBoss).length));
-            return prev.map(staff=>{
-              if(staff.isBoss)return staff;
-              let sat=staff.satisfaction;
-              if(perStaff>staff.stamina)sat=Math.max(0,sat-1);
-              return {...staff,satisfaction:sat};
+          setStaffState(prev => {
+            const perStaff = Math.ceil(s.served / Math.max(1, prev.filter(x => !x.isBoss).length));
+            return prev.map(staff => {
+              if (staff.isBoss) return staff;
+              let sat = staff.satisfaction;
+              if (perStaff > staff.stamina) sat = Math.max(0, sat - 1);
+              return { ...staff, satisfaction: sat };
             });
           });
-          if(loan&&loan.daysLeft>0&&setMoney){
-            setMoney(m=>m-loan.dailyPayment);
-            if(setLoan)setLoan(prev=>prev?{...prev,daysLeft:prev.daysLeft-1}:null);
+          if (loan && loan.daysLeft > 0 && setMoney) {
+            setMoney(m => m - loan.dailyPayment);
+            if (setLoan) setLoan(prev => prev ? { ...prev, daysLeft: prev.daysLeft - 1 } : null);
           }
           setRunning(false);
           flushDisplay();
           return;
         }
 
-        const nm = s.simMin;
-        const isOpen = nm>=10*60&&nm<21*60;
+        if (isOpen) {
+          const nm = s.simMin;
+          const isOpenTime = nm >= 10 * 60 && nm < 21 * 60;
 
-        const _getPrepTime = () => {
-          const kNames=assignment?assignment.kitchen:[];
-          const kStaff=staffState.filter(s=>kNames.includes(s.name));
-          const avgCook=kStaff.length>0?kStaff.reduce((acc,p)=>acc+(p.cook||5),0)/kStaff.length:5;
-          const cookMult=1.3-(avgCook-1)*0.06;
-          const lowSatP=kStaff.some(p=>p.satisfaction<3)?1.3:1.0;
-          const kCells=cells?cells.flat().filter(c=>c==='kitchen').length:selectedFood.standardKitchen;
-          const chefCount=Math.max(1,Math.floor(kCells/selectedFood.standardKitchen));
-          const areaRatio=kCells/(selectedFood.standardKitchen*chefCount);
-          const base=areaRatio>=1?selectedFood.preparing:Math.round(selectedFood.preparing/areaRatio);
-          return Math.max(1,Math.round(base*cookMult*lowSatP));
-        };
-        const _getCheckoutTime = () => {
-          const fNames=assignment?assignment.front:[];
-          const fStaff=staffState.filter(s=>fNames.includes(s.name));
-          return fStaff.some(p=>p.satisfaction<3)?4:2;
-        };
+          const _getPrepTime = () => {
+            const kNames = assignment ? assignment.kitchen : [];
+            const kStaff = staffState.filter(s => kNames.includes(s.name));
+            const avgCook = kStaff.length > 0 ? kStaff.reduce((acc, p) => acc + (p.cook || 5), 0) / kStaff.length : 5;
+            const cookMult = 1.3 - (avgCook - 1) * 0.06;
+            const lowSatP = kStaff.some(p => p.satisfaction < 3) ? 1.3 : 1.0;
+            const kCells = cells ? cells.flat().filter(c => c === 'kitchen').length : selectedFood.kitchenAreaPP;
+            const chefCount = Math.max(1, Math.floor(kCells / selectedFood.kitchenAreaPP));
+            const areaRatio = kCells / (selectedFood.kitchenAreaPP * chefCount);
+            const base = areaRatio >= 1 ? selectedFood.preparing : Math.round(selectedFood.preparing / areaRatio);
+            return Math.max(1, Math.round(base * cookMult * lowSatP));
+          };
+          const _getCheckoutTime = () => {
+            const fNames = assignment ? assignment.front : [];
+            const fStaff = staffState.filter(s => fNames.includes(s.name));
+            return fStaff.some(p => p.satisfaction < 3) ? 4 : 2;
+          };
 
-        if(isOpen){
-          const hf=nm/60;
-          const peakMult=(hf>=11&&hf<13)||(hf>=17&&hf<20)?2:0.6;
-          if(Math.random()<peakArrivalRate*peakMult*SIM_SPEED){
-            const party=spawnParty();
-            if(!isDineIn){
-              const spend=party.size*selectedFood.materialCost/(1-selectedFood.grossMargin);
-              s.revenue+=spend;
-              s.served+=party.size;
-              addLog(`${timeStr(nm)} ${party.emoji} ${party.type}×${party.size} 外卖`);
-            } else {
-              s.queue=[...s.queue,party];
+          if (isOpenTime) {
+            const hf = nm / 60;
+            const peakMult = (hf >= 11 && hf < 13) || (hf >= 17 && hf < 20) ? 2 : 0.6;
+            if (Math.random() < peakArrivalRate * peakMult * SIM_SPEED) {
+              const party = spawnParty();
+              if (!isDineIn) {
+                const spend = party.size * selectedFood.materialCost / (1 - selectedFood.grossMargin) * openingBonus;
+                s.revenue += spend;
+                s.served += party.size;
+                addLog(`${timeStr(nm)} ${party.emoji} ${party.type}×${party.size} 外卖 (开业加成 ${openingBonus.toFixed(2)}x)`);
+              } else {
+                s.queue = [...s.queue, party];
+              }
             }
+          }
+
+          if (isDineIn) {
+            s.queue = s.queue.map(p => ({ ...p, waitedMin: p.waitedMin + SIM_SPEED }));
+            const imp = s.queue.filter(p => p.waitedMin > 20);
+            imp.forEach(p => addLog(`${timeStr(nm)} ${p.emoji} 等太久离开`));
+            s.leftWithout += imp.length;
+            s.queue = s.queue.filter(p => p.waitedMin <= 20);
+
+            s.queue = s.queue.filter(party => {
+              const compat = s.tables.filter(t =>
+                t.state === 'empty' &&
+                SEAT_ACCEPTS[t.zone]?.includes(party.type) &&
+                t.capacity >= party.size
+              );
+              if (compat.length === 0) return true;
+              compat.sort((a, b) => a.capacity - b.capacity);
+              const table = compat[0];
+              table.state = 'ordering';
+              table.party = { ...party };
+              table.timer = 3;
+              addLog(`${timeStr(nm)} ${party.emoji} ${party.type}×${party.size} 入座 ${table.label}`);
+              return false;
+            });
+
+            s.tables.forEach(t => {
+              if (t.state === 'empty') return;
+              if (t.timer > 0) { t.timer -= SIM_SPEED; if (t.timer > 0) return; }
+              switch (t.state) {
+                case 'ordering':
+                  t.state = 'waiting';
+                  t.timer = Math.max(1, _getPrepTime());
+                  addLog(`${timeStr(nm)} 🍳 ${t.label} 出餐 ~${t.timer}分钟`);
+                  break;
+                case 'waiting':
+                  t.state = 'eating';
+                  t.timer = Math.max(1, DINE_TIME(selectedFood));
+                  addLog(`${timeStr(nm)} 🍽️ ${t.label} 用餐 ~${t.timer}分钟`);
+                  break;
+                case 'eating':
+                  t.state = 'checkout';
+                  t.timer = Math.max(1, _getCheckoutTime());
+                  break;
+                case 'checkout': {
+                  if (!t.party) { t.state = 'cleaning'; t.timer = 1; break; }
+                  const partySize = t.party.size || 1;
+                  const spend = partySize * selectedFood.materialCost / (1 - selectedFood.grossMargin) * openingBonus;
+                  s.revenue += spend;
+                  s.served += partySize;
+                  addLog(`${timeStr(nm)} 💰 ${t.label} ¥${Math.round(spend)} (${partySize}人) (开业加成 ${openingBonus.toFixed(2)}x)`);
+                  t.state = 'cleaning'; t.party = null; t.timer = 1;
+                  break;
+                }
+                case 'cleaning': {
+                  t.state = 'empty'; t.party = null; t.timer = 0;
+                  addLog(`${timeStr(nm)} 🧹 ${t.label} 清理完成`);
+                  break;
+                }
+              }
+            }
+            );
           }
         }
 
-        if(isDineIn){
-          s.queue=s.queue.map(p=>({...p,waitedMin:p.waitedMin+SIM_SPEED}));
-          const imp=s.queue.filter(p=>p.waitedMin>20);
-          imp.forEach(p=>addLog(`${timeStr(nm)} ${p.emoji} 等太久离开`));
-          s.leftWithout+=imp.length;
-          s.queue=s.queue.filter(p=>p.waitedMin<=20);
-
-          s.queue=s.queue.filter(party=>{
-            const compat=s.tables.filter(t=>
-              t.state==='empty'&&
-              SEAT_ACCEPTS[t.zone]?.includes(party.type)&&
-              t.capacity>=party.size
-            );
-            if(compat.length===0)return true;
-            compat.sort((a,b)=>a.capacity-b.capacity);
-            const table=compat[0];
-            table.state='ordering';
-            table.party={...party};
-            table.timer=3;
-            addLog(`${timeStr(nm)} ${party.emoji} ${party.type}×${party.size} 入座 ${table.label}`);
-            return false;
-          });
-
-          s.tables.forEach(t=>{
-            if(t.state==='empty')return;
-            if(t.timer>0){ t.timer-=SIM_SPEED; if(t.timer>0)return; }
-            switch(t.state){
-              case 'ordering':
-                t.state='waiting';
-                t.timer=Math.max(1,_getPrepTime());
-                addLog(`${timeStr(nm)} 🍳 ${t.label} 出餐 ~${t.timer}分钟`);
-                break;
-              case 'waiting':
-                t.state='eating';
-                t.timer=Math.max(1,DINE_TIME(selectedFood));
-                addLog(`${timeStr(nm)} 🍽️ ${t.label} 用餐 ~${t.timer}分钟`);
-                break;
-              case 'eating':
-                t.state='checkout';
-                t.timer=Math.max(1,_getCheckoutTime());
-                break;
-              case 'checkout': {
-                if(!t.party){t.state='empty';t.timer=0;break;}
-                const partySize=t.party.size||1;
-                const spend=partySize*selectedFood.materialCost/(1-selectedFood.grossMargin);
-                s.revenue+=spend;
-                s.served+=partySize;
-                addLog(`${timeStr(nm)} 💰 ${t.label} ¥${Math.round(spend)} (${partySize}人)`);
-                t.state='empty'; t.party=null; t.timer=0;
-                break;
-              }
-            }
-          });
-        }
-
         flushDisplay();
-      }, [running, assignment, isDineIn, peakArrivalRate, staffState, loan, cells]);
+      }, [running, assignment, isDineIn, peakArrivalRate, staffState, loan, cells, isOpen]);
 
-      const resetSim=()=>{
+      const resetSim = () => {
         const freshTables = buildTables();
-        simRef.current={tables:freshTables,queue:[],simMin:600,revenue:0,served:0,leftWithout:0,dayEnded:false,log:[]};
-        setTables(freshTables.map(t=>({...t})));
-        setQueue([]);setSimMin(600);setLog([]);
-        setRevenue(0);setServed(0);setLeftWithout(0);setRunning(false);
-        setDayEnded(false);setDaySummary(null);servedRef.current=0;
+        simRef.current = { tables: freshTables, queue: [], simMin: 600, revenue: 0, served: 0, leftWithout: 0, dayEnded: false, log: [] };
+        setTables(freshTables.map(t => ({ ...t })));
+        setQueue([]); setSimMin(600); setLog([]);
+        setRevenue(0); setServed(0); setLeftWithout(0); setRunning(false);
+        setIsOpen(false); setDayEnded(false); setDaySummary(null); servedRef.current = 0;
         // CHANGE 2: Don't show assign modal on reset if assignment already exists
         // Just keep existing assignment
       };
 
-      useEffect(()=>{
-        if(!running||!assignment)return;
-        const interval=setInterval(tickSim, TICK_MS);
-        return ()=>clearInterval(interval);
-      },[running,assignment,tickSim]);
+      useEffect(() => {
+        if (!running || !assignment) return;
+        const interval = setInterval(tickSim, TICK_MS);
+        return () => clearInterval(interval);
+      }, [running, assignment, tickSim]);
 
-      const stateColor={empty:'#f5f5f5',ordering:'#fff9c4',waiting:'#ffccbc',eating:'#c8e6c9',checkout:'#e1bee7'};
-      const stateLabel={empty:'空',ordering:'点单',waiting:'等餐',eating:'用餐',checkout:'结账'};
+      const stateColor = { empty: '#f5f5f5', ordering: '#fff9c4', waiting: '#ffccbc', eating: '#c8e6c9', checkout: '#e1bee7' };
+      const stateLabel = { empty: '空', ordering: '点单', waiting: '等餐', eating: '用餐', checkout: '结账' };
 
-      const resignedStaff=staffState.filter(s=>!s.isBoss&&s.satisfaction<=0);
+      const resignedStaff = staffState.filter(s => !s.isBoss && s.satisfaction <= 0);
 
       // CHANGE 2: Handler for sleep button at day end
       const handleSleepAfterDay = () => {
-        if(daySummary) {
+        if (daySummary) {
           // Deduct utility from money
           setMoney(m => m - daySummary.utilityDaily);
-          // CHANGE 3: Deduct boss energy (revenue/200)
-          if(setEnergy) setEnergy(e => Math.max(0, e - daySummary.bossEnergyDrain));
+          // CHANGE 3: Boss energy cost = revenue / 200, only if open
+          if (isOpen) setEnergy(e => Math.max(0, e - daySummary.bossEnergyDrain));
         }
-        // Deduct daily living expense and restore energy (same as street sleep)
+        // Always deduct daily living expense and restore energy
         setMoney(m => m - DAILY_EXPENSE);
-        if(setEnergy) setEnergy(e => Math.min(INITIAL_ENERGY, e + ENERGY_RESTORED));
+        if (setEnergy) setEnergy(e => Math.min(INITIAL_ENERGY, e + ENERGY_RESTORED));
+
+        // Opening bonus decays as shop ages. increment openDays each day
+        if (setMyShops) {
+          setMyShops(shops => shops.map(sh => sh === shopConfig ? { ...sh, openDays: openDays + 1 } : sh));
+        }
+
         // Reset simulation for next day
         resetSim();
       };
 
-      return (
-        <div>
-          {/* CHANGE 1: Assignment modal only shows when showAssignModal is true (first open) */}
-          {showAssignModal && (
-            <StaffAssignModal
-              allStaff={staffState.filter(s=>s.satisfaction>0||s.isBoss)}
-              initialAssignment={assignment}
-              onConfirm={a=>{
-                setAssignment(a);
-                setShowAssignModal(false);
-                // Save assignment to shopConfig so it persists
-                if(setMyShops) setMyShops(shops=>shops.map(sh=>sh===shopConfig?{...sh,savedAssignment:a}:sh));
-              }}
-              onCancel={()=>setShowAssignModal(false)}
-            />
-          )}
+      const handleRestDay = () => {
+        if (daySummary) {
+          // Deduct utility from money
+          setMoney(m => m - daySummary.utilityDaily);
+          // CHANGE 3: Deduct boss energy (revenue/200)
+          if (setEnergy) setEnergy(e => Math.max(0, e - daySummary.bossEnergyDrain));
+        }
+        // No daily living expense or energy restore for rest day
 
-          {raiseModal && (
-            <div className="modal-bg">
-              <div className="modal" style={{ maxWidth:380 }}>
-                <div className="modal-title">💬 {raiseModal.name} 要求涨薪</div>
-                <p style={{ fontSize:12, color:'#666', marginBottom:12 }}>
-                  当前满意度 {raiseModal.satisfaction}/10，耐力 {raiseModal.stamina}。涨薪须5%倍数，每5%满意度+2，耐力+10%。
-                </p>
-                <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:12 }}>
-                  {[5,10,15,20].map(pct=>{
-                    const newSal=Math.round(raiseModal.salary*(1+pct/100));
-                    const rounds=pct/5;
-                    return (
-                      <button key={pct} className="btn" style={{ textAlign:'left',fontSize:12 }}
-                        onClick={()=>{
-                          setStaffState(prev=>prev.map(s=>s.name===raiseModal.name
-                            ?{...s,salary:newSal,satisfaction:Math.min(10,s.satisfaction+rounds*2),stamina:Math.round(s.stamina*Math.pow(1.1,rounds))}:s));
-                          setRaiseModal(null);
-                        }}>
-                        涨薪{pct}% → ¥{newSal.toLocaleString()}/月，满意度+{rounds*2}，耐力+{pct}%
-                      </button>
-                    );
-                  })}
-                  <button className="btn" style={{ fontSize:12,color:'#c0392b' }}
-                    onClick={()=>{
-                      setStaffState(prev=>prev.map(s=>s.name===raiseModal.name?{...s,satisfaction:Math.max(0,s.satisfaction-1)}:s));
-                      setRaiseModal(null);
-                    }}>忽略（满意度继续下降）</button>
-                </div>
+        // Employee satisfaction recovery: 20% chance +1
+        setStaffState(prev => prev.map(staff => {
+          if (staff.isBoss) return staff;
+          const recover = Math.random() < 0.2;
+          return recover ? { ...staff, satisfaction: Math.min(10, staff.satisfaction + 1) } : staff;
+        }));
+
+        // Opening bonus decays as shop ages. increment openDays each day
+        if (setMyShops) {
+          setMyShops(shops => shops.map(sh => sh === shopConfig ? { ...sh, openDays: openDays + 1 } : sh));
+        }
+
+        // Reset simulation for next day
+        resetSim();
+      };
+
+      {/* CHANGE 1: Assignment modal only shows when showAssignModal is true (first open) */ }
+      {
+        showAssignModal && (
+          <StaffAssignModal
+            allStaff={staffState.filter(s => s.satisfaction > 0 || s.isBoss)}
+            initialAssignment={assignment}
+            selectedFood={selectedFood}
+            onConfirm={a => {
+              setAssignment(a);
+              setShowAssignModal(false);
+              // Save assignment to shopConfig so it persists
+              if (setMyShops) setMyShops(shops => shops.map(sh => sh === shopConfig ? { ...sh, savedAssignment: a } : sh));
+            }}
+            onCancel={() => setShowAssignModal(false)}
+          />
+        )
+      }
+
+      {
+        raiseModal && (
+          <div className="modal-bg">
+            <div className="modal" style={{ maxWidth: 380 }}>
+              <div className="modal-title">💬 {raiseModal.name} 要求涨薪</div>
+              <p style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
+                当前满意度 {raiseModal.satisfaction}/10，耐力 {raiseModal.stamina}。涨薪须5%倍数，每5%满意度+2，耐力+10%。
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                {[5, 10, 15, 20].map(pct => {
+                  const newSal = Math.round(raiseModal.salary * (1 + pct / 100));
+                  const rounds = pct / 5;
+                  return (
+                    <button key={pct} className="btn" style={{ textAlign: 'left', fontSize: 12 }}
+                      onClick={() => {
+                        setStaffState(prev => prev.map(s => s.name === raiseModal.name
+                          ? { ...s, salary: newSal, satisfaction: Math.min(10, s.satisfaction + rounds * 2), stamina: Math.round(s.stamina * Math.pow(1.1, rounds)) } : s));
+                        setRaiseModal(null);
+                      }}>
+                      涨薪{pct}% → ¥{newSal.toLocaleString()}/月，满意度+{rounds * 2}，耐力+{pct}%
+                    </button>
+                  );
+                })}
+                <button className="btn" style={{ fontSize: 12, color: '#c0392b' }}
+                  onClick={() => {
+                    setStaffState(prev => prev.map(s => s.name === raiseModal.name ? { ...s, satisfaction: Math.max(0, s.satisfaction - 1) } : s));
+                    setRaiseModal(null);
+                  }}>忽略（满意度继续下降）</button>
               </div>
-            </div>
-          )}
-
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-            <div style={{ fontSize:15, fontWeight:600 }}>
-              🍽️ 营业模拟 — {site.name}
-              {franchise&&<span style={{ color:'#2d7a1f',fontSize:12,marginLeft:8 }}>🏷️ {franchise.name} +{Math.round(franchise.boost*100)}%</span>}
-            </div>
-            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-              <button className="btn" onClick={()=>setShowAssignModal(true)}>👥 调整分工</button>
-              <button className="btn" onClick={resetSim}>↺ 重置</button>
-              {/* CHANGE 2: Day-end shows sleep button; otherwise shows start/pause */}
-              {dayEnded ? (
-                <button className="btn primary" style={{ background:'#5c6bc0' }} onClick={handleSleepAfterDay}>
-                  🛏️ 睡觉（-¥{DAILY_EXPENSE}生活费，+{ENERGY_RESTORED}精力，开始新的一天）
-                </button>
-              ) : (
-                <button className="btn primary" onClick={()=>setRunning(r=>!r)} disabled={!assignment}>
-                  {running?'⏸ 暂停':!assignment?'请先分配岗位':'▶ 开始营业'}
-                </button>
-              )}
-              <button className="btn" onClick={onBack}>← 返回</button>
             </div>
           </div>
+        )
+      }
 
-          {resignedStaff.length>0&&(
-            <div style={{ background:'#ffeaea',border:'1.5px solid #f44336',borderRadius:8,padding:'10px 14px',marginBottom:10,fontSize:12,color:'#c0392b' }}>
-              ⚠️ {resignedStaff.map(s=>s.name).join('、')} 满意度归零，已辞职！
-            </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>
+          🍽️ 营业模拟 — {site.name}
+          {franchise && <span style={{ color: '#2d7a1f', fontSize: 12, marginLeft: 8 }}>🏷️ {franchise.name} +{Math.round(franchise.boost * 100)}%</span>}
+        </div>
+        <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
+          开业加成：{openingBonus.toFixed(2)}x（第 {openDays + 1} 天，30天递减到1.00）
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button className="btn" onClick={() => setShowAssignModal(true)}>👥 调整分工</button>
+          <button className="btn" onClick={resetSim}>↺ 重置</button>
+          {/* Day-end shows sleep button; otherwise shows open/close */}
+          {dayEnded ? (
+            <button className="btn primary" style={{ background: '#5c6bc0' }} onClick={handleSleepAfterDay}>
+              🛏️ 睡觉（-¥{DAILY_EXPENSE}生活费，+{ENERGY_RESTORED}精力，开始新的一天）
+            </button>
+          ) : !isOpen ? (
+            <button className="btn primary" onClick={() => setIsOpen(true)} disabled={!assignment}>
+              🏪 开门营业
+            </button>
+          ) : (
+            <button className="btn primary" onClick={() => setRunning(r => !r)} disabled={!assignment}>
+              {running ? '⏸ 暂停营业' : '▶ 开始营业'}
+            </button>
           )}
+          <button className="btn" onClick={() => { setRunning(false); onBack(); }}>← 逛街</button>
+        </div>
+      </div>
 
-          {assignment&&(
-            <div style={{ background:'#f0f7ff',border:'1px solid #90caf9',borderRadius:6,padding:'6px 12px',marginBottom:8,fontSize:11,display:'flex',gap:16,flexWrap:'wrap' }}>
-              <span>🍳 后厨: {assignment.kitchen.join('、')||'无'}</span>
-              <span>😊 前厅: {assignment.front.join('、')||'无'}</span>
-              <span>📣 营销: {assignment.market.join('、')||'无'}</span>
-            </div>
-          )}
-
-          <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap' }}>
-            {[
-              {label:'时间',value:timeStr(simMin)},
-              {label:'今日营业额',value:`¥${Math.round(revenue).toLocaleString()}`},
-              {label:'已服务人数',value:served+'人'},
-              {label:'流失客(组)',value:leftWithout},
-              {label:'等位',value:queue.length+'组'},
-              {label:'装修系数',value:`${((shopConfig.renoCoeff||1)*100).toFixed(1)}%`},
-            ].map(({label,value})=>(
-              <div key={label} className="hud-card" style={{ minWidth:70 }}>
-                <div className="hud-label">{label}</div>
-                <div className="hud-value" style={{ fontSize:13 }}>{value}</div>
-              </div>
-            ))}
+      {
+        resignedStaff.length > 0 && (
+          <div style={{ background: '#ffeaea', border: '1.5px solid #f44336', borderRadius: 8, padding: '10px 14px', marginBottom: 10, fontSize: 12, color: '#c0392b' }}>
+            ⚠️ {resignedStaff.map(s => s.name).join('、')} 满意度归零，已辞职！
           </div>
+        )
+      }
 
-          {/* CHANGE 2 & 3: Day-end summary with sleep button and boss energy drain + utility shown as result only */}
-          {dayEnded&&daySummary&&(
-            <div style={{ background:'#fff9e6',border:'1.5px solid #ffc107',borderRadius:8,padding:'12px 16px',marginBottom:12 }}>
-              <div style={{ fontWeight:700,fontSize:13,marginBottom:8 }}>📋 今日营业总结</div>
-              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px 20px',fontSize:12,marginBottom:10 }}>
-                <span>营业额</span><span style={{ fontWeight:600,color:'#2d7a1f' }}>¥{Math.round(revenue).toLocaleString()}</span>
-                <span>食材成本(估)</span><span style={{ color:'#c0392b' }}>−¥{Math.round(revenue*(1-selectedFood.grossMargin)).toLocaleString()}</span>
-                <span>今日租金(月租÷30)</span><span style={{ color:'#c0392b' }}>−¥{daySummary.dailyRent.toLocaleString()}</span>
-                <span>今日工资(÷30)</span><span style={{ color:'#c0392b' }}>−¥{daySummary.staffSalaryDaily.toLocaleString()}</span>
-                {/* CHANGE 3: Utility shown as single result, no formula */}
-                <span>水电费</span><span style={{ color:'#c0392b' }}>−¥{daySummary.utilityDaily.toLocaleString()}</span>
-                {daySummary.loanDeduction>0&&<><span>贷款日还款</span><span style={{ color:'#c0392b' }}>−¥{Math.round(daySummary.loanDeduction).toLocaleString()}</span></>}
-                <span style={{ fontWeight:700,borderTop:'1px solid #eee',paddingTop:4 }}>毛利润(估)</span>
-                <span style={{ fontWeight:700,borderTop:'1px solid #eee',paddingTop:4,
-                  color:(revenue*selectedFood.grossMargin-daySummary.dailyRent-daySummary.staffSalaryDaily-daySummary.utilityDaily-(daySummary.loanDeduction||0))>=0?'#2d7a1f':'#c0392b' }}>
-                  ¥{Math.round(revenue*selectedFood.grossMargin-daySummary.dailyRent-daySummary.staffSalaryDaily-daySummary.utilityDaily-(daySummary.loanDeduction||0)).toLocaleString()}
-                </span>
-              </div>
+      {
+        assignment && (
+          <div style={{ background: '#f0f7ff', border: '1px solid #90caf9', borderRadius: 6, padding: '6px 12px', marginBottom: 8, fontSize: 11, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <span>🍳 后厨: {assignment.kitchen.join('、') || '无'}</span>
+            <span>😊 前厅: {assignment.front.join('、') || '无'}</span>
+            <span>📣 营销: {assignment.market.join('、') || '无'}</span>
+          </div>
+        )
+      }
 
-              {/* CHANGE 3: Boss energy cost display */}
-              <div style={{ background:'#f0f4ff', border:'1px solid #c5cae9', borderRadius:6, padding:'8px 10px', marginBottom:10, fontSize:12 }}>
-                <span style={{ fontWeight:600 }}>👑 老板今日体力消耗：</span>
-                <span style={{ color:'#c0392b', fontWeight:600 }}> -{daySummary.bossEnergyDrain} 精力</span>
-                <span style={{ color:'#888', marginLeft:6, fontSize:11 }}>(在店工作日结算)</span>
-              </div>
+      {/* Pricing UI */ }
+      <div>
+        <div style={{ background: '#f9f9f9', border: '1px solid #ddd', borderRadius: 6, padding: '8px 12px', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>💰 定价策略</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <input type="range" min={Math.ceil(selectedFood.materialCost)} max={Math.ceil(selectedFood.materialCost * 3)} step={1}
+              value={unitPrice} onChange={e => { setUnitPrice(parseInt(e.target.value)); setPriceSliderValue(((parseInt(e.target.value) - selectedFood.materialCost) / (selectedFood.materialCost * 2)) * 100); }}
+              style={{ flex: 1, minWidth: 150 }} />
+            <span style={{ fontWeight: 700, color: '#c0392b', minWidth: 60 }}>¥{unitPrice}</span>
+          </div>
+          <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+            <span>成本：¥{selectedFood.materialCost}</span>
+            <span>毛利率：{Math.round(currentGrossMargin * 100)}%</span>
+            <span>系数：{priceCoefficient.toFixed(2)}x</span>
+          </div>
+        </div>
 
-              {staffState.filter(s=>!s.isBoss).length>0&&(
-                <div style={{ borderTop:'1px solid #ffe082',paddingTop:8 }}>
-                  <div style={{ fontWeight:600,fontSize:12,marginBottom:6 }}>👥 员工状态</div>
-                  {staffState.filter(s=>!s.isBoss).map((s,i)=>{
-                    const satColor=s.satisfaction>=7?'#2d7a1f':s.satisfaction>=5?'#a06000':'#c0392b';
-                    return (
-                      <div key={i} style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4,fontSize:11,flexWrap:'wrap' }}>
-                        <span style={{ fontWeight:600 }}>{s.name}</span>
-                        <span style={{ color:'#888' }}>耐力{s.stamina}</span>
-                        <span style={{ color:satColor,fontWeight:600 }}>满意度{s.satisfaction}/10</span>
-                        {s.satisfaction<=0&&<span style={{ color:'#c0392b',fontWeight:700 }}>🚪已辞职</span>}
-                        {s.satisfaction>0&&s.satisfaction<3&&<span style={{ color:'#c0392b' }}>⚠️出餐/结账变慢</span>}
-                        {s.satisfaction>=3&&s.satisfaction<5&&(
-                          <button style={{ fontSize:10,padding:'2px 8px',background:'#fff3cd',border:'1px solid #ffc107',borderRadius:4,cursor:'pointer' }}
-                            onClick={()=>setRaiseModal(s)}>
-                            😤涨薪
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
 
-              {/* CHANGE 2: Sleep button at the bottom of summary */}
-              <div style={{ marginTop:12, borderTop:'1px solid #ffe082', paddingTop:10 }}>
-                <button className="btn primary" style={{ width:'100%', background:'#5c6bc0', fontSize:13, padding:'10px' }}
-                  onClick={handleSleepAfterDay}>
-                  🛏️ 睡觉，结束今日营业（-¥{DAILY_EXPENSE}生活费 +{ENERGY_RESTORED}精力）
-                </button>
-                <div style={{ fontSize:10, color:'#888', marginTop:4, textAlign:'center' }}>明天需要手动点"开始营业"</div>
-              </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+          {[
+            { label: '时间', value: timeStr(simMin) },
+            { label: '今日营业额', value: `¥${Math.round(revenue).toLocaleString()}` },
+            { label: '已服务人数', value: served + '人' },
+            { label: '流失客(组)', value: leftWithout },
+            { label: '等位', value: queue.length + '组' },
+            { label: '装修系数', value: `${((shopConfig.renoCoeff || 1) * 100).toFixed(1)}%` },
+          ].map(({ label, value }) => (
+            <div key={label} className="hud-card" style={{ minWidth: 70 }}>
+              <div className="hud-label">{label}</div>
+              <div className="hud-value" style={{ fontSize: 13 }}>{value}</div>
             </div>
-          )}
+          ))}
+        </div>
 
-          <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-            <div style={{ flex:1, minWidth:260 }}>
-              <div style={{ fontSize:12,fontWeight:600,marginBottom:6 }}>桌位状态</div>
-              {!isDineIn&&<div style={{ padding:10,background:'#e8f5e9',borderRadius:6,fontSize:12,color:'#2d7a1f' }}>外卖/打包店，客人不就坐</div>}
-              <div style={{ display:'flex',flexWrap:'wrap',gap:6 }}>
-                {tables.map(t=>(
-                  <div key={t.id} style={{ width:88,padding:'6px 8px',borderRadius:6,fontSize:11,background:stateColor[t.state]||'#f5f5f5',border:`1.5px solid ${t.state==='empty'?'#ddd':'#aaa'}` }}>
-                    <div style={{ fontWeight:600 }}>{t.label}</div>
-                    <div style={{ color:'#666' }}>{stateLabel[t.state]}</div>
-                    {t.party&&<div>{t.party.emoji}×{t.party.size}</div>}
-                    {t.timer>0&&<div style={{ color:'#888' }}>~{t.timer}分</div>}
-                  </div>
-                ))}
-                {tables.length===0&&<div style={{ fontSize:11,color:'#888' }}>暂无座位，请先布局</div>}
-              </div>
-              {queue.length>0&&(
-                <div style={{ marginTop:8 }}>
-                  <div style={{ fontSize:12,fontWeight:600,marginBottom:4 }}>等位区 ({queue.length}组)</div>
-                  <div style={{ display:'flex',flexWrap:'wrap',gap:4 }}>
-                    {queue.map(p=>(
-                      <div key={p.id} style={{ padding:'2px 7px',background:'#fff3cd',borderRadius:12,fontSize:11,border:'1px solid #ffc107' }}>
-                        {p.emoji}×{p.size} {p.waitedMin}分
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* CHANGE 2 & 3: Day-end summary with sleep button and boss energy drain + utility shown as result only */}
+        {dayEnded && daySummary && (
+          <div style={{ background: '#fff9e6', border: '1.5px solid #ffc107', borderRadius: 8, padding: '12px 16px', marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8 }}>📋 今日营业总结</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 20px', fontSize: 12, marginBottom: 10 }}>
+              <span>营业额</span><span style={{ fontWeight: 600, color: '#2d7a1f' }}>¥{Math.round(revenue).toLocaleString()}</span>
+              <span>食材成本(估)</span><span style={{ color: '#c0392b' }}>−¥{Math.round(revenue * (1 - selectedFood.grossMargin)).toLocaleString()}</span>
+              <span>今日租金(月租÷30)</span><span style={{ color: '#c0392b' }}>−¥{daySummary.dailyRent.toLocaleString()}</span>
+              <span>今日工资(÷30)</span><span style={{ color: '#c0392b' }}>−¥{daySummary.staffSalaryDaily.toLocaleString()}</span>
+              {/* CHANGE 3: Utility shown as single result, no formula */}
+              <span>水电费</span><span style={{ color: '#c0392b' }}>−¥{daySummary.utilityDaily.toLocaleString()}</span>
+              {daySummary.loanDeduction > 0 && <><span>贷款日还款</span><span style={{ color: '#c0392b' }}>−¥{Math.round(daySummary.loanDeduction).toLocaleString()}</span></>}
+              <span style={{ fontWeight: 700, borderTop: '1px solid #eee', paddingTop: 4 }}>毛利润(估)</span>
+              <span style={{
+                fontWeight: 700, borderTop: '1px solid #eee', paddingTop: 4,
+                color: (revenue * selectedFood.grossMargin - daySummary.dailyRent - daySummary.staffSalaryDaily - daySummary.utilityDaily - (daySummary.loanDeduction || 0)) >= 0 ? '#2d7a1f' : '#c0392b'
+              }}>
+                ¥{Math.round(revenue * selectedFood.grossMargin - daySummary.dailyRent - daySummary.staffSalaryDaily - daySummary.utilityDaily - (daySummary.loanDeduction || 0)).toLocaleString()}
+              </span>
             </div>
-            <div style={{ width:230,flexShrink:0 }}>
-              <div style={{ fontSize:12,fontWeight:600,marginBottom:6 }}>事件日志</div>
-              <div style={{ height:280,overflowY:'auto',background:'#fafafa',borderRadius:6,padding:'6px 8px',border:'1px solid #eee' }}>
-                {log.length===0&&<div style={{ fontSize:11,color:'#aaa' }}>点击开始营业...</div>}
-                {log.map((l,i)=>(
-                  <div key={i} style={{ fontSize:11,padding:'2px 0',borderBottom:'0.5px solid #f0f0f0',color:i===0?'#111':'#666' }}>{l.msg}</div>
-                ))}
+
+            {/* CHANGE 3: Boss energy cost display */}
+            <div style={{ background: '#f0f4ff', border: '1px solid #c5cae9', borderRadius: 6, padding: '8px 10px', marginBottom: 10, fontSize: 12 }}>
+              <span style={{ fontWeight: 600 }}>👑 老板今日体力消耗：</span>
+              <span style={{ color: '#c0392b', fontWeight: 600 }}> -{daySummary.bossEnergyDrain} 精力</span>
+              <span style={{ color: '#888', marginLeft: 6, fontSize: 11 }}>(在店工作日结算)</span>
+            </div>
+
+            {staffState.filter(s => !s.isBoss).length > 0 && (
+              <div style={{ borderTop: '1px solid #ffe082', paddingTop: 8 }}>
+                <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 6 }}>👥 员工状态</div>
+                {staffState.filter(s => !s.isBoss).map((s, i) => {
+                  const satColor = s.satisfaction >= 7 ? '#2d7a1f' : s.satisfaction >= 5 ? '#a06000' : '#c0392b';
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 11, flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 600 }}>{s.name}</span>
+                      <span style={{ color: '#888' }}>耐力{s.stamina}</span>
+                      <span style={{ color: satColor, fontWeight: 600 }}>满意度{s.satisfaction}/10</span>
+                      {s.satisfaction <= 0 && <span style={{ color: '#c0392b', fontWeight: 700 }}>🚪已辞职</span>}
+                      {s.satisfaction > 0 && s.satisfaction < 3 && <span style={{ color: '#c0392b' }}>⚠️出餐/结账变慢</span>}
+                      {s.satisfaction >= 3 && s.satisfaction < 5 && (
+                        <button style={{ fontSize: 10, padding: '2px 8px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 4, cursor: 'pointer' }}
+                          onClick={() => setRaiseModal(s)}>
+                          😤涨薪
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
+            )}
+
+            {/* CHANGE 2: Sleep button at the bottom of summary */}
+            <div style={{ marginTop: 12, borderTop: '1px solid #ffe082', paddingTop: 10 }}>
+              <button className="btn primary" style={{ width: '100%', background: '#5c6bc0', fontSize: 13, padding: '10px' }}
+                onClick={handleSleepAfterDay}>
+                🛏️ 睡觉，结束今日营业（-¥{DAILY_EXPENSE}生活费 +{ENERGY_RESTORED}精力）
+              </button>
+              <div style={{ fontSize: 10, color: '#888', marginTop: 4, textAlign: 'center' }}>明天需要手动点"开始营业"</div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>桌位状态</div>
+            {!isDineIn && <div style={{ padding: 10, background: '#e8f5e9', borderRadius: 6, fontSize: 12, color: '#2d7a1f' }}>外卖/打包店，客人不就坐</div>}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {tables.map(t => (
+                <div key={t.id} style={{ width: 88, padding: '6px 8px', borderRadius: 6, fontSize: 11, background: stateColor[t.state] || '#f5f5f5', border: `1.5px solid ${t.state === 'empty' ? '#ddd' : '#aaa'}` }}>
+                  <div style={{ fontWeight: 600 }}>{t.label}</div>
+                  <div style={{ color: '#666' }}>{stateLabel[t.state]}</div>
+                  {t.party && <div>{t.party.emoji}×{t.party.size}</div>}
+                  {t.timer > 0 && <div style={{ color: '#888' }}>~{t.timer}分</div>}
+                </div>
+              ))}
+              {tables.length === 0 && <div style={{ fontSize: 11, color: '#888' }}>暂无座位，请先布局</div>}
+            </div>
+            {queue.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>等位区 ({queue.length}组)</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {queue.map(p => (
+                    <div key={p.id} style={{ padding: '2px 7px', background: '#fff3cd', borderRadius: 12, fontSize: 11, border: '1px solid #ffc107' }}>
+                      {p.emoji}×{p.size} {p.waitedMin}分
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{ width: 230, flexShrink: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>事件日志</div>
+            <div style={{ height: 280, overflowY: 'auto', background: '#fafafa', borderRadius: 6, padding: '6px 8px', border: '1px solid #eee' }}>
+              {log.length === 0 && <div style={{ fontSize: 11, color: '#aaa' }}>点击开始营业...</div>}
+              {log.map((l, i) => (
+                <div key={i} style={{ fontSize: 11, padding: '2px 0', borderBottom: '0.5px solid #f0f0f0', color: i === 0 ? '#111' : '#666' }}>{l.msg}</div>
+              ))}
             </div>
           </div>
         </div>
-      );
+      </div>
     }
 
 
@@ -2150,6 +2311,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       const [franchiseModal, setFranchiseModal] = useState(null);
       const [recruitModal, setRecruitModal] = useState(null);
       const [myShops, setMyShops] = useState([]);
+      const [learnedFoodTech, setLearnedFoodTech] = useState([]);
 
       const [loan, setLoan] = useState(null);
       const [loanModal, setLoanModal] = useState(false);
@@ -2188,6 +2350,34 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
         setTimeout(() => setToast(''), 2800);
       };
 
+      const handleSleepHunting = () => {
+        setMoney(m => m - DAILY_EXPENSE);
+        setEnergy(e => Math.min(INITIAL_ENERGY, e + ENERGY_RESTORED));
+        setTime(t => { const d = new Date(t); d.setDate(d.getDate() + 1); return d; });
+        setTakenSites([]);
+        const st = pick(STREET_LIBRARY);
+        const data = generateStreet(st, biz, time);
+        setStreetData(data);
+        setCurrentStreet(st);
+        setSelectedSite(null);
+        setShowForecast(null);
+        if (streetData) {
+          const allSites = [...(streetData.streetA || []), ...(streetData.streetB || [])];
+          checkSitesRentedBySomeone(allSites);
+        }
+      };
+
+      const ensureMoney = (requiredAmount) => {
+        if (money >= requiredAmount) return true;
+        if (!loan) {
+          setLoanModal(true);
+          showToast('资金不足，已为您打开贷款窗口');
+        } else {
+          showToast('资金不足，当前已有贷款仍不足以完成操作');
+        }
+        return false;
+      };
+
       const checkSitesRentedBySomeone = (sitesArray) => {
         if (!sitesArray || sitesArray.length === 0) return;
 
@@ -2214,7 +2404,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       };
 
       const doRegenerate = useCallback((free = false) => {
-        if (!free && money < DAILY_EXPENSE) { alert('资金不足，无法继续寻找店铺了。'); return; }
+        if (!free && !ensureMoney(DAILY_EXPENSE)) return;
         const cost = free ? 0 : DAILY_EXPENSE;
         if (!free) setMoney(m => m - cost);
         setTime(t => { const d = new Date(t); d.setDate(d.getDate() + 1); return d; });
@@ -2246,8 +2436,8 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
         const cost = type === 'lease'
           ? (site.rent + site.bond)
           : (site.salePrice + site.rent + site.bond);
-        if (money < cost && !loan) {
-          setLoanModal(true);
+        if (money < cost) {
+          ensureMoney(cost);
           return;
         }
         setMoney(m => m - cost);
@@ -2351,22 +2541,22 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
         if (isSourceSite) {
           const sourceCount = [...(streetData?.streetA || []), ...(streetData?.streetB || [])]
             .filter(s => ['school', 'residential', '写字楼', '车站', '景点'].includes(s.type)).length;
-          const totalFlow = Math.round(streetData.street.typicalFlow * (sourceCount>1 ?  1+0.2*sourceCount : 1));
+          const totalFlow = Math.round(streetData.street.typicalFlow * (sourceCount > 1 ? 1 + 0.2 * sourceCount : 1));
           const flowPerSource = Math.round(totalFlow / Math.max(sourceCount, 1));
 
           //allHighMessages.push(`📍 ${site.name} 日均人流约${flowPerSource.toLocaleString()}人`);
 
-          const weekendFactorSum = currentStreet.weekdayFactor?.[5]||1 + currentStreet.weekdayFactor?.[6]||1;
+          const weekendFactorSum = currentStreet.weekdayFactor?.[5] || 1 + currentStreet.weekdayFactor?.[6] || 1;
           const weekendPercent = Math.round(weekendFactorSum / 7 * 100);
 
           if (site.type === 'school') {
             const studentCount = flowPerSource * 30 / 31;
             const teacherCount = Math.ceil(studentCount / 30);
-            
-            const schoolType= pick(['小学', '初中']);
+
+            const schoolType = pick(['小学', '初中']);
             const classAmount = Math.floor(Math.random() * 7) + 3;
-            const grades=schoolType==='小学' ? 6 : 3;
-            const studentperClass = Math.ceil(studentCount / classAmount*grades);;
+            const grades = schoolType === '小学' ? 6 : 3;
+            const studentperClass = Math.ceil(studentCount / classAmount * grades);;
             allHighMessages.push(`🏫 该学校为${schoolType}`);
             allMediumMessages.push(`👨‍🎓 每个年级班级数: ${classAmount.toLocaleString()}班`);
             allMediumMessages.push(`👨‍🎓 每个年级大概人数: ${studentperClass.toLocaleString()}人`);
@@ -2381,7 +2571,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
             const buildingCount = Math.ceil(flowPerSource / (occupancyRate * unitsPerBuilding * 3));
             allMediumMessages.push(`🏢 楼栋数: ${buildingCount}栋`);
             allMediumMessages.push(`🚪 户数/栋: 约${unitsPerBuilding}户`);
-            allMediumMessages.push(`👥 入住率: ${Math.round(occupancyRate*100)}%`);
+            allMediumMessages.push(`👥 入住率: ${Math.round(occupancyRate * 100)}%`);
           }
           else if (site.type === '车站') {
             allMediumMessages.push(`🗓️ 周末人流量占比: ${weekendPercent}%`);
@@ -2540,7 +2730,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
         const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
         high.push(`📊 ${site.name}`);
         high.push(`日期: ${dayNames[dayIndex]}`);
-        const errorDesc = maxError > 0 ? `(因为蹲的不专心，数据可能误差最多到${maxError*100}%)` : '';
+        const errorDesc = maxError > 0 ? `(因为蹲的不专心，数据可能误差最多到${maxError * 100}%)` : '';
         high.push(`实时客流估算: 约${Math.round(actualCustomers)}人 ${errorDesc}`);
 
         setSiteSpyInfo(old => {
@@ -2570,7 +2760,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
       };
 
       const handleSleep = () => {
-        if (money < DAILY_EXPENSE) { showToast('资金不足'); return; }
+        if (!ensureMoney(DAILY_EXPENSE)) return;
         setMoney(m => m - DAILY_EXPENSE);
         setEnergy(e => Math.min(INITIAL_ENERGY, e + ENERGY_RESTORED));
         setTime(t => { const d = new Date(t); d.setDate(d.getDate() + 1); return d; });
@@ -2599,28 +2789,28 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
             myShops={myShops}
           />
 
-          <div style={{ display:'flex', gap:6, marginBottom:8, flexWrap:'wrap' }}>
-            <button className={`mode-btn${mainView==='street'?' active':''}`} onClick={() => setMainView('street')}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+            <button className={`mode-btn${mainView === 'street' ? ' active' : ''}`} onClick={() => setMainView('street')}>
               🏪 街道选铺
             </button>
             {myShops.map((shop, i) => (
-              <button key={i} className={`mode-btn${mainView==='simulation' && activeShopConfig===shop?' active':''}`}
+              <button key={i} className={`mode-btn${mainView === 'simulation' && activeShopConfig === shop ? ' active' : ''}`}
                 onClick={() => { setActiveShopConfig(shop); setMainView('simulation'); }}>
                 🍽️ {shop.site.name}
               </button>
             ))}
             {myShops.map((shop, i) => (
-              <button key={'fp'+i} className={`mode-btn${mainView==='floorplan' && activeShopConfig===shop?' active':''}`}
+              <button key={'fp' + i} className={`mode-btn${mainView === 'floorplan' && activeShopConfig === shop ? ' active' : ''}`}
                 onClick={() => { setActiveShopConfig(shop); setMainView('floorplan'); }}
-                style={{ fontSize:11 }}>
-                📐 布局:{shop.site.name.slice(0,6)}
+                style={{ fontSize: 11 }}>
+                📐 布局:{shop.site.name.slice(0, 6)}
               </button>
             ))}
             {pendingFloorplan && (
-              <button className={`mode-btn${mainView==='floorplan-setup'?' active':''}`}
+              <button className={`mode-btn${mainView === 'floorplan-setup' ? ' active' : ''}`}
                 onClick={() => setMainView('floorplan-setup')}
-                style={{ background:'#fff3cd', borderColor:'#ffc107', color:'#856404' }}>
-                ⚙️ 待布局:{pendingFloorplan.site.name.slice(0,6)}
+                style={{ background: '#fff3cd', borderColor: '#ffc107', color: '#856404' }}>
+                ⚙️ 待布局:{pendingFloorplan.site.name.slice(0, 6)}
               </button>
             )}
           </div>
@@ -2633,7 +2823,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                 onRegen={() => doRegenerate(false)}
                 onSnoop={handleSnoop}
                 onCounting={handleCounting}
-                onSleep={handleSleep}
+                onSleep={handleSleepHunting}
               />
               <Legend />
               <div ref={containerRef} id="streets-container">
@@ -2770,9 +2960,11 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
               selectedFood={franchiseModal.selectedFood}
               money={money}
               setMoney={setMoney}
-              onConfirm={(franchise) => {
+              learnedFoodTech={learnedFoodTech}
+              setLearnedFoodTech={setLearnedFoodTech}
+              onConfirm={(franchise, learnedTech) => {
                 const { site, selectedFood } = franchiseModal;
-                setPendingFloorplan({ site, selectedFood, franchise, renoCoeff:1 });
+                setPendingFloorplan({ site, selectedFood, franchise, renoCoeff: 1, learnedTech: !!learnedTech });
                 setFranchiseModal(null);
                 setMainView('floorplan-setup');
               }}
@@ -2784,7 +2976,7 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
             <RecruitModal
               site={recruitModal.site}
               onConfirm={(hiredStaff) => {
-                const shopConfig = { ...recruitModal, hiredStaff };
+                const shopConfig = { ...recruitModal, hiredStaff, openDays: 0 };
                 setMyShops(ms => [...ms, shopConfig]);
                 setRecruitModal(null);
                 setActiveShopConfig(shopConfig);
@@ -2804,21 +2996,21 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
 
           {loanModal && (
             <div className="modal-bg">
-              <div className="modal" style={{ maxWidth:400 }}>
+              <div className="modal" style={{ maxWidth: 400 }}>
                 <div className="modal-title">🏦 申请贷款</div>
-                <p style={{ fontSize:12, color:'#666', marginBottom:12 }}>
-                  只可贷款一次。年化6%，本息同还，摊薄到每天。
+                <p style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
+                  只可贷款一次。年化6%，本息同还，每天支付。
                 </p>
-                <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:12 }}>
-                  {[50000,100000,150000].map(amt=>{
-                    const days=365;
-                    const rate=0.06/365;
-                    const dailyPmt=amt*rate*Math.pow(1+rate,days)/(Math.pow(1+rate,days)-1);
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                  {[50000, 100000, 150000].map(amt => {
+                    const days = 365;
+                    const rate = 0.06 / 365;
+                    const dailyPmt = amt * rate * Math.pow(1 + rate, days) / (Math.pow(1 + rate, days) - 1);
                     return (
-                      <button key={amt} className="btn" style={{ textAlign:'left',fontSize:12,padding:'10px 14px' }}
-                        onClick={()=>{
-                          setMoney(m=>m+amt);
-                          setLoan({principal:amt,dailyPayment:dailyPmt,daysLeft:days});
+                      <button key={amt} className="btn" style={{ textAlign: 'left', fontSize: 12, padding: '10px 14px' }}
+                        onClick={() => {
+                          setMoney(m => m + amt);
+                          setLoan({ principal: amt, dailyPayment: dailyPmt, daysLeft: days });
                           setLoanModal(false);
                           showToast(`💰 贷款 ¥${amt.toLocaleString()} 已到账，每日还款 ¥${Math.round(dailyPmt)}`);
                         }}
@@ -2828,9 +3020,9 @@ const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四
                     );
                   })}
                 </div>
-                {loan && <div style={{ color:'#c0392b',fontSize:12,marginBottom:8 }}>已有贷款，不可再贷</div>}
-                <div style={{ display:'flex', justifyContent:'flex-end' }}>
-                  <button className="btn" onClick={()=>setLoanModal(false)}>关闭</button>
+                {loan && <div style={{ color: '#c0392b', fontSize: 12, marginBottom: 8 }}>已有贷款，不可再贷</div>}
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button className="btn" onClick={() => setLoanModal(false)}>关闭</button>
                 </div>
               </div>
             </div>
