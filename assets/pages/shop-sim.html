@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -1268,8 +1269,12 @@
       const doorRow = gridH - 1;
       const isDoorClear = () => {
         for (let c = doorStart; c < doorStart + doorW; c++) {
+          // 检查门内（室内最后一行）
           if (cells[doorRow] && cells[doorRow][c]) return false;
-          if (cells[doorRow + 1] && cells[doorRow + 1][c]) return false;
+          // 检查门外（所有户外行）
+          for (let r = doorRow + 1; r < fullH; r++) {
+            if (cells[r] && cells[r][c]) return false;
+          }
         }
         return true;
       };
@@ -1278,11 +1283,9 @@
 
       const kitchenArea = countZone('kitchen');
       const kitchenOk = kitchenArea >= selectedFood.standardKitchen;
-      const chefs = kStaff.length;
-      const requiredAreaForChefs = selectedFood.kitchenAreaPP * chefs;
-      const recommendedArea = Math.max(selectedFood.standardKitchen, requiredAreaForChefs);
-      const areaRatio = kitchenArea / requiredAreaForChefs;
-      const efficiency = Math.min(1, kitchenArea / recommendedArea);
+      const recommendedArea = selectedFood.standardKitchen;
+      const areaRatio = kitchenArea / recommendedArea;
+      const efficiency = Math.min(1, areaRatio);
       const actualPrepTime = areaRatio >= 1 ? selectedFood.preparing : Math.round(selectedFood.preparing * areaRatio);
 
       const frontArea = countZone('front');
@@ -1467,8 +1470,8 @@
                 color: kitchenOk ? '#2d7a1f' : '#c0392b', marginBottom: 6
               }}>
                 {kitchenOk
-                  ? `✅ 厨房${kitchenArea}m²，最多容纳${chefs}厨师，出餐${actualPrepTime}分钟/人`
-                  : `⚠️ 厨房推荐面积≥${Math.max(selectedFood.standardKitchen, selectedFood.kitchenAreaPP * chefs)}m²（当前${kitchenArea}m²）`}
+                  ? `✅ 厨房${kitchenArea}m²，出餐${actualPrepTime}分钟/人`
+                  : `⚠️ 厨房推荐面积≥${selectedFood.standardKitchen}m²（当前${kitchenArea}m²）`}
               </div>
 
               <div style={{ background: '#f6f6f6', padding: '6px 8px', borderRadius: 5, fontSize: 11, marginBottom: 6 }}>
@@ -1508,12 +1511,22 @@
                 </div>
               )}
 
+              {doorClearWarning && (
+                <div style={{ background: '#ffeaea', border: '1.5px solid #f44336', padding: '8px', borderRadius: 5, fontSize: 11, marginBottom: 8, color: '#c0392b', fontWeight: 600 }}>
+                  ⚠️ 不能在大门处放置设施，影响客人进出！
+                </div>
+              )}
+
               {readOnly && (
                 <div style={{ background: '#fff3cd', border: '1px solid #ffc107', padding: '8px', borderRadius: 5, fontSize: 11, marginBottom: 8 }}>
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>🔨 重装修</div>
                   <div style={{ color: '#666', marginBottom: 6 }}>在原装修基础上+¥3000，施工3天（房租照付），装修系数重置</div>
                   <button className="btn" style={{ fontSize: 11, width: '100%' }}
                     onClick={() => {
+                      if (doorClearWarning) {
+                        alert('请移除大门处的设施！');
+                        return;
+                      }
                       if (!ensureMoney(3000)) return;
                       setMoney(m => m - 3000);
                       if (onConfirm) onConfirm(cells, seatSummary, totalSeats, Math.min(2.0, (renoCoeff || 1) + 0.3), 3000, countZone('kitchen'), frontStaff);
@@ -1524,9 +1537,13 @@
               )}
 
               {!readOnly && (
-                <button className="btn primary" disabled={money < totalCost}
+                <button className="btn primary" disabled={money < totalCost || doorClearWarning}
                   style={{ width: '100%' }}
                   onClick={() => {
+                    if (doorClearWarning) {
+                      alert('请移除大门处的设施！');
+                      return;
+                    }
                     setMoney(m => m - totalCost);
                     onConfirm(cells, seatSummary, totalSeats, renoCoeff, totalCost, countZone('kitchen'), frontStaff);
                   }}>
@@ -1743,13 +1760,14 @@
       const [leftWithout, setLeftWithout] = useState(0);
       const [dayEnded, setDayEnded] = useState(false);
       const [daySummary, setDaySummary] = useState(null);
+      const [isResting, setIsResting] = useState(false);
       const servedRef = React.useRef(0);
 
       // CHANGE 1: Only show assignment modal if no assignment has been set yet (first time)
       // Assignment is stored outside so it persists between view switches
       const [staffState, setStaffState] = useState(() => {
         const boss = {
-          name: '老板(我)', salary: 0, cook: 5, service: 5, market: 5, age: 0,
+          name: '老板(我)', salary: 0, cook: 10, service: 10, market: 10, age: 0,
           traits: '', topAttr: '💼综合', stamina: 80, satisfaction: 10, isBoss: true
         };
         return [boss, ...(hiredStaff || []).map(s => ({ ...s }))];
@@ -2041,14 +2059,17 @@
           setMyShops(shops => shops.map(sh => sh === shopConfig ? { ...sh, openDays: openDays + 1 } : sh));
         }
 
-        // Reset simulation for next day
+        // Reset simulation and mark as resting
         resetSim();
+        setIsResting(true);
       };
 
-      {/* CHANGE 1: Assignment modal only shows when showAssignModal is true (first open) */ }
-      {
-        showAssignModal && (
-          <StaffAssignModal
+      return (
+        <>
+          {/* CHANGE 1: Assignment modal only shows when showAssignModal is true (first open) */ }
+          {
+            showAssignModal && (
+              <StaffAssignModal
             allStaff={staffState.filter(s => s.satisfaction > 0 || s.isBoss)}
             initialAssignment={assignment}
             selectedFood={selectedFood}
@@ -2108,21 +2129,35 @@
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <button className="btn" onClick={() => setShowAssignModal(true)}>👥 调整分工</button>
           <button className="btn" onClick={resetSim}>↺ 重置</button>
-          {/* Day-end shows sleep button; otherwise shows open/close */}
-          {dayEnded ? (
+          {/* Day-end: only show sleep button */}
+          {dayEnded && (
             <button className="btn primary" style={{ background: '#5c6bc0' }} onClick={handleSleepAfterDay}>
               🛏️ 睡觉（-¥{DAILY_EXPENSE}生活费，+{ENERGY_RESTORED}精力，开始新的一天）
             </button>
-          ) : !isOpen ? (
-            <button className="btn primary" onClick={() => setIsOpen(true)} disabled={!assignment}>
-              🏪 开门营业
-            </button>
-          ) : (
-            <button className="btn primary" onClick={() => setRunning(r => !r)} disabled={!assignment}>
-              {running ? '⏸ 暂停营业' : '▶ 开始营业'}
-            </button>
           )}
-          <button className="btn" onClick={() => { setRunning(false); onBack(); }}>← 逛街</button>
+          {/* After sleep: show open/rest options */}
+          {!dayEnded && !isResting && (
+            <>
+              {!isOpen ? (
+                <>
+                  <button className="btn primary" onClick={() => setIsOpen(true)} disabled={!assignment}>
+                    🏪 开门营业
+                  </button>
+                  <button className="btn" onClick={handleRestDay}>
+                    😴 歇业休息一天（恢复体力，员工加满意）
+                  </button>
+                </>
+              ) : (
+                <button className="btn primary" onClick={() => setRunning(r => !r)} disabled={!assignment}>
+                  {running ? '⏸ 暂停营业' : '▶ 开始营业'}
+                </button>
+              )}
+            </>
+          )}
+          {/* During rest: show street button */}
+          {isResting && (
+            <button className="btn" onClick={() => { setRunning(false); setIsResting(false); onBack(); }}>← 离开，去逛街</button>
+          )}
         </div>
       </div>
 
@@ -2234,9 +2269,9 @@
             <div style={{ marginTop: 12, borderTop: '1px solid #ffe082', paddingTop: 10 }}>
               <button className="btn primary" style={{ width: '100%', background: '#5c6bc0', fontSize: 13, padding: '10px' }}
                 onClick={handleSleepAfterDay}>
-                🛏️ 睡觉，结束今日营业（-¥{DAILY_EXPENSE}生活费 +{ENERGY_RESTORED}精力）
+                🛏️ 睡觉，开始新的一天（-¥{DAILY_EXPENSE}生活费，+{ENERGY_RESTORED}精力）
               </button>
-              <div style={{ fontSize: 10, color: '#888', marginTop: 4, textAlign: 'center' }}>明天需要手动点"开始营业"</div>
+              <div style={{ fontSize: 10, color: '#888', marginTop: 4, textAlign: 'center' }}>明天可以选择开门营业或歇业休息</div>
             </div>
           </div>
         )}
@@ -2280,6 +2315,8 @@
           </div>
         </div>
       </div>
+        </>
+      );
     }
 
 
@@ -2945,7 +2982,11 @@
               money={money}
               setMoney={setMoney}
               onConfirm={(food, isSameCat, equipCost) => {
-                const updatedSite = { ...foodSelectModal.site, food, convertedToFood: !isSameCat || !foodSelectModal.site.food };
+                const oldFoodName = foodSelectModal.site.food?.name || '';
+                const newName = oldFoodName && foodSelectModal.site.name.includes(oldFoodName)
+                  ? foodSelectModal.site.name.replace(oldFoodName, food.name)
+                  : `${pick(SHOP_NAMES)}${food.name}`;
+                const updatedSite = { ...foodSelectModal.site, food, convertedToFood: !isSameCat || !foodSelectModal.site.food, name: newName };
                 setTakenSites(ts => ts.map(s => s === foodSelectModal.site ? updatedSite : s));
                 setFranchiseModal({ site: updatedSite, selectedFood: food, isSameCat });
                 setFoodSelectModal(null);
@@ -2980,7 +3021,7 @@
                 setMyShops(ms => [...ms, shopConfig]);
                 setRecruitModal(null);
                 setActiveShopConfig(shopConfig);
-                setMainView('simulation');
+                setLoanModal(true);
                 showToast(`🎉 恭喜开店！${recruitModal.site.name} 正式营业！`);
               }}
               onSkip={() => {
@@ -2988,7 +3029,7 @@
                 setMyShops(ms => [...ms, shopConfig]);
                 setRecruitModal(null);
                 setActiveShopConfig(shopConfig);
-                setMainView('simulation');
+                setLoanModal(true);
                 showToast(`🎉 恭喜开店！${recruitModal.site.name} 正式营业！`);
               }}
             />
@@ -3012,6 +3053,7 @@
                           setMoney(m => m + amt);
                           setLoan({ principal: amt, dailyPayment: dailyPmt, daysLeft: days });
                           setLoanModal(false);
+                          setMainView('simulation');
                           showToast(`💰 贷款 ¥${amt.toLocaleString()} 已到账，每日还款 ¥${Math.round(dailyPmt)}`);
                         }}
                         disabled={!!loan}>
@@ -3022,7 +3064,12 @@
                 </div>
                 {loan && <div style={{ color: '#c0392b', fontSize: 12, marginBottom: 8 }}>已有贷款，不可再贷</div>}
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button className="btn" onClick={() => setLoanModal(false)}>关闭</button>
+                  <button className="btn" onClick={() => {
+                    setLoanModal(false);
+                    if (activeShopConfig) {
+                      setMainView('simulation');
+                    }
+                  }}>关闭</button>
                 </div>
               </div>
             </div>
