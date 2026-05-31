@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>孕期备忘录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --p50:#FFF0F5;--p100:#FFD6E7;--p200:#FFB3CE;--p300:#FF8FB6;
+  --p400:#FF6B9D;--p500:#E84E82;--p600:#C73B6B;--p700:#A02855;
+  --cream:#FFF8F9;--rose50:#FFF5F7;
+  --tx1:#2D1B25;--tx2:#7A4E5E;--txm:#B08090;
+  --bd:rgba(232,78,130,0.12);--bds:rgba(232,78,130,0.25);
+  --sc:0 4px 24px rgba(232,78,130,0.10);
+  --rm:16px;--rl:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradient(160deg,#FFF0F5 0%,#FFF8F9 50%,#FFF5F0 100%);min-height:100vh;color:var(--tx1);overflow-x:hidden}
+#app{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
+
+/* Header */
+.app-header{position:sticky;top:0;z-index:100;background:rgba(255,248,249,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:14px 18px 10px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.app-title{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:600;color:var(--p600);letter-spacing:.5px}
+.hdr-sub{font-size:10px;color:var(--txm);font-weight:300;margin-top:1px}
+.week-badge{background:linear-gradient(135deg,var(--p400),var(--p500));color:#fff;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.prog-track{height:3px;background:var(--p100);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--p300),var(--p500));border-radius:2px;transition:width .6s ease}
+.prog-lbl{font-size:10px;color:var(--txm);margin-top:3px;font-weight:300}
+
+/* History */
+#hist-drawer{position:sticky;top:72px;z-index:90;background:rgba(255,248,249,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1);max-height:44px}
+#hist-drawer.open{max-height:300px}
+.hist-toggle{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;cursor:pointer;user-select:none}
+.hist-toggle:active{background:var(--p50)}
+.hist-lbl{font-size:11px;color:var(--txm);letter-spacing:1px}
+.hist-chev{width:15px;height:15px;color:var(--txm);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+#hist-drawer.open .hist-chev{transform:rotate(180deg)}
+.hist-dot{width:6px;height:6px;border-radius:50%;background:var(--p300);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.hist-list{padding:0 14px 12px;max-height:256px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.hist-item{background:var(--p50);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;animation:fsi .3s ease-out}
+.hist-item-hdr{display:flex;justify-content:space-between;margin-bottom:2px}
+.hist-wk{font-size:10px;color:var(--p500);font-weight:500}
+.hist-dt{font-size:10px;color:var(--txm)}
+.hist-ttl{font-size:13px;color:var(--tx2);line-height:1.4}
+.hist-note{font-size:11px;color:var(--txm);margin-top:2px;font-style:italic}
+.hist-item.done .hist-ttl{text-decoration:line-through;opacity:.55}
+
+/* Scroll area */
+#scroll-area{padding:14px 14px 110px;display:flex;flex-direction:column;gap:11px}
+
+/* Cards */
+.ev-card{background:#fff;border-radius:var(--rl);border:1px solid var(--bd);box-shadow:var(--sc);overflow:hidden;transition:transform .2s,box-shadow .2s;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1) both}
+.ev-card.focus-card{border-color:var(--p300);box-shadow:0 4px 32px rgba(232,78,130,.2)}
+.ev-card:active{transform:scale(.99)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fsi{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.done-strip{height:3px;background:linear-gradient(90deg,var(--p200),var(--p300));width:0;transition:width .6s ease}
+.ev-card.done .done-strip{width:100%}
+.ev-card.done .card-ttl{text-decoration:line-through;opacity:.5}
+.ev-card.done .card-note{opacity:.4}
+.card-inner{padding:13px 14px}
+.card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-left{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0}
+.card-meta{flex:1;min-width:0}
+.wk-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.wk-pill{font-size:10px;font-weight:500;color:var(--p600);background:var(--p50);border:1px solid var(--p200);padding:2px 8px;border-radius:20px;flex-shrink:0}
+.dt-lbl{font-size:11px;color:var(--txm);font-weight:300}
+.card-ttl{font-size:15px;font-weight:500;color:var(--tx1);line-height:1.45;word-break:break-all}
+.card-note{font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5;font-style:italic;font-weight:300}
+.card-note-empty{font-size:11px;color:var(--p200);margin-top:4px;font-style:italic}
+.card-acts{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.btn-ic{width:30px;height:30px;border-radius:9px;border:none;background:var(--p50);color:var(--p500);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .15s}
+.btn-ic:active{transform:scale(.88);background:var(--p100)}
+.btn-ic.del{color:var(--txm);background:transparent}
+.btn-ic.del:active{color:#E53E3E;background:#FFF5F5}
+.chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--p200);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;flex-shrink:0;margin-top:1px}
+.chk.on{background:linear-gradient(135deg,var(--p400),var(--p500));border-color:var(--p400)}
+.chk svg{width:11px;height:11px;color:#fff;opacity:0;transform:scale(.5);transition:all .2s ease}
+.chk.on svg{opacity:1;transform:scale(1)}
+
+/* Month divider */
+.mo-div{display:flex;align-items:center;gap:8px;padding:3px 0;animation:fsi .3s ease-out}
+.mo-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--p200),transparent)}
+.mo-txt{font-size:10px;color:var(--txm);font-weight:500;letter-spacing:1px;white-space:nowrap;padding:2px 7px;background:var(--p50);border:1px solid var(--bd);border-radius:20px}
+
+/* Edit form inline */
+.edit-form{padding:13px 14px;border-top:1px solid var(--bd);background:var(--rose50);animation:formIn .3s cubic-bezier(.4,0,.2,1)}
+@keyframes formIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.form-row{margin-bottom:9px}
+.form-lbl{font-size:10px;color:var(--txm);font-weight:500;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.form-inp{width:100%;padding:9px 12px;border:1px solid var(--bds);border-radius:9px;font-size:14px;font-family:'Noto Sans SC',sans-serif;color:var(--tx1);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-inp:focus{border-color:var(--p400);box-shadow:0 0 0 3px rgba(232,78,130,.1)}
+.form-inp[type=number]{-moz-appearance:textfield}
+.form-inp[type=number]::-webkit-outer-spin-button,.form-inp[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.form-hint{font-size:10px;color:var(--txm);margin-top:3px;display:block}
+.time-row{display:flex;gap:8px;align-items:flex-start}
+.time-or{font-size:11px;color:var(--txm);padding-top:10px;flex-shrink:0}
+.week-input-wrap{flex:1}
+.date-input-wrap{flex:1.4;position:relative}
+.date-cal-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--p400);cursor:pointer;padding:2px;display:flex;align-items:center;line-height:1}
+.form-btns{display:flex;gap:7px;margin-top:11px}
+.btn-save{flex:1;padding:10px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--p400),var(--p500));color:#fff;font-size:13px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s}
+.btn-save:active{opacity:.85;transform:scale(.98)}
+.btn-cancel{padding:10px 14px;border:1px solid var(--bds);border-radius:9px;background:#fff;color:var(--tx2);font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer}
+
+/* FAB */
+#fab{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;background:linear-gradient(135deg,var(--p400),var(--p600));color:#fff;border:none;padding:13px 26px;border-radius:30px;font-size:14px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(232,78,130,.4);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
+#fab:active{transform:translateX(-50%) scale(.95);box-shadow:0 2px 12px rgba(232,78,130,.3)}
+
+/* Bottom Sheet */
+.sheet-bg{position:fixed;inset:0;z-index:300;background:rgba(45,27,37,.4);backdrop-filter:blur(4px);display:flex;align-items:flex-end;opacity:0;transition:opacity .3s ease;pointer-events:none}
+.sheet-bg.vis{opacity:1;pointer-events:all}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px 38px;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 -8px 40px rgba(232,78,130,.15)}
+.sheet-bg.vis .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--p200);border-radius:2px;margin:0 auto 18px}
+.sheet-ttl{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:600;color:var(--p600);margin-bottom:14px;text-align:center}
+
+/* Sync bar */
+#sync-bar{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:400;background:#fff;border:1px solid var(--bd);border-radius:0 0 14px 14px;padding:9px 18px;font-size:12px;color:var(--tx2);box-shadow:0 2px 16px rgba(232,78,130,.08);transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:300px}
+#sync-bar.show{transform:translateX(-50%) translateY(0)}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--p400);margin-right:5px;vertical-align:middle}
+
+/* Config panel */
+.cfg-note{font-size:11px;color:var(--txm);line-height:1.6;background:var(--p50);border:1px solid var(--bd);border-radius:9px;padding:9px 11px;margin-bottom:13px}
+#cfg-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bd);background:#fff;color:var(--txm);cursor:pointer;display:flex;align-items:center;justify-content:center}
+#cfg-btn:active{background:var(--p50)}
+
+/* Export section */
+.export-section{margin-top:14px;border-top:1px solid var(--bd);padding-top:14px}
+.export-lbl{font-size:11px;color:var(--txm);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:block}
+.export-btns{display:flex;flex-direction:column;gap:8px}
+.btn-export{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--bds);border-radius:12px;background:#fff;color:var(--tx1);font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer;text-align:left;transition:background .2s,transform .15s}
+.btn-export:active{background:var(--p50);transform:scale(.98)}
+.btn-export .exp-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.btn-export .exp-desc{font-size:10px;color:var(--txm);margin-top:1px}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--p200);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="app-header">
+  <div class="hdr-top">
+    <div>
+      <div class="app-title">🌸 孕期备忘录</div>
+      <div class="hdr-sub">末次月经 2026年4月23日</div>
+    </div>
+    <div class="hdr-right">
+      <div id="wk-badge" class="week-badge">计算中</div>
+      <button id="cfg-btn" onclick="toggleCfg()" title="设置">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07M19.07 4.93L12 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-lbl" id="prog-lbl">加载中…</div>
+</header>
+
+<div id="hist-drawer">
+  <div class="hist-toggle" onclick="toggleHist()">
+    <div class="hist-dot"></div>
+    <span class="hist-lbl">历史记录</span>
+    <svg class="hist-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </div>
+  <div class="hist-list" id="hist-list"></div>
+</div>
+
+<div id="scroll-area">
+  <div style="text-align:center;padding:48px;color:var(--txm);font-size:13px">🌸 加载中…</div>
+</div>
+</div>
+
+<button id="fab" onclick="openAdd()">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  添加事件
+</button>
+
+<div id="add-bg" class="sheet-bg" onclick="bgClick(event,'add-bg')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-ttl">✦ 添加新事件</div>
+    <div class="form-row">
+      <label class="form-lbl">时间（二选一）</label>
+      <div class="time-row">
+        <div class="week-input-wrap">
+          <input class="form-inp" type="number" id="add-wk" min="1" max="42" placeholder="孕周数" oninput="onWeekInput('add')">
+          <span class="form-hint">如：输入 15</span>
+        </div>
+        <div class="time-or">或</div>
+        <div class="date-input-wrap">
+          <input class="form-inp" type="date" id="add-dt" style="padding-right:36px" oninput="onDateInput('add')">
+          <button class="date-cal-btn" onclick="document.getElementById('add-dt').showPicker()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">事件内容</label>
+      <input class="form-inp" id="add-ttl" placeholder="输入事件内容…">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">备注（事后填写）</label>
+      <input class="form-inp" id="add-note" placeholder="就诊结果、费用等…">
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeAdd()">取消</button>
+      <button class="btn-save" onclick="saveNew()">保存 →</button>
+    </div>
+  </div>
+</div>
+
+<div id="cfg-bg" class="sheet-bg" onclick="bgClick(event,'cfg-bg')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-ttl">⚙ 设置与导出</div>
+    <div class="cfg-note">
+      配置 GitHub 同步后，数据存储在仓库 JSON 文件中，跨设备同步。需要一个有 <code>repo</code> 权限的 Personal Access Token。
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">GitHub 用户名</label>
+      <input class="form-inp" id="cfg-owner" placeholder="username">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">仓库名</label>
+      <input class="form-inp" id="cfg-repo" placeholder="my-pregnancy-data">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">文件路径</label>
+      <input class="form-inp" id="cfg-path" placeholder="pregnancy.json" value="pregnancy.json">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Personal Access Token</label>
+      <input class="form-inp" id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeCfg()">取消</button>
+      <button class="btn-save" onclick="saveCfg()">保存并同步 →</button>
+    </div>
+
+    <div class="export-section">
+      <span class="export-lbl">导出到日历</span>
+      <div class="export-btns">
+        <button class="btn-export" onclick="exportICS('apple')">
+          <div class="exp-icon" style="background:#f0f0f5">🍎</div>
+          <div>
+            <div>导出到苹果日历</div>
+            <div class="exp-desc">下载 .ics 文件，导入 Apple Calendar / iCloud</div>
+          </div>
+        </button>
+        <button class="btn-export" onclick="exportGoogleCalendar()">
+          <div class="exp-icon" style="background:#e8f0fe">📅</div>
+          <div>
+            <div>导出到 Google 日历</div>
+            <div class="exp-desc">下载 .ics 文件，在 Google Calendar 中导入</div>
+          </div>
+        </button>
+        <button class="btn-export" onclick="exportICS('ics')">
+          <div class="exp-icon" style="background:#e8f5e9">📋</div>
+          <div>
+            <div>导出 .ics 文件</div>
+            <div class="exp-desc">通用日历格式，适用于所有日历应用</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sync-bar"><span class="sync-dot"></span><span id="sync-msg">同步中…</span></div>
+
+<script>
+const LMP = new Date('2026-04-23T00:00:00');
+const TOTAL_WKS = 40;
+
+let events = [];
+let ghCfg = {owner:'juejove',repo:'dataStorage',path:'pregnancy.json',token:'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'};
+let histOpen = false;
+
+const DEFAULTS = [
+  {id:1,week:5, date:'2026-05-28',title:'GP安排抽血 看数据',          note:'',done:false},
+  {id:2,week:7, date:'2026-06-11',title:'可以开始看B超',              note:'',done:false},
+  {id:3,week:8, date:'2026-06-18',title:'见OB第一次看诊',             note:'周8-10之间',done:false},
+  {id:4,week:10,date:'2026-07-02',title:'NIPT 抽血检查基因排畸',      note:'450自费 可选',done:false},
+  {id:5,week:13,date:'2026-07-23',title:'NT检查',                     note:'必须 $270',done:false},
+  {id:6,week:13,date:'2026-07-23',title:'不再需要GP',                 note:'',done:false},
+  {id:7,week:15,date:'2026-08-06',title:'OB复诊 NT结果分析',          note:'',done:false},
+  {id:8,week:20,date:'2026-09-10',title:'大排畸 最后一次B超',         note:'',done:false},
+  {id:9,week:21,date:'2026-09-17',title:'OB分析排畸结果 第一次交管理费 流感疫苗',note:'',done:false},
+  {id:10,week:25,date:'2026-10-15',title:'OB产检',                   note:'',done:false},
+  {id:11,week:27,date:'2026-10-29',title:'糖耐检测',                 note:'',done:false},
+  {id:12,week:28,date:'2026-11-05',title:'交OB管理费5000',           note:'',done:false},
+  {id:13,week:31,date:'2026-11-26',title:'每两周见一次医生',         note:'',done:false},
+  {id:40,week:40,date:'2027-01-28',title:'预产期 🍼',               note:'',done:false},
+];
+
+// ── date helpers ──────────────────────────────────────────────────
+function wkToDate(w){
+  const d=new Date(LMP);d.setDate(d.getDate()+(w-1)*7);return d.toISOString().slice(0,10);
+}
+function dateToWk(s){
+  const d=new Date(s+'T00:00:00');
+  const diff=d-LMP;
+  const days=Math.floor(diff/(86400000));
+  return Math.max(1,Math.floor(days/7)+1);
+}
+function curWk(){
+  const diff=new Date()-LMP;
+  const days=Math.floor(diff/86400000);
+  return Math.max(1,Math.floor(days/7)+1);
+}
+function fmtDate(s){
+  const d=new Date(s+'T00:00:00');
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+function fmtMY(s){
+  const d=new Date(s+'T00:00:00');
+  return `${d.getFullYear()}年${d.getMonth()+1}月`;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ── time input mutual clearing ─────────────────────────────────────
+function onWeekInput(prefix){
+  const wkEl=document.getElementById(prefix+'-wk');
+  const dtEl=document.getElementById(prefix+'-dt');
+  if(wkEl.value){dtEl.value=''}
+}
+function onDateInput(prefix){
+  const wkEl=document.getElementById(prefix+'-wk');
+  const dtEl=document.getElementById(prefix+'-dt');
+  if(dtEl.value){wkEl.value=''}
+}
+
+// ── parse time from form ───────────────────────────────────────────
+function parseTime(prefix){
+  const wkVal=document.getElementById(prefix+'-wk').value.trim();
+  const dtVal=document.getElementById(prefix+'-dt').value.trim();
+  if(wkVal){
+    const w=parseInt(wkVal);
+    if(isNaN(w)||w<1||w>45){alert('请输入1–45之间的孕周数');return null;}
+    return{week:w,date:wkToDate(w)};
+  }
+  if(dtVal){
+    return{week:dateToWk(dtVal),date:dtVal};
+  }
+  alert('请输入孕周数或选择日期');return null;
+}
+
+// ── fill time inputs ───────────────────────────────────────────────
+function fillTime(prefix,week,date){
+  document.getElementById(prefix+'-wk').value=week||'';
+  document.getElementById(prefix+'-dt').value='';
+}
+
+// ── header ─────────────────────────────────────────────────────────
+function updateHeader(){
+  const w=curWk();
+  document.getElementById('wk-badge').textContent=w<=TOTAL_WKS?`孕${w}周`:'产后';
+  const pct=Math.min(100,Math.round(w/TOTAL_WKS*100));
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-lbl').textContent=`孕程进度 ${pct}%（第${w}周 / 共${TOTAL_WKS}周）`;
+}
+
+// ── sort ───────────────────────────────────────────────────────────
+function sorted(){return[...events].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id-b.id)}
+
+// ── render ─────────────────────────────────────────────────────────
+function render(){
+  const list=sorted();
+  const today=new Date().toISOString().slice(0,10);
+  const focusEv=list.find(e=>e.date>=today&&!e.done);
+  let lastM=null,html='';
+
+  list.forEach(ev=>{
+    const mo=fmtMY(ev.date);
+    if(mo!==lastM){
+      html+=`<div class="mo-div"><div class="mo-line"></div><div class="mo-txt">${mo}</div><div class="mo-line"></div></div>`;
+      lastM=mo;
+    }
+    const isFocus=focusEv&&ev.id===focusEv.id;
+    const noteHtml=ev.note
+      ?`<div class="card-note">${esc(ev.note)}</div>`
+      :`<div class="card-note-empty">备注待填写…</div>`;
+
+    html+=`
+<div class="ev-card${ev.done?' done':''}${isFocus?' focus-card':''}" data-id="${ev.id}"${isFocus?` id="fc${ev.id}"`:''}">
+  <div class="done-strip"></div>
+  <div class="card-inner">
+    <div class="card-hdr">
+      <div class="card-left">
+        <div class="chk${ev.done?' on':''}" onclick="toggleDone(${ev.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="card-meta">
+          <div class="wk-row">
+            <span class="wk-pill">孕${ev.week}周</span>
+            <span class="dt-lbl">${fmtDate(ev.date)}</span>
+          </div>
+          <div class="card-ttl">${esc(ev.title)}</div>
+          ${noteHtml}
+        </div>
+      </div>
+      <div class="card-acts">
+        <button class="btn-ic" onclick="openEdit(${ev.id})" title="修改">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-ic del" onclick="delEv(${ev.id})" title="删除">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="ef${ev.id}" style="display:none">
+    <div class="edit-form">
+      <div class="form-row">
+        <label class="form-lbl">时间（修改其中一个即可）</label>
+        <div class="time-row">
+          <div class="week-input-wrap">
+            <input class="form-inp" type="number" id="ew${ev.id}" value="${ev.week}" min="1" max="42" placeholder="孕周数" oninput="onWeekInput('e${ev.id}')">
+            <span class="form-hint">孕周</span>
+          </div>
+          <div class="time-or">或</div>
+          <div class="date-input-wrap">
+            <input class="form-inp" type="date" id="ed${ev.id}" style="padding-right:36px" oninput="onDateInput('e${ev.id}')">
+            <button class="date-cal-btn" onclick="document.getElementById('ed${ev.id}').showPicker()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">事件内容</label>
+        <input class="form-inp" id="et${ev.id}" value="${esc(ev.title)}">
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">备注</label>
+        <input class="form-inp" id="en${ev.id}" value="${esc(ev.note)}" placeholder="就诊结果、费用等…">
+      </div>
+      <div class="form-btns">
+        <button class="btn-cancel" onclick="closeEdit(${ev.id})">取消</button>
+        <button class="btn-save" onclick="saveEdit(${ev.id})">保存 →</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+  });
+
+  if(!html) html='<div style="text-align:center;padding:48px;color:var(--txm);font-size:13px">🌸<br>暂无事件</div>';
+  document.getElementById('scroll-area').innerHTML=html;
+
+  // patch inline edit week/date mutual clear
+  list.forEach(ev=>{
+    const ewEl=document.getElementById(`ew${ev.id}`);
+    const edEl=document.getElementById(`ed${ev.id}`);
+    if(ewEl&&edEl){
+      ewEl.addEventListener('input',()=>{if(ewEl.value)edEl.value=''});
+      edEl.addEventListener('input',()=>{if(edEl.value)ewEl.value=''});
+    }
+  });
+}
+
+function renderHist(){
+  const list=sorted();
+  const today=new Date().toISOString().slice(0,10);
+  const past=list.filter(e=>e.date<today||e.done).reverse();
+  const el=document.getElementById('hist-list');
+  if(!past.length){el.innerHTML='<div style="font-size:12px;color:var(--txm);text-align:center;padding:8px">暂无历史记录</div>';return}
+  el.innerHTML=past.map(ev=>`
+<div class="hist-item${ev.done?' done':''}">
+  <div class="hist-item-hdr"><span class="hist-wk">孕${ev.week}周</span><span class="hist-dt">${fmtDate(ev.date)}</span></div>
+  <div class="hist-ttl">${esc(ev.title)}</div>
+  ${ev.note?`<div class="hist-note">${esc(ev.note)}</div>`:''}
+</div>`).join('');
+}
+
+// ── interactions ───────────────────────────────────────────────────
+function toggleHist(){
+  histOpen=!histOpen;
+  document.getElementById('hist-drawer').classList.toggle('open',histOpen);
+  if(histOpen)renderHist();
+}
+
+function toggleDone(id){
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  ev.done=!ev.done;render();if(histOpen)renderHist();saveGH();
+}
+
+function openEdit(id){
+  document.querySelectorAll('[id^="ef"]').forEach(el=>el.style.display='none');
+  const f=document.getElementById(`ef${id}`);if(!f)return;
+  f.style.display='block';
+  // clear date input, keep week
+  document.getElementById(`ed${id}`).value='';
+  f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeEdit(id){const f=document.getElementById(`ef${id}`);if(f)f.style.display='none'}
+
+function saveEdit(id){
+  const wkEl=document.getElementById(`ew${id}`);
+  const dtEl=document.getElementById(`ed${id}`);
+  const ttl=document.getElementById(`et${id}`).value.trim();
+  const note=document.getElementById(`en${id}`).value.trim();
+  if(!ttl){alert('内容不能为空');return}
+  let week,date;
+  if(dtEl.value){week=dateToWk(dtEl.value);date=dtEl.value}
+  else if(wkEl.value){week=parseInt(wkEl.value);date=wkToDate(week)}
+  else{alert('请输入孕周或选择日期');return}
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  ev.week=week;ev.date=date;ev.title=ttl;ev.note=note;
+  render();if(histOpen)renderHist();saveGH();
+}
+
+function delEv(id){
+  if(!confirm('确认删除这个事件？'))return;
+  events=events.filter(e=>e.id!==id);render();if(histOpen)renderHist();saveGH();
+}
+
+// ── add sheet ──────────────────────────────────────────────────────
+function openAdd(){
+  document.getElementById('add-wk').value='';
+  document.getElementById('add-dt').value='';
+  document.getElementById('add-ttl').value='';
+  document.getElementById('add-note').value='';
+  document.getElementById('add-bg').classList.add('vis');
+  setTimeout(()=>document.getElementById('add-wk').focus(),420);
+}
+function closeAdd(){document.getElementById('add-bg').classList.remove('vis')}
+
+function saveNew(){
+  const t=parseTime('add');if(!t)return;
+  const ttl=document.getElementById('add-ttl').value.trim();
+  const note=document.getElementById('add-note').value.trim();
+  if(!ttl){alert('请输入事件内容');return}
+  const newId=events.length?Math.max(...events.map(e=>e.id))+1:1;
+  events.push({id:newId,week:t.week,date:t.date,title:ttl,note,done:false});
+  closeAdd();render();if(histOpen)renderHist();saveGH();
+  setTimeout(()=>{
+    const s=sorted();const idx=s.findIndex(e=>e.id===newId);
+    const cards=document.querySelectorAll('.ev-card');
+    if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+}
+
+function bgClick(e,id){if(e.target===document.getElementById(id)){if(id==='add-bg')closeAdd();else closeCfg()}}
+
+// ── config ─────────────────────────────────────────────────────────
+function loadCfg(){try{const s=localStorage.getItem('pg_ghcfg');if(s)ghCfg=JSON.parse(s)}catch(e){}}
+function toggleCfg(){
+  const p=document.getElementById('cfg-bg');
+  if(p.classList.contains('vis')){closeCfg();return}
+  document.getElementById('cfg-owner').value=ghCfg.owner||'';
+  document.getElementById('cfg-repo').value=ghCfg.repo||'';
+  document.getElementById('cfg-path').value=ghCfg.path||'pregnancy.json';
+  document.getElementById('cfg-token').value=ghCfg.token||'';
+  p.classList.add('vis');
+}
+function closeCfg(){document.getElementById('cfg-bg').classList.remove('vis')}
+function saveCfg(){
+  ghCfg={owner:document.getElementById('cfg-owner').value.trim(),repo:document.getElementById('cfg-repo').value.trim(),path:document.getElementById('cfg-path').value.trim()||'pregnancy.json',token:document.getElementById('cfg-token').value.trim()};
+  localStorage.setItem('pg_ghcfg',JSON.stringify(ghCfg));
+  closeCfg();showSync('配置已保存，正在同步…');
+  loadGH().then(ok=>showSync(ok?'✓ 已从 GitHub 加载':'⚠ 同步失败，使用本地数据'));
+}
+
+// ── GitHub ────────────────────────────────────────────────────────
+function showSync(msg){
+  const b=document.getElementById('sync-bar');
+  document.getElementById('sync-msg').textContent=msg;
+  b.classList.add('show');setTimeout(()=>b.classList.remove('show'),3200);
+}
+async function getSha(){
+  const{owner,repo,path,token}=ghCfg;
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});
+  return r.ok?(await r.json()).sha:null;
+}
+async function loadGH(){
+  const{owner,repo,path,token}=ghCfg;
+  if(!owner||!repo||!token)return false;
+  try{
+    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});
+    if(r.ok){
+      const d=await r.json();
+      const raw=atob(d.content.replace(/\n/g,''));
+      const decoded=new TextDecoder().decode(new Uint8Array([...raw].map(c=>c.charCodeAt(0))));
+      events=JSON.parse(decoded);render();if(histOpen)renderHist();return true;
+    }
+  }catch(e){}
+  return false;
+}
+async function saveGH(){
+  const{owner,repo,path,token}=ghCfg;
+  if(!owner||!repo||!token){localStorage.setItem('pg_local',JSON.stringify(events));return}
+  showSync('同步中…');
+  try{
+    const sha=await getSha();
+    const json=JSON.stringify(events,null,2);const bytes=new TextEncoder().encode(json);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));const content=btoa(bin);
+    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${token}`,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update pregnancy events',content,...(sha?{sha}:{})})});
+    showSync(r.ok?'✓ 已保存到 GitHub':'⚠ 保存失败 '+r.status);
+  }catch(e){showSync('⚠ 网络错误，已本地保存');localStorage.setItem('pg_local',JSON.stringify(events))}
+}
+
+// ── Export ────────────────────────────────────────────────────────
+function toICSDate(dateStr){
+  return dateStr.replace(/-/g,'');
+}
+function makeICS(){
+  const lines=[
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//孕期备忘录//ZH',
+    'CALSCALE:GREGORIAN','METHOD:PUBLISH'
+  ];
+  sorted().forEach(ev=>{
+    const uid=`pg-${ev.id}-${ev.date}@pregnancy`;
+    const start=toICSDate(ev.date);
+    const endD=new Date(ev.date+'T00:00:00');endD.setDate(endD.getDate()+1);
+    const end=endD.toISOString().slice(0,10).replace(/-/g,'');
+    const summary=`[孕${ev.week}周] ${ev.title}`;
+    const desc=ev.note?`备注：${ev.note}`:'';
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTART;VALUE=DATE:${start}`,
+      `DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:${summary}`,
+      ...(desc?[`DESCRIPTION:${desc}`]:[]),
+      'END:VEVENT'
+    );
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function downloadICS(filename){
+  const ics=makeICS();
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showSync('✓ 已下载日历文件');
+}
+function exportICS(type){
+  const filename = type === 'apple' ? '孕期日历_Apple.ics' : '孕期日历.ics';
+  downloadICS(filename);
+}
+function exportGoogleCalendar(){
+  downloadICS('孕期日历_Google.ics');
+  setTimeout(()=>{
+    if(confirm('文件已下载！\n\n在电脑上打开 calendar.google.com → 设置 → 导入，选择刚下载的文件。\n\n是否现在跳转到 Google 日历？')){
+      window.open('https://calendar.google.com/calendar/r/settings/export','_blank');
+    }
+  },400);
+}
+
+// ── init ───────────────────────────────────────────────────────────
+async function init(){
+  loadCfg();updateHeader();
+  let loaded=false;
+  if(ghCfg.owner&&ghCfg.repo&&ghCfg.token){
+    showSync('正在从 GitHub 加载…');
+    loaded=await loadGH();
+    if(loaded)showSync('✓ 已从 GitHub 加载');
+  }
+  if(!loaded){
+    const local=localStorage.getItem('pg_local');
+    if(local){try{events=JSON.parse(local);loaded=true}catch(e){}}
+  }
+  if(!loaded)events=DEFAULTS;
+  render();updateHeader();
+  setTimeout(()=>{
+    const today=new Date().toISOString().slice(0,10);
+    const s=sorted();const idx=s.findIndex(e=>e.date>=today&&!e.done);
+    if(idx>=0){const cards=document.querySelectorAll('.ev-card');if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'})}
+  },600);
+}
+init();
+</script>
+</body>
+</html>
