@@ -351,35 +351,63 @@ let calYear,calMonth,calSelectedDate=null;
 let swipeStartX=0;
 
 const DEFAULTS=[
-  {id:1,week:5,date:'2026-05-28',title:'GP安排抽血 看数据',note:'',done:false},
-  {id:2,week:7,date:'2026-06-11',title:'可以开始看B超',note:'',done:false},
-  {id:3,week:8,date:'2026-06-18',title:'见OB第一次看诊',note:'周8-10之间',done:false},
-  {id:4,week:10,date:'2026-07-02',title:'NIPT 抽血检查基因排畸',note:'450自费 可选',done:false},
-  {id:5,week:13,date:'2026-07-23',title:'NT检查',note:'必须 $270',done:false},
-  {id:6,week:13,date:'2026-07-23',title:'不再需要GP',note:'',done:false},
-  {id:7,week:15,date:'2026-08-06',title:'OB复诊 NT结果分析',note:'',done:false},
-  {id:8,week:20,date:'2026-09-10',title:'大排畸 最后一次B超',note:'',done:false},
-  {id:9,week:21,date:'2026-09-17',title:'OB分析排畸结果 第一次交管理费 流感疫苗',note:'',done:false},
-  {id:10,week:25,date:'2026-10-15',title:'OB产检',note:'',done:false},
-  {id:11,week:27,date:'2026-10-29',title:'糖耐检测',note:'',done:false},
-  {id:12,week:28,date:'2026-11-05',title:'交OB管理费5000',note:'',done:false},
-  {id:13,week:31,date:'2026-11-26',title:'每两周见一次医生',note:'',done:false},
-  {id:40,week:40,date:'2027-01-28',title:'预产期 🍼',note:'',done:false},
+  {id:1, week:5, date:'2026-05-28', title:'GP安排抽血 看数据', note:'', done:false}, // 5周0天
+  {id:2, week:7, date:'2026-06-11', title:'可以开始看B超', note:'', done:false},     // 7周0天
+  {id:3, week:8, date:'2026-06-18', title:'见OB第一次看诊', note:'周8-10之间', done:false},
+  {id:4, week:10, date:'2026-07-02', title:'NIPT 抽血检查基因排畸', note:'450自费 可选', done:false},
+  {id:5, week:13, date:'2026-07-23', title:'NT检查', note:'必须 $270', done:false},
+  {id:6, week:13, date:'2026-07-23', title:'不再需要GP', note:'', done:false},
+  {id:7, week:15, date:'2026-08-06', title:'OB复诊 NT结果分析', note:'', done:false},
+  {id:8, week:20, date:'2026-09-10', title:'大排畸 最后一次B超', note:'', done:false},
+  {id:9, week:21, date:'2026-09-17', title:'OB分析排畸结果 第一次交管理费 流感疫苗', note:'', done:false},
+  {id:10, week:25, date:'2026-10-15', title:'OB产检', note:'', done:false},
+  {id:11, week:27, date:'2026-10-29', title:'糖耐检测', note:'', done:false},
+  {id:12, week:28, date:'2026-11-05', title:'交OB管理费5000', note:'', done:false},
+  {id:13, week:31, date:'2026-11-26', title:'每两周见一次医生', note:'', done:false},
+  {id:40, week:40, date:'2027-01-28', title:'预产期 🍼', note:'', done:false}        // 40周0天
 ];
 
-function wkToDate(w,d=0){const dt=new Date(LMP);dt.setDate(dt.getDate()+(w-1)*7+d);return dt.toISOString().slice(0,10)}
-function dateToWkDay(s){const d=new Date(s+'T00:00:00');const days=Math.floor((d-LMP)/86400000);const wk=Math.floor(days/7)+1;const dy=days%7;return{wk:Math.max(1,wk),day:Math.max(0,dy)}}
-function dateToWk(s){return dateToWkDay(s).wk}
-function curWk(){const days=Math.floor((new Date()-LMP)/86400000);return Math.max(1,Math.floor(days/7)+1)}
+function wkToDate(w, d = 0) {
+  const dt = new Date(LMP);
+  // 医学上 1周+0天 是第7天。我们要以 0周+0天 为基准点，公式改为 (w * 7) + d
+  dt.setDate(dt.getDate() + (w * 7) + d);
+  return dt.toISOString().slice(0, 10);
+}
+// 2. 修改：根据公历日期，精确反推“已满周数”和“剩余天数”
+function dateToWkDay(s) {
+  const d = new Date(s + 'T00:00:00');
+  // 计算相差的绝对天数
+  const days = Math.floor((d - LMP) / 86400000);
+  
+  // 医学标准：整除 7 为已满周数，余数为天数
+  const wk = Math.floor(days / 7);
+  const dy = days % 7;
+  
+  return { 
+    wk: wk, 
+    day: dy 
+  };
+}
+
+// 3. 修改：获取当前日期的纯周数（用于列表分组或卡片显示）
+function dateToWk(s) {
+  return dateToWkDay(s).wk;
+}
+function curWk() {
+  const days = Math.floor((new Date() - LMP) / 86400000);
+  return Math.floor(days / 7);
+}
 function fmtDate(s){const d=new Date(s+'T00:00:00');return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`}
 function fmtMY(s){const d=new Date(s+'T00:00:00');return`${d.getFullYear()}年${d.getMonth()+1}月`}
 function isWeekBased(ev){return ev.date===wkToDate(ev.week)}
-function displayTime(ev){
-  if(isWeekBased(ev)){
-    const s=new Date(LMP);s.setDate(s.getDate()+(ev.week-1)*7);
-    const e=new Date(s);e.setDate(e.getDate()+6);
-    const sm=s.getMonth()+1,sd=s.getDate(),em=e.getMonth()+1,ed=e.getDate();
-    return sm===em?`${sm}月${sd}–${ed}日`:`${sm}月${sd}日–${em}月${ed}日`;
+function displayTime(ev) {
+  if (isWeekBased(ev)) {
+    const s = new Date(LMP);
+    s.setDate(s.getDate() + (ev.week * 7)); // 改为以满周为基准点
+    const e = new Date(s);
+    e.setDate(e.getDate() + 6);
+    const sm = s.getMonth() + 1, sd = s.getDate(), em = e.getMonth() + 1, ed = e.getDate();
+    return sm === em ? `${sm}月${sd}–${ed}日` : `${sm}月${sd}日–${em}月${ed}日`;
   }
   return fmtDate(ev.date);
 }
@@ -395,12 +423,16 @@ function switchTab(tab,btn){
   if(tab==='cal')renderCal();
 }
 
-function updateHeader(){
-  const w=curWk();
-  document.getElementById('wk-badge').textContent=w<=TOTAL_WKS?`孕${w}周`:'产后';
-  const pct=Math.min(100,Math.round(w/TOTAL_WKS*100));
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-lbl').textContent=`孕程进度 ${pct}%（第${w}周 / 共${TOTAL_WKS}周）`;
+function updateHeader() {
+  const w = curWk();
+  const days = Math.floor((new Date() - LMP) / 86400000);
+  const d = days % 7;
+  
+  // 显示格式调整为更有温度的：孕 X 周 + Y 天
+  document.getElementById('wk-badge').textContent = w <= TOTAL_WKS ? `孕${w}周+${d}天` : '产后';
+  const pct = Math.min(100, Math.round((days / 280) * 100));
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-lbl').textContent = `孕程进度 ${pct}%（第 ${w} 周 / 共 ${TOTAL_WKS} 周）`;
 }
 
 function render(){
