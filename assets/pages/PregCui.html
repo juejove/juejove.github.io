@@ -4,145 +4,168 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>孕期备忘录</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --p50:#FFF0F5;--p100:#FFD6E7;--p200:#FFB3CE;--p300:#FF8FB6;
-  --p400:#FF6B9D;--p500:#E84E82;--p600:#C73B6B;--p700:#A02855;
-  --cream:#FFF8F9;--rose50:#FFF5F7;
-  --tx1:#2D1B25;--tx2:#7A4E5E;--txm:#B08090;
-  --bd:rgba(232,78,130,0.12);--bds:rgba(232,78,130,0.25);
-  --sc:0 4px 24px rgba(232,78,130,0.10);
-  --rm:16px;--rl:22px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradient(160deg,#FFF0F5 0%,#FFF8F9 50%,#FFF5F0 100%);min-height:100vh;color:var(--tx1);overflow-x:hidden}
-#app{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradient(160deg,#FFF0F5 0%,#FFF8F9 50%,#FFF5F0 100%);min-height:100vh;overflow-x:hidden}
+#app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
-/* Header */
-.app-header{position:sticky;top:0;z-index:100;background:rgba(255,248,249,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:14px 18px 10px}
+.app-header{background:rgba(255,248,249,0.95);border-bottom:1px solid rgba(232,78,130,0.15);padding:14px 18px 10px}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.app-title{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:600;color:var(--p600);letter-spacing:.5px}
-.hdr-sub{font-size:10px;color:var(--txm);font-weight:300;margin-top:1px}
-.week-badge{background:linear-gradient(135deg,var(--p400),var(--p500));color:#fff;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px}
+.app-title{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:600;color:#C73B6B;letter-spacing:.5px}
+.hdr-sub{font-size:11px;color:#B08090;font-weight:300;margin-top:1px}
+.week-badge{background:#FF6B9D;color:#fff;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px}
 .hdr-right{display:flex;align-items:center;gap:8px}
-.prog-track{height:3px;background:var(--p100);border-radius:2px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--p300),var(--p500));border-radius:2px;transition:width .6s ease}
-.prog-lbl{font-size:10px;color:var(--txm);margin-top:3px;font-weight:300}
+.prog-track{height:3px;background:#FFD6E7;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:#FF8FB6;border-radius:2px}
+.prog-lbl{font-size:10px;color:#B08090;margin-top:3px;font-weight:300}
 
-/* History */
-#hist-drawer{position:sticky;top:72px;z-index:90;background:rgba(255,248,249,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1);max-height:44px}
-#hist-drawer.open{max-height:300px}
-.hist-toggle{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;cursor:pointer;user-select:none}
-.hist-toggle:active{background:var(--p50)}
-.hist-lbl{font-size:11px;color:var(--txm);letter-spacing:1px}
-.hist-chev{width:15px;height:15px;color:var(--txm);transition:transform .4s cubic-bezier(.4,0,.2,1)}
-#hist-drawer.open .hist-chev{transform:rotate(180deg)}
-.hist-dot{width:6px;height:6px;border-radius:50%;background:var(--p300);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
-.hist-list{padding:0 14px 12px;max-height:256px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
-.hist-item{background:var(--p50);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;animation:fsi .3s ease-out}
-.hist-item-hdr{display:flex;justify-content:space-between;margin-bottom:2px}
-.hist-wk{font-size:10px;color:var(--p500);font-weight:500}
-.hist-dt{font-size:10px;color:var(--txm)}
-.hist-ttl{font-size:13px;color:var(--tx2);line-height:1.4}
-.hist-note{font-size:11px;color:var(--txm);margin-top:2px;font-style:italic}
-.hist-item.done .hist-ttl{text-decoration:line-through;opacity:.55}
+.tab-nav{display:flex;background:rgba(255,248,249,0.98);border-bottom:1px solid rgba(232,78,130,0.12)}
+.tab-btn{flex:1;padding:10px 0;font-size:12px;font-family:'Noto Sans SC',sans-serif;border:none;background:none;color:#B08090;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-weight:400}
+.tab-btn.active{color:#E84E82;border-bottom-color:#E84E82;font-weight:500}
 
-/* Scroll area */
-#scroll-area{padding:14px 14px 110px;display:flex;flex-direction:column;gap:11px}
+.view{display:none}
+.view.active{display:block}
 
-/* Cards */
-.ev-card{background:#fff;border-radius:var(--rl);border:1px solid var(--bd);box-shadow:var(--sc);overflow:hidden;transition:transform .2s,box-shadow .2s;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1) both}
-.ev-card.focus-card{border-color:var(--p300);box-shadow:0 4px 32px rgba(232,78,130,.2)}
-.ev-card:active{transform:scale(.99)}
-@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes fsi{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.done-strip{height:3px;background:linear-gradient(90deg,var(--p200),var(--p300));width:0;transition:width .6s ease}
+#scroll-area{padding:14px 14px 20px;display:flex;flex-direction:column;gap:11px}
+
+.ev-card{background:#fff;border-radius:22px;border:1px solid rgba(232,78,130,0.12);overflow:hidden;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1) both}
+.ev-card.focus-card{border-color:#FF8FB6}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.done-strip{height:3px;background:#FFB3CE;width:0;transition:width .6s ease}
 .ev-card.done .done-strip{width:100%}
 .ev-card.done .card-ttl{text-decoration:line-through;opacity:.5}
-.ev-card.done .card-note{opacity:.4}
 .card-inner{padding:13px 14px}
 .card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .card-left{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0}
 .card-meta{flex:1;min-width:0}
 .wk-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.wk-pill{font-size:10px;font-weight:500;color:var(--p600);background:var(--p50);border:1px solid var(--p200);padding:2px 8px;border-radius:20px;flex-shrink:0}
-.dt-lbl{font-size:11px;color:var(--txm);font-weight:300}
-.card-ttl{font-size:15px;font-weight:500;color:var(--tx1);line-height:1.45;word-break:break-all}
-.card-note{font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5;font-style:italic;font-weight:300}
-.card-note-empty{font-size:11px;color:var(--p200);margin-top:4px;font-style:italic}
+.wk-pill{font-size:10px;font-weight:500;color:#C73B6B;background:#FFF0F5;border:1px solid #FFB3CE;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.dt-lbl{font-size:11px;color:#B08090;font-weight:300}
+.card-ttl{font-size:15px;font-weight:500;color:#2D1B25;line-height:1.45;word-break:break-all}
+.card-note{font-size:12px;color:#7A4E5E;margin-top:4px;line-height:1.5;font-style:italic;font-weight:300}
+.card-note-empty{font-size:11px;color:#FFB3CE;margin-top:4px;font-style:italic}
 .card-acts{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
-.btn-ic{width:30px;height:30px;border-radius:9px;border:none;background:var(--p50);color:var(--p500);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .15s}
-.btn-ic:active{transform:scale(.88);background:var(--p100)}
-.btn-ic.del{color:var(--txm);background:transparent}
-.btn-ic.del:active{color:#E53E3E;background:#FFF5F5}
-.chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--p200);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;flex-shrink:0;margin-top:1px}
-.chk.on{background:linear-gradient(135deg,var(--p400),var(--p500));border-color:var(--p400)}
-.chk svg{width:11px;height:11px;color:#fff;opacity:0;transform:scale(.5);transition:all .2s ease}
+.btn-ic{width:30px;height:30px;border-radius:9px;border:none;background:#FFF0F5;color:#E84E82;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.btn-ic.del{color:#B08090;background:transparent}
+.chk{width:22px;height:22px;border-radius:50%;border:1.5px solid #FFB3CE;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .25s}
+.chk.on{background:#FF6B9D;border-color:#FF6B9D}
+.chk svg{width:11px;height:11px;color:#fff;opacity:0;transform:scale(.5);transition:all .2s}
 .chk.on svg{opacity:1;transform:scale(1)}
-
-/* Month divider */
-.mo-div{display:flex;align-items:center;gap:8px;padding:3px 0;animation:fsi .3s ease-out}
-.mo-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--p200),transparent)}
-.mo-txt{font-size:10px;color:var(--txm);font-weight:500;letter-spacing:1px;white-space:nowrap;padding:2px 7px;background:var(--p50);border:1px solid var(--bd);border-radius:20px}
-
-/* Edit form inline */
-.edit-form{padding:13px 14px;border-top:1px solid var(--bd);background:var(--rose50);animation:formIn .3s cubic-bezier(.4,0,.2,1)}
-@keyframes formIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.mo-div{display:flex;align-items:center;gap:8px;padding:3px 0}
+.mo-line{flex:1;height:1px;background:#FFD6E7}
+.mo-txt{font-size:10px;color:#B08090;font-weight:500;letter-spacing:1px;white-space:nowrap;padding:2px 7px;background:#FFF0F5;border:1px solid rgba(232,78,130,0.12);border-radius:20px}
+.edit-form{padding:13px 14px;border-top:1px solid rgba(232,78,130,0.12);background:#FFF5F7}
 .form-row{margin-bottom:9px}
-.form-lbl{font-size:10px;color:var(--txm);font-weight:500;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
-.form-inp{width:100%;padding:9px 12px;border:1px solid var(--bds);border-radius:9px;font-size:14px;font-family:'Noto Sans SC',sans-serif;color:var(--tx1);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
-.form-inp:focus{border-color:var(--p400);box-shadow:0 0 0 3px rgba(232,78,130,.1)}
+.form-lbl{font-size:10px;color:#B08090;font-weight:500;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.form-inp{width:100%;padding:9px 12px;border:1px solid rgba(232,78,130,0.25);border-radius:9px;font-size:14px;font-family:'Noto Sans SC',sans-serif;color:#2D1B25;background:#fff;outline:none}
+.form-inp:focus{border-color:#FF6B9D;box-shadow:0 0 0 3px rgba(232,78,130,.1)}
 .form-inp[type=number]{-moz-appearance:textfield}
-.form-inp[type=number]::-webkit-outer-spin-button,.form-inp[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-.form-hint{font-size:10px;color:var(--txm);margin-top:3px;display:block}
+.form-inp[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.form-hint{font-size:10px;color:#B08090;margin-top:3px;display:block}
 .time-row{display:flex;gap:8px;align-items:flex-start}
-.time-or{font-size:11px;color:var(--txm);padding-top:10px;flex-shrink:0}
+.time-or{font-size:11px;color:#B08090;padding-top:10px;flex-shrink:0}
 .week-input-wrap{flex:1}
 .date-input-wrap{flex:1.4;position:relative}
-.date-cal-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--p400);cursor:pointer;padding:2px;display:flex;align-items:center;line-height:1}
+.date-cal-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#FF6B9D;cursor:pointer;padding:2px;display:flex;align-items:center}
 .form-btns{display:flex;gap:7px;margin-top:11px}
-.btn-save{flex:1;padding:10px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--p400),var(--p500));color:#fff;font-size:13px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s}
-.btn-save:active{opacity:.85;transform:scale(.98)}
-.btn-cancel{padding:10px 14px;border:1px solid var(--bds);border-radius:9px;background:#fff;color:var(--tx2);font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer}
+.btn-save{flex:1;padding:10px;border:none;border-radius:9px;background:#FF6B9D;color:#fff;font-size:13px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer}
+.btn-cancel{padding:10px 14px;border:1px solid rgba(232,78,130,0.25);border-radius:9px;background:#fff;color:#7A4E5E;font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer}
+
+.hist-drawer{background:rgba(255,248,249,0.95);border-bottom:1px solid rgba(232,78,130,0.12);overflow:hidden;max-height:44px;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+.hist-drawer.open{max-height:280px}
+.hist-toggle{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;cursor:pointer}
+.hist-lbl{font-size:11px;color:#B08090;letter-spacing:1px}
+.hist-chev{width:15px;height:15px;color:#B08090;transition:transform .4s}
+.hist-drawer.open .hist-chev{transform:rotate(180deg)}
+.hist-dot{width:6px;height:6px;border-radius:50%;background:#FF8FB6;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.hist-list{padding:0 14px 12px;max-height:236px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.hist-item{background:#FFF0F5;border:1px solid rgba(232,78,130,0.12);border-radius:10px;padding:9px 12px}
+.hist-item-hdr{display:flex;justify-content:space-between;margin-bottom:2px}
+.hist-wk{font-size:10px;color:#E84E82;font-weight:500}
+.hist-dt{font-size:10px;color:#B08090}
+.hist-ttl{font-size:13px;color:#7A4E5E;line-height:1.4}
+.hist-note{font-size:11px;color:#B08090;margin-top:2px;font-style:italic}
+.hist-item.done .hist-ttl{text-decoration:line-through;opacity:.55}
+
+/* CALENDAR */
+#cal-view{background:#FFF8F9}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:rgba(255,248,249,0.98);border-bottom:1px solid rgba(232,78,130,0.12)}
+.cal-nav-btn{width:32px;height:32px;border:1px solid rgba(232,78,130,0.12);border-radius:10px;background:#fff;color:#E84E82;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cal-month-ttl{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:600;color:#C73B6B}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 10px 4px;gap:2px}
+.cal-dow-lbl{text-align:center;font-size:10px;color:#B08090;font-weight:500}
+.cal-grid{padding:4px 10px 10px;display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{min-height:52px;border-radius:10px;padding:3px;cursor:pointer;position:relative;transition:background .15s}
+.cal-day:active{background:#FFF0F5}
+.cal-day.selected{background:#FFF0F5}
+.cal-day.other-month .cal-num{color:#FFB3CE}
+.cal-day.today .cal-num-inner{background:#E84E82;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#fff}
+.cal-num{font-size:12px;font-weight:500;color:#2D1B25;margin-bottom:2px;display:flex;justify-content:center}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;margin-top:1px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cal-dot.done{background:#FFB3CE}
+.cal-dot.pending{background:#E84E82}
+.cal-week-band{background:#FFF0F5;border-radius:0 0 8px 8px;margin-top:1px;font-size:9px;color:#E84E82;text-align:center;padding:1px 0;line-height:1.2}
+.cal-event-sheet{border-top:1px solid rgba(232,78,130,0.12);padding:12px 14px;background:#fff;min-height:60px}
+.cal-ev-ttl{font-size:12px;font-weight:500;color:#C73B6B;margin-bottom:8px}
+.cal-ev-list{display:flex;flex-direction:column;gap:6px}
+.cal-ev-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7A4E5E}
+.cal-ev-dot{width:7px;height:7px;border-radius:50%;background:#E84E82;flex-shrink:0;margin-top:3px}
+.cal-ev-dot.done{background:#FFB3CE}
+.cal-ev-name{flex:1;line-height:1.4;color:#2D1B25}
+.cal-ev-wk{font-size:10px;color:#B08090;white-space:nowrap}
+.cal-empty{font-size:12px;color:#B08090;text-align:center;padding:12px 0;font-style:italic}
+.swipe-hint{font-size:10px;color:#FFB3CE;text-align:center;padding:4px 0 8px}
+
+/* CONVERTER — using system CSS vars for dark mode safety */
+#conv-view{padding:16px 14px 24px;background:#FFF8F9}
+.conv-card{background:#fff;border-radius:18px;border:1px solid rgba(232,78,130,0.15);padding:18px 16px;margin-bottom:0}
+.conv-section-lbl{font-size:10px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--color-text-secondary,#B08090);margin-bottom:8px;display:block}
+.conv-field{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.conv-field-lbl{font-size:13px;color:var(--color-text-secondary,#7A4E5E);width:56px;flex-shrink:0}
+.conv-date-inp{flex:1;padding:10px 12px;border:1.5px solid rgba(232,78,130,0.25);border-radius:10px;font-size:15px;font-family:'Noto Sans SC',sans-serif;color:var(--color-text-primary,#2D1B25);background:var(--color-background-secondary,#FFF0F5);outline:none}
+.conv-date-inp:focus{border-color:#FF6B9D;background:var(--color-background-primary,#fff);box-shadow:0 0 0 3px rgba(232,78,130,.1)}
+.conv-wkday-row{display:flex;gap:6px;flex:1;align-items:flex-end}
+.conv-num-wrap{flex:1;text-align:center}
+.conv-num-inp{width:100%;padding:10px 6px;border:1.5px solid rgba(232,78,130,0.25);border-radius:10px;font-size:17px;font-family:'Noto Sans SC',sans-serif;color:var(--color-text-primary,#2D1B25);background:var(--color-background-secondary,#FFF0F5);outline:none;text-align:center}
+.conv-num-inp:focus{border-color:#FF6B9D;background:var(--color-background-primary,#fff);box-shadow:0 0 0 3px rgba(232,78,130,.1)}
+.conv-num-inp[type=number]{-moz-appearance:textfield}
+.conv-num-inp[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.conv-num-unit{font-size:11px;color:var(--color-text-secondary,#B08090);margin-top:4px}
+.conv-plus{font-size:16px;color:var(--color-text-secondary,#B08090);padding-bottom:14px}
+.conv-arrow{display:flex;align-items:center;justify-content:center;padding:10px 0 6px;color:#FFB3CE;font-size:20px;letter-spacing:4px}
+.conv-results{background:#FFF0F5;border-radius:12px;border:1px solid #FFD6E7;padding:14px 16px;margin-top:14px}
+.conv-result-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(232,78,130,0.08)}
+.conv-result-row:last-child{border-bottom:none}
+.conv-rlbl{font-size:12px;color:var(--color-text-secondary,#7A4E5E)}
+.conv-rval{font-size:13px;font-weight:500;color:var(--color-text-primary,#2D1B25)}
+.conv-rval.big{font-size:15px;color:#C73B6B}
+.conv-footer{font-size:10px;color:var(--color-text-secondary,#B08090);text-align:center;margin-top:10px;font-style:italic}
 
 /* FAB */
-#fab{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;background:linear-gradient(135deg,var(--p400),var(--p600));color:#fff;border:none;padding:13px 26px;border-radius:30px;font-size:14px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(232,78,130,.4);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
-#fab:active{transform:translateX(-50%) scale(.95);box-shadow:0 2px 12px rgba(232,78,130,.3)}
+#fab{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;background:#E84E82;color:#fff;border:none;padding:13px 26px;border-radius:30px;font-size:14px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+#fab.hidden{display:none}
 
-/* Bottom Sheet */
-.sheet-bg{position:fixed;inset:0;z-index:300;background:rgba(45,27,37,.4);backdrop-filter:blur(4px);display:flex;align-items:flex-end;opacity:0;transition:opacity .3s ease;pointer-events:none}
+.sheet-bg{position:fixed;inset:0;z-index:300;background:rgba(45,27,37,.4);display:flex;align-items:flex-end;opacity:0;transition:opacity .3s;pointer-events:none}
 .sheet-bg.vis{opacity:1;pointer-events:all}
-.sheet{width:100%;max-width:430px;margin:0 auto;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px 38px;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 -8px 40px rgba(232,78,130,.15)}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px 38px;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
 .sheet-bg.vis .sheet{transform:translateY(0)}
-.sheet-handle{width:36px;height:4px;background:var(--p200);border-radius:2px;margin:0 auto 18px}
-.sheet-ttl{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:600;color:var(--p600);margin-bottom:14px;text-align:center}
-
-/* Sync bar */
-#sync-bar{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:400;background:#fff;border:1px solid var(--bd);border-radius:0 0 14px 14px;padding:9px 18px;font-size:12px;color:var(--tx2);box-shadow:0 2px 16px rgba(232,78,130,.08);transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:300px}
-#sync-bar.show{transform:translateX(-50%) translateY(0)}
-.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--p400);margin-right:5px;vertical-align:middle}
-
-/* Config panel */
-.cfg-note{font-size:11px;color:var(--txm);line-height:1.6;background:var(--p50);border:1px solid var(--bd);border-radius:9px;padding:9px 11px;margin-bottom:13px}
-#cfg-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bd);background:#fff;color:var(--txm);cursor:pointer;display:flex;align-items:center;justify-content:center}
-#cfg-btn:active{background:var(--p50)}
-
-/* Export section */
-.export-section{margin-top:14px;border-top:1px solid var(--bd);padding-top:14px}
-.export-lbl{font-size:11px;color:var(--txm);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:block}
+.sheet-handle{width:36px;height:4px;background:#FFD6E7;border-radius:2px;margin:0 auto 18px}
+.sheet-ttl{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:600;color:#C73B6B;margin-bottom:14px;text-align:center}
+.cfg-note{font-size:11px;color:#B08090;line-height:1.6;background:#FFF0F5;border:1px solid rgba(232,78,130,0.12);border-radius:9px;padding:9px 11px;margin-bottom:13px}
+#cfg-btn{width:34px;height:34px;border-radius:11px;border:1px solid rgba(232,78,130,0.12);background:#fff;color:#B08090;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.export-section{margin-top:14px;border-top:1px solid rgba(232,78,130,0.12);padding-top:14px}
+.export-lbl{font-size:11px;color:#B08090;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:block}
 .export-btns{display:flex;flex-direction:column;gap:8px}
-.btn-export{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--bds);border-radius:12px;background:#fff;color:var(--tx1);font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer;text-align:left;transition:background .2s,transform .15s}
-.btn-export:active{background:var(--p50);transform:scale(.98)}
+.btn-export{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(232,78,130,0.25);border-radius:12px;background:#fff;color:#2D1B25;font-size:13px;font-family:'Noto Sans SC',sans-serif;cursor:pointer;text-align:left}
 .btn-export .exp-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
-.btn-export .exp-desc{font-size:10px;color:var(--txm);margin-top:1px}
+.btn-export .exp-desc{font-size:10px;color:#B08090;margin-top:1px}
 
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--p200);border-radius:2px}
+#sync-bar{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);z-index:400;background:#fff;border:1px solid rgba(232,78,130,0.12);border-radius:0 0 14px 14px;padding:9px 18px;font-size:12px;color:#7A4E5E;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:300px}
+#sync-bar.show{transform:translateX(-50%) translateY(0)}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#FF6B9D;margin-right:5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -156,7 +179,7 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
     </div>
     <div class="hdr-right">
       <div id="wk-badge" class="week-badge">计算中</div>
-      <button id="cfg-btn" onclick="toggleCfg()" title="设置">
+      <button id="cfg-btn" onclick="toggleCfg()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07M19.07 4.93L12 12"/></svg>
       </button>
     </div>
@@ -165,18 +188,91 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
   <div class="prog-lbl" id="prog-lbl">加载中…</div>
 </header>
 
-<div id="hist-drawer">
-  <div class="hist-toggle" onclick="toggleHist()">
-    <div class="hist-dot"></div>
-    <span class="hist-lbl">历史记录</span>
-    <svg class="hist-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('list',this)">📋 事件列表</button>
+  <button class="tab-btn" onclick="switchTab('cal',this)">📅 月历</button>
+  <button class="tab-btn" onclick="switchTab('conv',this)">⇄ 日期换算</button>
+</nav>
+
+<!-- LIST -->
+<div id="list-view" class="view active">
+  <div class="hist-drawer" id="hist-drawer">
+    <div class="hist-toggle" onclick="toggleHist()">
+      <div class="hist-dot"></div>
+      <span class="hist-lbl">历史记录</span>
+      <svg class="hist-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+    </div>
+    <div class="hist-list" id="hist-list"></div>
   </div>
-  <div class="hist-list" id="hist-list"></div>
+  <div id="scroll-area"><div style="text-align:center;padding:48px;color:#B08090;font-size:13px">🌸 加载中…</div></div>
 </div>
 
-<div id="scroll-area">
-  <div style="text-align:center;padding:48px;color:var(--txm);font-size:13px">🌸 加载中…</div>
+<!-- CALENDAR -->
+<div id="cal-view" class="view">
+  <div class="cal-header">
+    <button class="cal-nav-btn" onclick="calPrev()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="cal-month-ttl" id="cal-month-ttl"></div>
+    <button class="cal-nav-btn" onclick="calNext()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <div class="cal-dow" id="cal-dow"></div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="swipe-hint">← 左右滑动切换月份 →</div>
+  <div class="cal-event-sheet" id="cal-event-sheet"><div class="cal-empty">点击日期查看事件</div></div>
 </div>
+
+<!-- CONVERTER -->
+<div id="conv-view" class="view">
+  <div class="conv-card">
+    <span class="conv-section-lbl">公历日期</span>
+    <div class="conv-field">
+      <span class="conv-field-lbl">日期</span>
+      <input class="conv-date-inp" type="date" id="conv-date" oninput="convFromDate()">
+    </div>
+
+    <div class="conv-arrow">⇅</div>
+
+    <span class="conv-section-lbl">孕周 + 天数</span>
+    <div class="conv-field">
+      <span class="conv-field-lbl">孕周天</span>
+      <div class="conv-wkday-row">
+        <div class="conv-num-wrap">
+          <input class="conv-num-inp" type="number" id="conv-wk" min="1" max="45" placeholder="—" oninput="convFromWkDay()">
+          <div class="conv-num-unit">周</div>
+        </div>
+        <div class="conv-plus">+</div>
+        <div class="conv-num-wrap">
+          <input class="conv-num-inp" type="number" id="conv-day" min="0" max="6" placeholder="—" oninput="convFromWkDay()">
+          <div class="conv-num-unit">天</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conv-results" id="conv-results">
+      <div class="conv-result-row">
+        <span class="conv-rlbl">孕期阶段</span>
+        <span class="conv-rval big" id="res-stage">—</span>
+      </div>
+      <div class="conv-result-row">
+        <span class="conv-rlbl">本周区间</span>
+        <span class="conv-rval" id="res-range">—</span>
+      </div>
+      <div class="conv-result-row">
+        <span class="conv-rlbl">距预产期</span>
+        <span class="conv-rval" id="res-due">—</span>
+      </div>
+      <div class="conv-result-row">
+        <span class="conv-rlbl">怀孕月份</span>
+        <span class="conv-rval" id="res-month">—</span>
+      </div>
+    </div>
+    <div class="conv-footer">末次月经：2026年4月23日 · 预产期：2027年1月28日</div>
+  </div>
+</div>
+
 </div>
 
 <button id="fab" onclick="openAdd()">
@@ -193,13 +289,13 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
       <div class="time-row">
         <div class="week-input-wrap">
           <input class="form-inp" type="number" id="add-wk" min="1" max="42" placeholder="孕周数" oninput="onWeekInput('add')">
-          <span class="form-hint">如：输入 15</span>
+          <span class="form-hint">输入后显示为周区间</span>
         </div>
         <div class="time-or">或</div>
         <div class="date-input-wrap">
           <input class="form-inp" type="date" id="add-dt" style="padding-right:36px" oninput="onDateInput('add')">
           <button class="date-cal-btn" onclick="document.getElementById('add-dt').showPicker()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           </button>
         </div>
       </div>
@@ -223,54 +319,20 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-ttl">⚙ 设置与导出</div>
-    <div class="cfg-note">
-      配置 GitHub 同步后，数据存储在仓库 JSON 文件中，跨设备同步。需要一个有 <code>repo</code> 权限的 Personal Access Token。
-    </div>
-    <div class="form-row">
-      <label class="form-lbl">GitHub 用户名</label>
-      <input class="form-inp" id="cfg-owner" placeholder="username">
-    </div>
-    <div class="form-row">
-      <label class="form-lbl">仓库名</label>
-      <input class="form-inp" id="cfg-repo" placeholder="my-pregnancy-data">
-    </div>
-    <div class="form-row">
-      <label class="form-lbl">文件路径</label>
-      <input class="form-inp" id="cfg-path" placeholder="pregnancy.json" value="pregnancy.json">
-    </div>
-    <div class="form-row">
-      <label class="form-lbl">Personal Access Token</label>
-      <input class="form-inp" id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
-    </div>
+    <div class="cfg-note">配置 GitHub 同步后，数据存储在仓库 JSON 文件中，跨设备同步。</div>
+    <div class="form-row"><label class="form-lbl">GitHub 用户名</label><input class="form-inp" id="cfg-owner" placeholder="username"></div>
+    <div class="form-row"><label class="form-lbl">仓库名</label><input class="form-inp" id="cfg-repo" placeholder="my-pregnancy-data"></div>
+    <div class="form-row"><label class="form-lbl">文件路径</label><input class="form-inp" id="cfg-path" value="pregnancy.json"></div>
+    <div class="form-row"><label class="form-lbl">Personal Access Token</label><input class="form-inp" id="cfg-token" type="password" placeholder="ghp_…"></div>
     <div class="form-btns">
       <button class="btn-cancel" onclick="closeCfg()">取消</button>
       <button class="btn-save" onclick="saveCfg()">保存并同步 →</button>
     </div>
-
     <div class="export-section">
       <span class="export-lbl">导出到日历</span>
       <div class="export-btns">
-        <button class="btn-export" onclick="exportICS('apple')">
-          <div class="exp-icon" style="background:#f0f0f5">🍎</div>
-          <div>
-            <div>导出到苹果日历</div>
-            <div class="exp-desc">下载 .ics 文件，导入 Apple Calendar / iCloud</div>
-          </div>
-        </button>
-        <button class="btn-export" onclick="exportGoogleCalendar()">
-          <div class="exp-icon" style="background:#e8f0fe">📅</div>
-          <div>
-            <div>导出到 Google 日历</div>
-            <div class="exp-desc">下载 .ics 文件，在 Google Calendar 中导入</div>
-          </div>
-        </button>
-        <button class="btn-export" onclick="exportICS('ics')">
-          <div class="exp-icon" style="background:#e8f5e9">📋</div>
-          <div>
-            <div>导出 .ics 文件</div>
-            <div class="exp-desc">通用日历格式，适用于所有日历应用</div>
-          </div>
-        </button>
+        <button class="btn-export" onclick="exportICS('apple')"><div class="exp-icon" style="background:#f0f0f5">🍎</div><div><div>导出到苹果日历</div><div class="exp-desc">下载 .ics 文件</div></div></button>
+        <button class="btn-export" onclick="exportICS('ics')"><div class="exp-icon" style="background:#e8f5e9">📋</div><div><div>导出 .ics 文件</div><div class="exp-desc">通用日历格式</div></div></button>
       </div>
     </div>
   </div>
@@ -279,89 +341,60 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
 <div id="sync-bar"><span class="sync-dot"></span><span id="sync-msg">同步中…</span></div>
 
 <script>
-const LMP = new Date('2026-04-23T00:00:00');
-const TOTAL_WKS = 40;
+const LMP=new Date('2026-04-23T00:00:00');
+const DUE=new Date('2027-01-28T00:00:00');
+const TOTAL_WKS=40;
+let events=[];
+let ghCfg={owner:'juejove',repo:'dataStorage',path:'pregnancy.json',token:'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'};
+let histOpen=false;
+let calYear,calMonth,calSelectedDate=null;
+let swipeStartX=0;
 
-let events = [];
-let ghCfg = {owner:'juejove',repo:'dataStorage',path:'pregnancy.json',token:'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'};
-let histOpen = false;
-
-const DEFAULTS = [
-  {id:1,week:5, date:'2026-05-28',title:'GP安排抽血 看数据',          note:'',done:false},
-  {id:2,week:7, date:'2026-06-11',title:'可以开始看B超',              note:'',done:false},
-  {id:3,week:8, date:'2026-06-18',title:'见OB第一次看诊',             note:'周8-10之间',done:false},
-  {id:4,week:10,date:'2026-07-02',title:'NIPT 抽血检查基因排畸',      note:'450自费 可选',done:false},
-  {id:5,week:13,date:'2026-07-23',title:'NT检查',                     note:'必须 $270',done:false},
-  {id:6,week:13,date:'2026-07-23',title:'不再需要GP',                 note:'',done:false},
-  {id:7,week:15,date:'2026-08-06',title:'OB复诊 NT结果分析',          note:'',done:false},
-  {id:8,week:20,date:'2026-09-10',title:'大排畸 最后一次B超',         note:'',done:false},
+const DEFAULTS=[
+  {id:1,week:5,date:'2026-05-28',title:'GP安排抽血 看数据',note:'',done:false},
+  {id:2,week:7,date:'2026-06-11',title:'可以开始看B超',note:'',done:false},
+  {id:3,week:8,date:'2026-06-18',title:'见OB第一次看诊',note:'周8-10之间',done:false},
+  {id:4,week:10,date:'2026-07-02',title:'NIPT 抽血检查基因排畸',note:'450自费 可选',done:false},
+  {id:5,week:13,date:'2026-07-23',title:'NT检查',note:'必须 $270',done:false},
+  {id:6,week:13,date:'2026-07-23',title:'不再需要GP',note:'',done:false},
+  {id:7,week:15,date:'2026-08-06',title:'OB复诊 NT结果分析',note:'',done:false},
+  {id:8,week:20,date:'2026-09-10',title:'大排畸 最后一次B超',note:'',done:false},
   {id:9,week:21,date:'2026-09-17',title:'OB分析排畸结果 第一次交管理费 流感疫苗',note:'',done:false},
-  {id:10,week:25,date:'2026-10-15',title:'OB产检',                   note:'',done:false},
-  {id:11,week:27,date:'2026-10-29',title:'糖耐检测',                 note:'',done:false},
-  {id:12,week:28,date:'2026-11-05',title:'交OB管理费5000',           note:'',done:false},
-  {id:13,week:31,date:'2026-11-26',title:'每两周见一次医生',         note:'',done:false},
-  {id:40,week:40,date:'2027-01-28',title:'预产期 🍼',               note:'',done:false},
+  {id:10,week:25,date:'2026-10-15',title:'OB产检',note:'',done:false},
+  {id:11,week:27,date:'2026-10-29',title:'糖耐检测',note:'',done:false},
+  {id:12,week:28,date:'2026-11-05',title:'交OB管理费5000',note:'',done:false},
+  {id:13,week:31,date:'2026-11-26',title:'每两周见一次医生',note:'',done:false},
+  {id:40,week:40,date:'2027-01-28',title:'预产期 🍼',note:'',done:false},
 ];
 
-// ── date helpers ──────────────────────────────────────────────────
-function wkToDate(w){
-  const d=new Date(LMP);d.setDate(d.getDate()+(w-1)*7);return d.toISOString().slice(0,10);
-}
-function dateToWk(s){
-  const d=new Date(s+'T00:00:00');
-  const diff=d-LMP;
-  const days=Math.floor(diff/(86400000));
-  return Math.max(1,Math.floor(days/7)+1);
-}
-function curWk(){
-  const diff=new Date()-LMP;
-  const days=Math.floor(diff/86400000);
-  return Math.max(1,Math.floor(days/7)+1);
-}
-function fmtDate(s){
-  const d=new Date(s+'T00:00:00');
-  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-}
-function fmtMY(s){
-  const d=new Date(s+'T00:00:00');
-  return `${d.getFullYear()}年${d.getMonth()+1}月`;
+function wkToDate(w,d=0){const dt=new Date(LMP);dt.setDate(dt.getDate()+(w-1)*7+d);return dt.toISOString().slice(0,10)}
+function dateToWkDay(s){const d=new Date(s+'T00:00:00');const days=Math.floor((d-LMP)/86400000);const wk=Math.floor(days/7)+1;const dy=days%7;return{wk:Math.max(1,wk),day:Math.max(0,dy)}}
+function dateToWk(s){return dateToWkDay(s).wk}
+function curWk(){const days=Math.floor((new Date()-LMP)/86400000);return Math.max(1,Math.floor(days/7)+1)}
+function fmtDate(s){const d=new Date(s+'T00:00:00');return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`}
+function fmtMY(s){const d=new Date(s+'T00:00:00');return`${d.getFullYear()}年${d.getMonth()+1}月`}
+function isWeekBased(ev){return ev.date===wkToDate(ev.week)}
+function displayTime(ev){
+  if(isWeekBased(ev)){
+    const s=new Date(LMP);s.setDate(s.getDate()+(ev.week-1)*7);
+    const e=new Date(s);e.setDate(e.getDate()+6);
+    const sm=s.getMonth()+1,sd=s.getDate(),em=e.getMonth()+1,ed=e.getDate();
+    return sm===em?`${sm}月${sd}–${ed}日`:`${sm}月${sd}日–${em}月${ed}日`;
+  }
+  return fmtDate(ev.date);
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function sorted(){return[...events].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id-b.id)}
 
-// ── time input mutual clearing ─────────────────────────────────────
-function onWeekInput(prefix){
-  const wkEl=document.getElementById(prefix+'-wk');
-  const dtEl=document.getElementById(prefix+'-dt');
-  if(wkEl.value){dtEl.value=''}
-}
-function onDateInput(prefix){
-  const wkEl=document.getElementById(prefix+'-wk');
-  const dtEl=document.getElementById(prefix+'-dt');
-  if(dtEl.value){wkEl.value=''}
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(tab+'-view').classList.add('active');
+  document.getElementById('fab').classList.toggle('hidden',tab!=='list');
+  if(tab==='cal')renderCal();
 }
 
-// ── parse time from form ───────────────────────────────────────────
-function parseTime(prefix){
-  const wkVal=document.getElementById(prefix+'-wk').value.trim();
-  const dtVal=document.getElementById(prefix+'-dt').value.trim();
-  if(wkVal){
-    const w=parseInt(wkVal);
-    if(isNaN(w)||w<1||w>45){alert('请输入1–45之间的孕周数');return null;}
-    return{week:w,date:wkToDate(w)};
-  }
-  if(dtVal){
-    return{week:dateToWk(dtVal),date:dtVal};
-  }
-  alert('请输入孕周数或选择日期');return null;
-}
-
-// ── fill time inputs ───────────────────────────────────────────────
-function fillTime(prefix,week,date){
-  document.getElementById(prefix+'-wk').value=week||'';
-  document.getElementById(prefix+'-dt').value='';
-}
-
-// ── header ─────────────────────────────────────────────────────────
 function updateHeader(){
   const w=curWk();
   document.getElementById('wk-badge').textContent=w<=TOTAL_WKS?`孕${w}周`:'产后';
@@ -370,315 +403,169 @@ function updateHeader(){
   document.getElementById('prog-lbl').textContent=`孕程进度 ${pct}%（第${w}周 / 共${TOTAL_WKS}周）`;
 }
 
-// ── sort ───────────────────────────────────────────────────────────
-function sorted(){return[...events].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id-b.id)}
-
-// ── render ─────────────────────────────────────────────────────────
 function render(){
   const list=sorted();
   const today=new Date().toISOString().slice(0,10);
   const focusEv=list.find(e=>e.date>=today&&!e.done);
   let lastM=null,html='';
-
   list.forEach(ev=>{
     const mo=fmtMY(ev.date);
-    if(mo!==lastM){
-      html+=`<div class="mo-div"><div class="mo-line"></div><div class="mo-txt">${mo}</div><div class="mo-line"></div></div>`;
-      lastM=mo;
-    }
+    if(mo!==lastM){html+=`<div class="mo-div"><div class="mo-line"></div><div class="mo-txt">${mo}</div><div class="mo-line"></div></div>`;lastM=mo;}
     const isFocus=focusEv&&ev.id===focusEv.id;
-    const noteHtml=ev.note
-      ?`<div class="card-note">${esc(ev.note)}</div>`
-      :`<div class="card-note-empty">备注待填写…</div>`;
-
-    html+=`
-<div class="ev-card${ev.done?' done':''}${isFocus?' focus-card':''}" data-id="${ev.id}"${isFocus?` id="fc${ev.id}"`:''}">
-  <div class="done-strip"></div>
-  <div class="card-inner">
-    <div class="card-hdr">
-      <div class="card-left">
-        <div class="chk${ev.done?' on':''}" onclick="toggleDone(${ev.id})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="card-meta">
-          <div class="wk-row">
-            <span class="wk-pill">孕${ev.week}周</span>
-            <span class="dt-lbl">${fmtDate(ev.date)}</span>
-          </div>
-          <div class="card-ttl">${esc(ev.title)}</div>
-          ${noteHtml}
-        </div>
-      </div>
-      <div class="card-acts">
-        <button class="btn-ic" onclick="openEdit(${ev.id})" title="修改">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="btn-ic del" onclick="delEv(${ev.id})" title="删除">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-  <div id="ef${ev.id}" style="display:none">
-    <div class="edit-form">
-      <div class="form-row">
-        <label class="form-lbl">时间（修改其中一个即可）</label>
-        <div class="time-row">
-          <div class="week-input-wrap">
-            <input class="form-inp" type="number" id="ew${ev.id}" value="${ev.week}" min="1" max="42" placeholder="孕周数" oninput="onWeekInput('e${ev.id}')">
-            <span class="form-hint">孕周</span>
-          </div>
-          <div class="time-or">或</div>
-          <div class="date-input-wrap">
-            <input class="form-inp" type="date" id="ed${ev.id}" style="padding-right:36px" oninput="onDateInput('e${ev.id}')">
-            <button class="date-cal-btn" onclick="document.getElementById('ed${ev.id}').showPicker()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="form-row">
-        <label class="form-lbl">事件内容</label>
-        <input class="form-inp" id="et${ev.id}" value="${esc(ev.title)}">
-      </div>
-      <div class="form-row">
-        <label class="form-lbl">备注</label>
-        <input class="form-inp" id="en${ev.id}" value="${esc(ev.note)}" placeholder="就诊结果、费用等…">
-      </div>
-      <div class="form-btns">
-        <button class="btn-cancel" onclick="closeEdit(${ev.id})">取消</button>
-        <button class="btn-save" onclick="saveEdit(${ev.id})">保存 →</button>
-      </div>
-    </div>
-  </div>
-</div>`;
+    const noteHtml=ev.note?`<div class="card-note">${esc(ev.note)}</div>`:`<div class="card-note-empty">备注待填写…</div>`;
+    const wkLabel=isWeekBased(ev)?`孕${ev.week}周区间`:`孕${ev.week}周`;
+    html+=`<div class="ev-card${ev.done?' done':''}${isFocus?' focus-card':''}" data-id="${ev.id}"${isFocus?` id="fc${ev.id}"`:''}><div class="done-strip"></div><div class="card-inner"><div class="card-hdr"><div class="card-left"><div class="chk${ev.done?' on':''}" onclick="toggleDone(${ev.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="card-meta"><div class="wk-row"><span class="wk-pill">${wkLabel}</span><span class="dt-lbl">${displayTime(ev)}</span></div><div class="card-ttl">${esc(ev.title)}</div>${noteHtml}</div></div><div class="card-acts"><button class="btn-ic" onclick="openEdit(${ev.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-ic del" onclick="delEv(${ev.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></button></div></div></div><div id="ef${ev.id}" style="display:none"><div class="edit-form"><div class="form-row"><label class="form-lbl">时间</label><div class="time-row"><div class="week-input-wrap"><input class="form-inp" type="number" id="ew${ev.id}" value="${ev.week}" min="1" max="42" placeholder="孕周"><span class="form-hint">孕周（存为区间）</span></div><div class="time-or">或</div><div class="date-input-wrap"><input class="form-inp" type="date" id="ed${ev.id}" style="padding-right:36px"><button class="date-cal-btn" onclick="document.getElementById('ed${ev.id}').showPicker()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div></div></div><div class="form-row"><label class="form-lbl">事件内容</label><input class="form-inp" id="et${ev.id}" value="${esc(ev.title)}"></div><div class="form-row"><label class="form-lbl">备注</label><input class="form-inp" id="en${ev.id}" value="${esc(ev.note)}" placeholder="就诊结果、费用等…"></div><div class="form-btns"><button class="btn-cancel" onclick="closeEdit(${ev.id})">取消</button><button class="btn-save" onclick="saveEdit(${ev.id})">保存 →</button></div></div></div></div>`;
   });
-
-  if(!html) html='<div style="text-align:center;padding:48px;color:var(--txm);font-size:13px">🌸<br>暂无事件</div>';
+  if(!html)html='<div style="text-align:center;padding:48px;color:#B08090;font-size:13px">🌸<br>暂无事件</div>';
   document.getElementById('scroll-area').innerHTML=html;
-
-  // patch inline edit week/date mutual clear
   list.forEach(ev=>{
-    const ewEl=document.getElementById(`ew${ev.id}`);
-    const edEl=document.getElementById(`ed${ev.id}`);
-    if(ewEl&&edEl){
-      ewEl.addEventListener('input',()=>{if(ewEl.value)edEl.value=''});
-      edEl.addEventListener('input',()=>{if(edEl.value)ewEl.value=''});
-    }
+    const ew=document.getElementById(`ew${ev.id}`);
+    const ed=document.getElementById(`ed${ev.id}`);
+    if(ew&&ed){ew.addEventListener('input',()=>{if(ew.value)ed.value=''});ed.addEventListener('input',()=>{if(ed.value)ew.value=''})}
   });
 }
 
 function renderHist(){
-  const list=sorted();
-  const today=new Date().toISOString().slice(0,10);
+  const list=sorted();const today=new Date().toISOString().slice(0,10);
   const past=list.filter(e=>e.date<today||e.done).reverse();
   const el=document.getElementById('hist-list');
-  if(!past.length){el.innerHTML='<div style="font-size:12px;color:var(--txm);text-align:center;padding:8px">暂无历史记录</div>';return}
-  el.innerHTML=past.map(ev=>`
-<div class="hist-item${ev.done?' done':''}">
-  <div class="hist-item-hdr"><span class="hist-wk">孕${ev.week}周</span><span class="hist-dt">${fmtDate(ev.date)}</span></div>
-  <div class="hist-ttl">${esc(ev.title)}</div>
-  ${ev.note?`<div class="hist-note">${esc(ev.note)}</div>`:''}
-</div>`).join('');
+  if(!past.length){el.innerHTML='<div style="font-size:12px;color:#B08090;text-align:center;padding:8px">暂无历史记录</div>';return}
+  el.innerHTML=past.map(ev=>`<div class="hist-item${ev.done?' done':''}"><div class="hist-item-hdr"><span class="hist-wk">孕${ev.week}周</span><span class="hist-dt">${displayTime(ev)}</span></div><div class="hist-ttl">${esc(ev.title)}</div>${ev.note?`<div class="hist-note">${esc(ev.note)}</div>`:''}</div>`).join('');
 }
 
-// ── interactions ───────────────────────────────────────────────────
-function toggleHist(){
-  histOpen=!histOpen;
-  document.getElementById('hist-drawer').classList.toggle('open',histOpen);
-  if(histOpen)renderHist();
-}
-
-function toggleDone(id){
-  const ev=events.find(e=>e.id===id);if(!ev)return;
-  ev.done=!ev.done;render();if(histOpen)renderHist();saveGH();
-}
-
-function openEdit(id){
-  document.querySelectorAll('[id^="ef"]').forEach(el=>el.style.display='none');
-  const f=document.getElementById(`ef${id}`);if(!f)return;
-  f.style.display='block';
-  // clear date input, keep week
-  document.getElementById(`ed${id}`).value='';
-  f.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+function toggleHist(){histOpen=!histOpen;document.getElementById('hist-drawer').classList.toggle('open',histOpen);if(histOpen)renderHist()}
+function toggleDone(id){const ev=events.find(e=>e.id===id);if(!ev)return;ev.done=!ev.done;render();if(histOpen)renderHist();saveGH()}
+function openEdit(id){document.querySelectorAll('[id^="ef"]').forEach(el=>el.style.display='none');const f=document.getElementById(`ef${id}`);if(!f)return;f.style.display='block';document.getElementById(`ed${id}`).value='';f.scrollIntoView({behavior:'smooth',block:'nearest'})}
 function closeEdit(id){const f=document.getElementById(`ef${id}`);if(f)f.style.display='none'}
-
 function saveEdit(id){
-  const wkEl=document.getElementById(`ew${id}`);
-  const dtEl=document.getElementById(`ed${id}`);
-  const ttl=document.getElementById(`et${id}`).value.trim();
-  const note=document.getElementById(`en${id}`).value.trim();
+  const wkEl=document.getElementById(`ew${id}`),dtEl=document.getElementById(`ed${id}`);
+  const ttl=document.getElementById(`et${id}`).value.trim(),note=document.getElementById(`en${id}`).value.trim();
   if(!ttl){alert('内容不能为空');return}
   let week,date;
   if(dtEl.value){week=dateToWk(dtEl.value);date=dtEl.value}
   else if(wkEl.value){week=parseInt(wkEl.value);date=wkToDate(week)}
   else{alert('请输入孕周或选择日期');return}
   const ev=events.find(e=>e.id===id);if(!ev)return;
-  ev.week=week;ev.date=date;ev.title=ttl;ev.note=note;
-  render();if(histOpen)renderHist();saveGH();
+  ev.week=week;ev.date=date;ev.title=ttl;ev.note=note;render();if(histOpen)renderHist();saveGH();
 }
-
-function delEv(id){
-  if(!confirm('确认删除这个事件？'))return;
-  events=events.filter(e=>e.id!==id);render();if(histOpen)renderHist();saveGH();
+function delEv(id){if(!confirm('确认删除这个事件？'))return;events=events.filter(e=>e.id!==id);render();if(histOpen)renderHist();saveGH()}
+function onWeekInput(p){const w=document.getElementById(p+'-wk'),d=document.getElementById(p+'-dt');if(w&&d&&w.value)d.value=''}
+function onDateInput(p){const w=document.getElementById(p+'-wk'),d=document.getElementById(p+'-dt');if(w&&d&&d.value)w.value=''}
+function parseTime(p){
+  const wv=document.getElementById(p+'-wk').value.trim(),dv=document.getElementById(p+'-dt').value.trim();
+  if(wv){const w=parseInt(wv);if(isNaN(w)||w<1||w>45){alert('请输入1–45之间的孕周数');return null}return{week:w,date:wkToDate(w)}}
+  if(dv)return{week:dateToWk(dv),date:dv};
+  alert('请输入孕周数或选择日期');return null;
 }
-
-// ── add sheet ──────────────────────────────────────────────────────
-function openAdd(){
-  document.getElementById('add-wk').value='';
-  document.getElementById('add-dt').value='';
-  document.getElementById('add-ttl').value='';
-  document.getElementById('add-note').value='';
-  document.getElementById('add-bg').classList.add('vis');
-  setTimeout(()=>document.getElementById('add-wk').focus(),420);
-}
+function openAdd(){['add-wk','add-dt','add-ttl','add-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('add-bg').classList.add('vis');setTimeout(()=>document.getElementById('add-wk').focus(),420)}
 function closeAdd(){document.getElementById('add-bg').classList.remove('vis')}
-
 function saveNew(){
   const t=parseTime('add');if(!t)return;
-  const ttl=document.getElementById('add-ttl').value.trim();
-  const note=document.getElementById('add-note').value.trim();
+  const ttl=document.getElementById('add-ttl').value.trim(),note=document.getElementById('add-note').value.trim();
   if(!ttl){alert('请输入事件内容');return}
   const newId=events.length?Math.max(...events.map(e=>e.id))+1:1;
   events.push({id:newId,week:t.week,date:t.date,title:ttl,note,done:false});
   closeAdd();render();if(histOpen)renderHist();saveGH();
-  setTimeout(()=>{
-    const s=sorted();const idx=s.findIndex(e=>e.id===newId);
-    const cards=document.querySelectorAll('.ev-card');
-    if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'});
-  },120);
 }
-
 function bgClick(e,id){if(e.target===document.getElementById(id)){if(id==='add-bg')closeAdd();else closeCfg()}}
 
-// ── config ─────────────────────────────────────────────────────────
+/* Calendar */
+function initCal(){const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth()}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()}
+function renderCal(){
+  document.getElementById('cal-dow').innerHTML=['日','一','二','三','四','五','六'].map(d=>`<div class="cal-dow-lbl">${d}</div>`).join('');
+  document.getElementById('cal-month-ttl').textContent=`${calYear}年${calMonth+1}月`;
+  const today=new Date().toISOString().slice(0,10);
+  const first=new Date(calYear,calMonth,1),last=new Date(calYear,calMonth+1,0);
+  const evMap={};events.forEach(ev=>{if(!evMap[ev.date])evMap[ev.date]=[];evMap[ev.date].push(ev)});
+  let html='';
+  const sdow=first.getDay();
+  for(let i=0;i<sdow;i++){const d=new Date(calYear,calMonth,1-sdow+i);html+=calDayHTML(d.toISOString().slice(0,10),d.getDate(),true,evMap,today)}
+  for(let d=1;d<=last.getDate();d++){const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;html+=calDayHTML(ds,d,false,evMap,today)}
+  const rem=(7-((sdow+last.getDate())%7))%7;
+  for(let i=1;i<=rem;i++){const d=new Date(calYear,calMonth+1,i);html+=calDayHTML(d.toISOString().slice(0,10),d.getDate(),true,evMap,today)}
+  document.getElementById('cal-grid').innerHTML=html;
+  if(calSelectedDate)renderCalEvents(calSelectedDate);
+}
+function calDayHTML(ds,dn,other,evMap,today){
+  const evs=evMap[ds]||[];const{wk,day}=dateToWkDay(ds);const inPreg=wk>=1&&wk<=40;const isToday=ds===today;
+  const isSel=ds===calSelectedDate;
+  let cls='cal-day';if(other)cls+=' other-month';if(isToday)cls+=' today';if(isSel)cls+=' selected';
+  const num=isToday?`<div class="cal-num-inner">${dn}</div>`:dn;
+  const dots=evs.length?`<div class="cal-dots">${evs.slice(0,4).map(e=>`<div class="cal-dot ${e.done?'done':'pending'}"></div>`).join('')}</div>`:'';
+  const band=inPreg&&!other?`<div class="cal-week-band">孕${wk}w${day>0?'+'+day:''}</div>`:'';
+  return`<div class="${cls}" onclick="selectCalDay('${ds}')" data-date="${ds}"><div class="cal-num">${num}</div>${dots}${band}</div>`;
+}
+function selectCalDay(ds){calSelectedDate=ds;document.querySelectorAll('.cal-day').forEach(el=>{el.classList.toggle('selected',el.dataset.date===ds)});renderCalEvents(ds)}
+function renderCalEvents(ds){
+  const evs=events.filter(e=>e.date===ds);const{wk,day}=dateToWkDay(ds);const d=new Date(ds+'T00:00:00');
+  const dateStr=`${d.getMonth()+1}月${d.getDate()}日`;const wkStr=wk>=1&&wk<=42?` · 孕${wk}周${day>0?' +'+day+'天':''}`:'';
+  let html=`<div class="cal-ev-ttl">${dateStr}${wkStr}</div>`;
+  html+=evs.length?'<div class="cal-ev-list">'+evs.map(ev=>`<div class="cal-ev-item"><div class="cal-ev-dot ${ev.done?'done':''}"></div><div class="cal-ev-name">${esc(ev.title)}${ev.note?`<br><span style="font-size:10px;color:#B08090;font-style:italic">${esc(ev.note)}</span>`:''}</div><div class="cal-ev-wk">孕${ev.week}周</div></div>`).join('')+'</div>':'<div class="cal-empty">当天无事件</div>';
+  document.getElementById('cal-event-sheet').innerHTML=html;
+}
+
+/* Converter */
+function convFromDate(){
+  const ds=document.getElementById('conv-date').value;
+  if(!ds)return clearConv();
+  const{wk,day}=dateToWkDay(ds);
+  document.getElementById('conv-wk').value=wk;
+  document.getElementById('conv-day').value=day;
+  updateConv(wk,day,ds);
+}
+function convFromWkDay(){
+  const wk=parseInt(document.getElementById('conv-wk').value)||0;
+  const day=parseInt(document.getElementById('conv-day').value)||0;
+  if(!wk)return clearConv();
+  const ds=wkToDate(wk,day);
+  document.getElementById('conv-date').value=ds;
+  updateConv(wk,day,ds);
+}
+function clearConv(){['res-stage','res-range','res-due','res-month'].forEach(id=>document.getElementById(id).textContent='—')}
+function updateConv(wk,day,ds){
+  let stage='';
+  if(wk<1)stage='末次月经前';
+  else if(wk<=12)stage=`孕早期 第${wk}周`;
+  else if(wk<=27)stage=`孕中期 第${wk}周`;
+  else if(wk<=40)stage=`孕晚期 第${wk}周`;
+  else stage='超过预产期';
+  document.getElementById('res-stage').textContent=stage;
+  const ws=new Date(LMP);ws.setDate(ws.getDate()+(wk-1)*7);
+  const we=new Date(ws);we.setDate(we.getDate()+6);
+  const sm=ws.getMonth()+1,sd=ws.getDate(),em=we.getMonth()+1,ed=we.getDate();
+  document.getElementById('res-range').textContent=sm===em?`${sm}月${sd}–${ed}日`:`${sm}月${sd}日–${em}月${ed}日`;
+  const diff=Math.round((DUE-new Date(ds+'T00:00:00'))/86400000);
+  document.getElementById('res-due').textContent=diff>0?`还有 ${diff} 天`:diff===0?'今天就是预产期！':`已过 ${-diff} 天`;
+  document.getElementById('res-month').textContent=`第 ${Math.ceil(wk/4)} 个月`;
+}
+
+/* GitHub */
 function loadCfg(){try{const s=localStorage.getItem('pg_ghcfg');if(s)ghCfg=JSON.parse(s)}catch(e){}}
-function toggleCfg(){
-  const p=document.getElementById('cfg-bg');
-  if(p.classList.contains('vis')){closeCfg();return}
-  document.getElementById('cfg-owner').value=ghCfg.owner||'';
-  document.getElementById('cfg-repo').value=ghCfg.repo||'';
-  document.getElementById('cfg-path').value=ghCfg.path||'pregnancy.json';
-  document.getElementById('cfg-token').value=ghCfg.token||'';
-  p.classList.add('vis');
-}
+function toggleCfg(){const p=document.getElementById('cfg-bg');if(p.classList.contains('vis')){closeCfg();return}document.getElementById('cfg-owner').value=ghCfg.owner||'';document.getElementById('cfg-repo').value=ghCfg.repo||'';document.getElementById('cfg-path').value=ghCfg.path||'pregnancy.json';document.getElementById('cfg-token').value=ghCfg.token||'';p.classList.add('vis')}
 function closeCfg(){document.getElementById('cfg-bg').classList.remove('vis')}
-function saveCfg(){
-  ghCfg={owner:document.getElementById('cfg-owner').value.trim(),repo:document.getElementById('cfg-repo').value.trim(),path:document.getElementById('cfg-path').value.trim()||'pregnancy.json',token:document.getElementById('cfg-token').value.trim()};
-  localStorage.setItem('pg_ghcfg',JSON.stringify(ghCfg));
-  closeCfg();showSync('配置已保存，正在同步…');
-  loadGH().then(ok=>showSync(ok?'✓ 已从 GitHub 加载':'⚠ 同步失败，使用本地数据'));
-}
+function saveCfg(){ghCfg={owner:document.getElementById('cfg-owner').value.trim(),repo:document.getElementById('cfg-repo').value.trim(),path:document.getElementById('cfg-path').value.trim()||'pregnancy.json',token:document.getElementById('cfg-token').value.trim()};localStorage.setItem('pg_ghcfg',JSON.stringify(ghCfg));closeCfg();showSync('配置已保存，正在同步…');loadGH().then(ok=>showSync(ok?'✓ 已从 GitHub 加载':'⚠ 同步失败，使用本地数据'))}
+function showSync(msg){const b=document.getElementById('sync-bar');document.getElementById('sync-msg').textContent=msg;b.classList.add('show');setTimeout(()=>b.classList.remove('show'),3200)}
+async function getSha(){const{owner,repo,path,token}=ghCfg;const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});return r.ok?(await r.json()).sha:null}
+async function loadGH(){const{owner,repo,path,token}=ghCfg;if(!owner||!repo||!token)return false;try{const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});if(r.ok){const d=await r.json();const raw=atob(d.content.replace(/\n/g,''));const decoded=new TextDecoder().decode(new Uint8Array([...raw].map(c=>c.charCodeAt(0))));events=JSON.parse(decoded);render();if(histOpen)renderHist();return true}}catch(e){}return false}
+async function saveGH(){const{owner,repo,path,token}=ghCfg;if(!owner||!repo||!token){localStorage.setItem('pg_local',JSON.stringify(events));return}showSync('同步中…');try{const sha=await getSha();const json=JSON.stringify(events,null,2);const bytes=new TextEncoder().encode(json);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));const content=btoa(bin);const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${token}`,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update pregnancy events',content,...(sha?{sha}:{})})});showSync(r.ok?'✓ 已保存到 GitHub':'⚠ 保存失败 '+r.status)}catch(e){showSync('⚠ 网络错误，已本地保存');localStorage.setItem('pg_local',JSON.stringify(events))}}
+function makeICS(){const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//孕期备忘录//ZH','CALSCALE:GREGORIAN','METHOD:PUBLISH'];sorted().forEach(ev=>{const uid=`pg-${ev.id}-${ev.date}@pregnancy`;const start=ev.date.replace(/-/g,'');const endD=new Date(ev.date+'T00:00:00');endD.setDate(endD.getDate()+1);const end=endD.toISOString().slice(0,10).replace(/-/g,'');const summary=`[孕${ev.week}周] ${ev.title}`;const desc=ev.note?`备注：${ev.note}`:'';lines.push('BEGIN:VEVENT',`UID:${uid}`,`DTSTART;VALUE=DATE:${start}`,`DTEND;VALUE=DATE:${end}`,`SUMMARY:${summary}`,...(desc?[`DESCRIPTION:${desc}`]:[]),'END:VEVENT')});lines.push('END:VCALENDAR');return lines.join('\r\n')}
+function exportICS(type){const ics=makeICS();const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=type==='apple'?'孕期日历_Apple.ics':'孕期日历.ics';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showSync('✓ 已下载日历文件')}
 
-// ── GitHub ────────────────────────────────────────────────────────
-function showSync(msg){
-  const b=document.getElementById('sync-bar');
-  document.getElementById('sync-msg').textContent=msg;
-  b.classList.add('show');setTimeout(()=>b.classList.remove('show'),3200);
-}
-async function getSha(){
-  const{owner,repo,path,token}=ghCfg;
-  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});
-  return r.ok?(await r.json()).sha:null;
-}
-async function loadGH(){
-  const{owner,repo,path,token}=ghCfg;
-  if(!owner||!repo||!token)return false;
-  try{
-    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.ok){
-      const d=await r.json();
-      const raw=atob(d.content.replace(/\n/g,''));
-      const decoded=new TextDecoder().decode(new Uint8Array([...raw].map(c=>c.charCodeAt(0))));
-      events=JSON.parse(decoded);render();if(histOpen)renderHist();return true;
-    }
-  }catch(e){}
-  return false;
-}
-async function saveGH(){
-  const{owner,repo,path,token}=ghCfg;
-  if(!owner||!repo||!token){localStorage.setItem('pg_local',JSON.stringify(events));return}
-  showSync('同步中…');
-  try{
-    const sha=await getSha();
-    const json=JSON.stringify(events,null,2);const bytes=new TextEncoder().encode(json);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));const content=btoa(bin);
-    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${token}`,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update pregnancy events',content,...(sha?{sha}:{})})});
-    showSync(r.ok?'✓ 已保存到 GitHub':'⚠ 保存失败 '+r.status);
-  }catch(e){showSync('⚠ 网络错误，已本地保存');localStorage.setItem('pg_local',JSON.stringify(events))}
-}
+/* Swipe */
+function initCalSwipe(){const el=document.getElementById('cal-view');el.addEventListener('touchstart',e=>{swipeStartX=e.touches[0].clientX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-swipeStartX;if(Math.abs(dx)>50){dx<0?calNext():calPrev()}},{passive:true})}
 
-// ── Export ────────────────────────────────────────────────────────
-function toICSDate(dateStr){
-  return dateStr.replace(/-/g,'');
-}
-function makeICS(){
-  const lines=[
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//孕期备忘录//ZH',
-    'CALSCALE:GREGORIAN','METHOD:PUBLISH'
-  ];
-  sorted().forEach(ev=>{
-    const uid=`pg-${ev.id}-${ev.date}@pregnancy`;
-    const start=toICSDate(ev.date);
-    const endD=new Date(ev.date+'T00:00:00');endD.setDate(endD.getDate()+1);
-    const end=endD.toISOString().slice(0,10).replace(/-/g,'');
-    const summary=`[孕${ev.week}周] ${ev.title}`;
-    const desc=ev.note?`备注：${ev.note}`:'';
-    lines.push(
-      'BEGIN:VEVENT',
-      `UID:${uid}`,
-      `DTSTART;VALUE=DATE:${start}`,
-      `DTEND;VALUE=DATE:${end}`,
-      `SUMMARY:${summary}`,
-      ...(desc?[`DESCRIPTION:${desc}`]:[]),
-      'END:VEVENT'
-    );
-  });
-  lines.push('END:VCALENDAR');
-  return lines.join('\r\n');
-}
-function downloadICS(filename){
-  const ics=makeICS();
-  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=filename;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showSync('✓ 已下载日历文件');
-}
-function exportICS(type){
-  const filename = type === 'apple' ? '孕期日历_Apple.ics' : '孕期日历.ics';
-  downloadICS(filename);
-}
-function exportGoogleCalendar(){
-  downloadICS('孕期日历_Google.ics');
-  setTimeout(()=>{
-    if(confirm('文件已下载！\n\n在电脑上打开 calendar.google.com → 设置 → 导入，选择刚下载的文件。\n\n是否现在跳转到 Google 日历？')){
-      window.open('https://calendar.google.com/calendar/r/settings/export','_blank');
-    }
-  },400);
-}
-
-// ── init ───────────────────────────────────────────────────────────
 async function init(){
-  loadCfg();updateHeader();
+  loadCfg();updateHeader();initCal();initCalSwipe();
   let loaded=false;
-  if(ghCfg.owner&&ghCfg.repo&&ghCfg.token){
-    showSync('正在从 GitHub 加载…');
-    loaded=await loadGH();
-    if(loaded)showSync('✓ 已从 GitHub 加载');
-  }
-  if(!loaded){
-    const local=localStorage.getItem('pg_local');
-    if(local){try{events=JSON.parse(local);loaded=true}catch(e){}}
-  }
+  if(ghCfg.owner&&ghCfg.repo&&ghCfg.token){showSync('正在从 GitHub 加载…');loaded=await loadGH();if(loaded)showSync('✓ 已从 GitHub 加载')}
+  if(!loaded){const local=localStorage.getItem('pg_local');if(local){try{events=JSON.parse(local);loaded=true}catch(e){}}}
   if(!loaded)events=DEFAULTS;
   render();updateHeader();
-  setTimeout(()=>{
-    const today=new Date().toISOString().slice(0,10);
-    const s=sorted();const idx=s.findIndex(e=>e.date>=today&&!e.done);
-    if(idx>=0){const cards=document.querySelectorAll('.ev-card');if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'})}
-  },600);
+  document.getElementById('conv-date').value=new Date().toISOString().slice(0,10);
+  convFromDate();
+  setTimeout(()=>{const today=new Date().toISOString().slice(0,10);const s=sorted();const idx=s.findIndex(e=>e.date>=today&&!e.done);if(idx>=0){const cards=document.querySelectorAll('.ev-card');if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'})}},600);
 }
 init();
 </script>
