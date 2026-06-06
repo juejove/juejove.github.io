@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>澳洲家庭资产20年预测</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#0d1117; --bg2:#161b22; --bg3:#21262d;
+  --border:#30363d; --text:#e6edf3; --text2:#8b949e;
+  --accent:#58a6ff; --green:#3fb950; --amber:#d29922;
+  --red:#f85149; --purple:#bc8cff; --teal:#39d353;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+.header-icon{width:44px;height:44px;background:linear-gradient(135deg,#1f6feb,#388bfd);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.header h1{font-size:18px;font-weight:600}
+.header p{color:var(--text2);font-size:11.5px;margin-top:1px}
+.layout{display:flex;height:calc(100vh - 72px)}
+.sidebar{width:340px;min-width:340px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:16px;flex-shrink:0}
+.main{flex:1;overflow:auto;padding:20px 24px}
+
+.stitle{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.stitle:first-child{margin-top:0}
+
+.prow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px}
+.plabel{color:var(--text2);font-size:12px;flex:1;line-height:1.35}
+.plabel small{display:block;font-size:10px;color:#6e7681}
+.pinput{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12.5px;padding:4px 7px;width:105px;text-align:right;transition:border-color .15s}
+.pinput:focus{outline:none;border-color:var(--accent)}
+.pinput.n70{width:70px}
+.pinput.n130{width:130px}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding:9px 11px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);gap:8px}
+.toggle-label{font-size:12px;color:var(--text);flex:1;line-height:1.35}
+.toggle-label small{display:block;font-size:10px;color:var(--text2)}
+.tog{width:38px;height:20px;background:var(--bg);border-radius:10px;border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--accent);border-color:var(--accent)}
+.tog::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.tog.on::after{left:20px}
+
+.calc-btn{width:100%;padding:10px;background:linear-gradient(135deg,#1f6feb,#388bfd);border:none;border-radius:8px;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:14px;transition:opacity .15s}
+.calc-btn:hover{opacity:.88}
+
+/* ===== TAX THRESHOLDS SECTION ===== */
+.tax-band-row{display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.tax-band-row .tb-label{font-size:10.5px;color:var(--text2);width:55px;flex-shrink:0}
+.tax-band-row .tb-input{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11.5px;padding:3px 6px;width:80px;text-align:right}
+.tax-band-row .tb-sep{color:var(--text2);font-size:11px;padding:0 3px}
+.tax-band-row .tb-rate{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--amber);font-size:11.5px;padding:3px 6px;width:52px;text-align:right}
+.tax-band-header{display:flex;gap:4px;margin-bottom:3px}
+.tax-band-header span{font-size:10px;color:#6e7681}
+
+/* ===== EVENTS SECTION ===== */
+.event-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;position:relative}
+.event-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.event-row:last-child{margin-bottom:0}
+.event-label{font-size:11px;color:var(--text2);width:55px;flex-shrink:0}
+.event-input{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11.5px;padding:3px 6px;flex:1;min-width:0}
+.event-type{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:3px 5px;width:60px}
+.event-type.income{border-color:rgba(63,185,80,.4);color:var(--green)}
+.event-type.expense{border-color:rgba(248,81,73,.4);color:var(--red)}
+.event-del{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:0 3px}
+.event-del:hover{color:var(--red)}
+.add-event-btn{width:100%;padding:6px;background:transparent;border:1px dashed var(--border);border-radius:6px;color:var(--text2);font-size:11.5px;cursor:pointer;margin-top:2px;transition:all .15s}
+.add-event-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.verify-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px}
+.verify-box .vr{display:flex;justify-content:space-between;margin-bottom:2px}
+.verify-box .vl{color:var(--text2)}
+.verify-box .vv{color:var(--text);font-weight:500}
+.match{color:var(--green)}
+.warn{color:var(--amber)}
+
+.scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.sc-label{font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.sc-val{font-size:19px;font-weight:600}
+.sc-val.g{color:var(--green)}.sc-val.a{color:var(--amber)}.sc-val.b{color:var(--accent)}.sc-val.p{color:var(--purple)}
+.sc-sub{font-size:10.5px;color:var(--text2);margin-top:2px}
+
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.ccrd{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ccrd h3{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px}
+.cwrap{position:relative;height:200px}
+
+.taxnote{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:8px;padding:8px 12px;font-size:11.5px;color:#79c0ff;margin-bottom:14px;line-height:1.5}
+.note{background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.25);border-radius:8px;padding:8px 12px;font-size:11.5px;color:var(--amber);margin-bottom:14px}
+
+.tcrd{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.tcrd-head{font-size:12.5px;font-weight:500;color:var(--text2);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px;min-width:1350px}
+thead th{background:var(--bg3);padding:8px 10px;text-align:right;font-weight:500;color:var(--text2);white-space:nowrap;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.03em}
+thead th:first-child{text-align:left;min-width:120px}
+tbody td{padding:7px 10px;text-align:right;border-bottom:1px solid #21262d;white-space:nowrap;color:var(--text)}
+tbody td:first-child{text-align:left;font-weight:500}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(88,166,255,.04)}
+.pos{color:var(--green)}.neg{color:var(--red)}.muted{color:var(--text2)}
+
+#welcomeArea{text-align:center;padding:80px 40px;color:var(--text2)}
+
+/* Milestone annotation style */
+.milestone-bubble{
+  background:rgba(63,185,80,.15);
+  border:1px solid rgba(63,185,80,.4);
+  border-radius:6px;
+  padding:2px 6px;
+  font-size:10px;
+  color:var(--green);
+  white-space:nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🏡</div>
+  <div>
+    <h1>澳洲家庭资产20年预测</h1>
+    <p>固定Capital还款轨迹 · Offset全额对冲利息返现现金 · 超额溢出月度注资美股 · 二孩出生年通胀锚定</p>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar">
+
+  <div class="stitle">🏠 房产与贷款</div>
+  <div class="prow"><div class="plabel">自住房当前价值 ($)</div><input class="pinput" id="homeValue" type="number" value="950000"></div>
+  <div class="prow"><div class="plabel">房产年增值率 (%)</div><input class="pinput" id="homeGrowth" type="number" value="2.5" step="0.1"></div>
+  <div class="prow"><div class="plabel">当前房贷余额 ($)</div><input class="pinput" id="loanBalance" type="number" value="446000"></div>
+  <div class="prow"><div class="plabel">贷款利率 (%)</div><input class="pinput" id="loanRate" type="number" value="6.09" step="0.01"></div>
+  <div class="prow"><div class="plabel">每月固定还款额 ($)<small>每月雷打不动上交</small></div><input class="pinput" id="mortgagePayment" type="number" value="2715"></div>
+
+  <div class="stitle">💰 Offset 与现金</div>
+  <div class="prow"><div class="plabel">Offset账户余额 ($)</div><input class="pinput" id="offsetBalance" type="number" value="277000"></div>
+  <div class="prow"><div class="plabel">主动定投美股 ($/月)<small>从Offset主动抽走</small></div><input class="pinput" id="monthlyToShares" type="number" value="0"></div>
+
+  <div class="stitle">📈 美股投资</div>
+  <div class="prow"><div class="plabel">美股账户余额 ($)</div><input class="pinput" id="stockBalance" type="number" value="222000"></div>
+  <div class="prow"><div class="plabel">美股年化收益率 (%)</div><input class="pinput" id="stockReturn" type="number" value="12" step="0.5"></div>
+
+  <div class="stitle">👤 我的收入</div>
+  <div class="prow"><div class="plabel">年薪 ($)</div><input class="pinput" id="myIncome" type="number" value="155000"></div>
+  <div class="prow"><div class="plabel">年薪增长率 (%)</div><input class="pinput" id="myIncomeGrowth" type="number" value="3" step="0.1"></div>
+
+  <div class="stitle">👩 配偶收入</div>
+  <div class="prow"><div class="plabel">配偶年薪 ($)</div><input class="pinput" id="spouseIncome" type="number" value="20000"></div>
+  <div class="prow"><div class="plabel">配偶年薪增长率 (%)</div><input class="pinput" id="spouseIncomeGrowth" type="number" value="3" step="0.1"></div>
+
+  <!-- ===== TAX BANDS (MODIFICATION 1) ===== -->
+  <div class="stitle">🏛️ 个税区间参数 <span style="font-size:9px;color:#6e7681">（可直接修改阈值与税率）</span></div>
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px">
+    <div style="display:grid;grid-template-columns:1fr 80px 54px;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:#6e7681">区间上限 ($)</span>
+      <span style="font-size:10px;color:#6e7681;text-align:right">税率 (%)</span>
+      <span style="font-size:10px;color:#6e7681;text-align:center">医疗税</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--text2);flex:1">$0 ~ 免税额</span>
+      <input class="pinput" id="tb0" type="number" value="18200" style="width:85px">
+      <span style="font-size:11px;color:var(--text2);padding:0 3px">0%</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--text2);flex:1">免税额 ~</span>
+      <input class="pinput" id="tb1" type="number" value="45000" style="width:85px">
+      <input class="pinput" id="tr1" type="number" value="16" step="0.5" style="width:52px;color:var(--amber)">
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--text2);flex:1">~ 上限</span>
+      <input class="pinput" id="tb2" type="number" value="135000" style="width:85px">
+      <input class="pinput" id="tr2" type="number" value="30" step="0.5" style="width:52px;color:var(--amber)">
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--text2);flex:1">~ 上限</span>
+      <input class="pinput" id="tb3" type="number" value="190000" style="width:85px">
+      <input class="pinput" id="tr3" type="number" value="37" step="0.5" style="width:52px;color:var(--amber)">
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--text2);flex:1">$190k 以上</span>
+      <span style="font-size:10px;color:var(--text2);width:85px;text-align:right">∞</span>
+      <input class="pinput" id="tr4" type="number" value="45" step="0.5" style="width:52px;color:var(--amber)">
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:2px">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:10px;color:var(--text2);flex:1">医疗税豁免上限 ($)</span>
+        <input class="pinput" id="medicareExempt" type="number" value="26000" style="width:85px">
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:10px;color:var(--text2);flex:1">医疗税逐渐起征段上限 ($)</span>
+        <input class="pinput" id="medicarePhaseEnd" type="number" value="32500" style="width:85px">
+      </div>
+      <div style="font-size:9.5px;color:#6e7681;margin-top:4px">$0-豁免额：0% · 豁免额-逐渐起征上限：10%渐进 · 以上：2%</div>
+    </div>
+  </div>
+
+  <div class="stitle">💸 日常开销 (含CPI年增长)</div>
+  <div class="prow"><div class="plabel">基本生活开销 ($/月)</div><input class="pinput" id="monthlyExpenses" type="number" value="3400"></div>
+  <div class="prow"><div class="plabel">一孩月度开销 ($)<small>从第2年开始计算</small></div><input class="pinput" id="childExpenses" type="number" value="1000"></div>
+
+  <div class="toggle-row" style="margin-top:4px">
+    <div class="toggle-label">👶 启用第二个孩子参数<small>开启后哪一年要二孩可调</small></div>
+    <div class="tog" id="child2Toggle"></div>
+  </div>
+  <div id="child2Fields" style="display:none; border-left: 2px solid var(--amber); padding-left: 10px; margin-bottom: 8px;">
+    <div class="prow"><div class="plabel">哪一年开始生二孩 (第X年)</div><input class="pinput n70" id="child2StartYear" type="number" value="3" min="1" max="20"></div>
+    <div class="prow"><div class="plabel">二孩基础开销 ($/月)<small>出生年完美计入通胀</small></div><input class="pinput" id="child2Expenses" type="number" value="800"></div>
+  </div>
+
+  <div class="prow"><div class="plabel">CPI增长率 (%)</div><input class="pinput" id="cpiRate" type="number" value="2.8" step="0.1"></div>
+
+  <div class="stitle">📅 年度一次性开销 (含CPI增长)</div>
+  <div class="prow"><div class="plabel">Council 费用 ($)</div><input class="pinput" id="council" type="number" value="1900"></div>
+  <div class="prow"><div class="plabel">车路费 ($)</div><input class="pinput" id="carToll" type="number" value="950"></div>
+  <div class="prow"><div class="plabel">车保险 ($)</div><input class="pinput" id="carInsurance" type="number" value="1400"></div>
+  <div class="prow"><div class="plabel">房屋保险 ($)</div><input class="pinput" id="homeInsurance" type="number" value="1300"></div>
+  <div class="prow"><div class="plabel">年度大开销(旅游等) ($)</div><input class="pinput" id="annualBig" type="number" value="3000"></div>
+
+  <div class="toggle-row" style="margin-top:4px">
+    <div class="toggle-label">🚗 第二辆车<small>开启后加年度注册+保险</small></div>
+    <div class="tog" id="car2Toggle"></div>
+  </div>
+  <div id="car2Fields" style="display:none">
+    <div class="prow"><div class="plabel">第二辆车注册费 ($)</div><input class="pinput" id="car2Reg" type="number" value="950"></div>
+    <div class="prow"><div class="plabel">第二辆车保险 ($)</div><input class="pinput" id="car2Insurance" type="number" value="500"></div>
+  </div>
+
+  <!-- ===== PARENTS SECTION (MODIFICATION 2) ===== -->
+  <div class="stitle">👴 父母来访 (含CPI增长)</div>
+  <div class="prow"><div class="plabel">平均每年来访人数</div><input class="pinput n70" id="parentsCount" type="number" value="4"></div>
+  <div class="prow"><div class="plabel">平均每年来访月数</div><input class="pinput n70" id="parentsMonths" type="number" value="9"></div>
+  <div class="prow"><div class="plabel">每人每月花费 ($)</div><input class="pinput" id="parentsCost" type="number" value="900"></div>
+
+  <div class="stitle">🏦 父母养老金投入</div>
+  <div class="prow">
+    <div class="plabel">父母每月贴补家用 ($)<small>计入家庭收入，免税</small></div>
+    <input class="pinput" id="parentsPension" type="number" value="3000">
+  </div>
+  <div class="prow">
+    <div class="plabel">养老金年增长率 (%)<small>通常低于CPI</small></div>
+    <input class="pinput" id="parentsPensionGrowth" type="number" value="1" step="0.1">
+  </div>
+
+  <!-- ===== ONE-TIME EVENTS (MODIFICATION 3) ===== -->
+  <div class="stitle">⚡ 自由空降事件 <span style="font-size:9px;color:#6e7681">（年末生效，+收入 / -支出）</span></div>
+  <div id="eventsList"></div>
+  <button class="add-event-btn" onclick="addEvent()">＋ 添加事件</button>
+
+  <div class="stitle">⚖️ CGT设置</div>
+  <div class="toggle-row">
+    <div class="toggle-label">CGT保底30%税率<small>关=按配偶个人税率阶梯算</small></div>
+    <div class="tog" id="cgtToggle"></div>
+  </div>
+
+  <div class="verify-box" id="verifyBox" style="display:none">
+    <div style="font-size:11px;font-weight:600;margin-bottom:5px;color:var(--text)">📊 个税验算（我的年薪）</div>
+    <div class="vr"><span class="vl">年薪</span><span class="vv" id="vIncome">-</span></div>
+    <div class="vr"><span class="vl">应税收入</span><span class="vv" id="vTaxable">-</span></div>
+    <div class="vr"><span class="vl">所得税</span><span class="vv" id="vTax">-</span></div>
+    <div class="vr"><span class="vl">医疗税(2%)</span><span class="vv" id="vMedicare">-</span></div>
+    <div class="vr" style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px"><span class="vl">月净到手</span><span class="vv" id="vMonthly">-</span></div>
+    <div id="vResult" style="margin-top:4px;font-size:11px"></div>
+  </div>
+
+  <button class="calc-btn" onclick="runProjection()">🔄 计算20年预测</button>
+</div>
+
+<div class="main">
+  <div id="welcomeArea">
+    <div style="font-size:44px;margin-bottom:14px">📊</div>
+    <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:6px">调整左侧参数，点击计算</div>
+    <div style="font-size:12.5px">固定Capital还款轨迹 · 满额对冲后溢出资金自动月度注入美股 · 二孩出生开销按基准金额 × (1+CPI)^N 锚定计算</div>
+  </div>
+
+  <div id="resultsArea" style="display:none">
+    <div class="taxnote" id="taxNote"></div>
+    <div class="note" id="cgtNote"></div>
+
+    <div class="scards" id="summaryCards"></div>
+
+    <div class="cgrid">
+      <div class="ccrd">
+        <h3>总净值增长（万澳元）</h3>
+        <div class="cwrap"><canvas id="chartNW"></canvas></div>
+      </div>
+      <div class="ccrd">
+        <h3>资产构成：房产净值 / Offset / 美股</h3>
+        <div class="cwrap"><canvas id="chartAssets"></canvas></div>
+      </div>
+      <div class="ccrd">
+        <h3>年度总实际开销</h3>
+        <div class="cwrap"><canvas id="chartExp"></canvas></div>
+      </div>
+      <div class="ccrd">
+        <h3>年税后总到手收入 vs 年生活总开支</h3>
+        <div class="cwrap"><canvas id="chartCF"></canvas></div>
+      </div>
+    </div>
+
+    <div class="tcrd">
+      <div class="tcrd-head">
+        <span>📋 逐年明细表（澳元）</span>
+        <span style="font-size:11px;color:var(--text2)">👶=一孩 · 🍼=二孩 · ⚡=空降事件 · 所有开销含复合CPI增长</span>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th>年份</th>
+              <th>房产价值</th>
+              <th>房贷余额</th>
+              <th>Offset余额</th>
+              <th>Offset返现</th>
+              <th>美股价值</th>
+              <th>生活+孩子/月</th>
+              <th>父母来访/年</th>
+              <th>年度一次性</th>
+              <th>空降事件净额</th>
+              <th>年总开销(含月供)</th>
+              <th>年税后净收入</th>
+              <th>非房资金</th>
+              <th>非房增量</th>
+              <th>总净值</th>
+              <th>净值增长</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ===================================================
+// STATE
+// ===================================================
+let cgtFloor = false;
+let car2 = false;
+let child2Active = false;
+let chartNW = null, chartAssets = null, chartExp = null, chartCF = null;
+let eventIdCounter = 0;
+
+// ===================================================
+// TOGGLE HANDLERS
+// ===================================================
+document.getElementById('cgtToggle').addEventListener('click', function() {
+  cgtFloor = !cgtFloor;
+  this.classList.toggle('on', cgtFloor);
+});
+document.getElementById('car2Toggle').addEventListener('click', function() {
+  car2 = !car2;
+  this.classList.toggle('on', car2);
+  document.getElementById('car2Fields').style.display = car2 ? 'block' : 'none';
+});
+document.getElementById('child2Toggle').addEventListener('click', function() {
+  child2Active = !child2Active;
+  this.classList.toggle('on', child2Active);
+  document.getElementById('child2Fields').style.display = child2Active ? 'block' : 'none';
+});
+
+// ===================================================
+// EVENTS (MODIFICATION 3) — add/remove free events
+// ===================================================
+function addEvent(yr=1, amount=0, type='income') {
+  const id = ++eventIdCounter;
+  const div = document.createElement('div');
+  div.className = 'event-item';
+  div.id = 'ev_' + id;
+  div.innerHTML = `
+    <button class="event-del" onclick="removeEvent(${id})">✕</button>
+    <div class="event-row">
+      <span class="event-label">第几年末</span>
+      <input class="event-input" id="evYr_${id}" type="number" min="0" max="20" value="${yr}" style="width:60px">
+      <span style="font-size:10px;color:var(--text2)">第0年=开局</span>
+    </div>
+    <div class="event-row">
+      <span class="event-label">金额 ($)</span>
+      <input class="event-input" id="evAmt_${id}" type="number" value="${amount}">
+      <select class="event-type ${type}" id="evType_${id}" onchange="updateEventTypeColor(${id})">
+        <option value="income" ${type==='income'?'selected':''}>收入+</option>
+        <option value="expense" ${type==='expense'?'selected':''}>支出-</option>
+      </select>
+    </div>
+  `;
+  document.getElementById('eventsList').appendChild(div);
+}
+
+function updateEventTypeColor(id) {
+  const sel = document.getElementById('evType_' + id);
+  sel.className = 'event-type ' + sel.value;
+}
+
+function removeEvent(id) {
+  const el = document.getElementById('ev_' + id);
+  if (el) el.remove();
+}
+
+function getEvents() {
+  const events = [];
+  document.querySelectorAll('.event-item').forEach(div => {
+    const id = div.id.replace('ev_', '');
+    const yr = parseInt(document.getElementById('evYr_' + id).value) || 0;
+    const amt = parseFloat(document.getElementById('evAmt_' + id).value) || 0;
+    const type = document.getElementById('evType_' + id).value;
+    events.push({ yr, amount: type === 'expense' ? -amt : amt });
+  });
+  return events;
+}
+
+// Default events (MODIFICATION 3 default): year 0 +100k, year 12 -160k
+addEvent(0, 100000, 'income');
+addEvent(12, 160000, 'expense');
+
+// ===================================================
+// MODIFICATION 1: TAX CALCULATION using sidebar params
+// ===================================================
+function getTaxParams() {
+  return {
+    tb0: parseFloat(document.getElementById('tb0').value) || 18200,
+    tb1: parseFloat(document.getElementById('tb1').value) || 45000,
+    tb2: parseFloat(document.getElementById('tb2').value) || 135000,
+    tb3: parseFloat(document.getElementById('tb3').value) || 190000,
+    tr1: (parseFloat(document.getElementById('tr1').value) || 16) / 100,
+    tr2: (parseFloat(document.getElementById('tr2').value) || 30) / 100,
+    tr3: (parseFloat(document.getElementById('tr3').value) || 37) / 100,
+    tr4: (parseFloat(document.getElementById('tr4').value) || 45) / 100,
+    medicareExempt: parseFloat(document.getElementById('medicareExempt').value) || 26000,
+    medicarePhaseEnd: parseFloat(document.getElementById('medicarePhaseEnd').value) || 32500,
+  };
+}
+
+function calcIncomeTax(income) {
+  const tp = getTaxParams();
+  let tax = 0;
+  if (income <= tp.tb0) {
+    tax = 0;
+  } else if (income <= tp.tb1) {
+    tax = (income - tp.tb0) * tp.tr1;
+  } else if (income <= tp.tb2) {
+    tax = (tp.tb1 - tp.tb0) * tp.tr1 + (income - tp.tb1) * tp.tr2;
+  } else if (income <= tp.tb3) {
+    tax = (tp.tb1 - tp.tb0) * tp.tr1 + (tp.tb2 - tp.tb1) * tp.tr2 + (income - tp.tb2) * tp.tr3;
+  } else {
+    tax = (tp.tb1 - tp.tb0) * tp.tr1 + (tp.tb2 - tp.tb1) * tp.tr2 + (tp.tb3 - tp.tb2) * tp.tr3 + (income - tp.tb3) * tp.tr4;
+  }
+  let medicare = 0;
+  if (income <= tp.medicareExempt) {
+    medicare = 0;
+  } else if (income <= tp.medicarePhaseEnd) {
+    medicare = (income - tp.medicareExempt) * 0.10;
+  } else {
+    medicare = income * 0.02;
+  }
+  return { tax, medicare, total: tax + medicare };
+}
+
+function marginalRate(income) {
+  const tp = getTaxParams();
+  if (income <= tp.tb0) return 0;
+  if (income <= tp.tb1) return tp.tr1;
+  if (income <= tp.tb2) return tp.tr2;
+  if (income <= tp.tb3) return tp.tr3;
+  return tp.tr4;
+}
+
+function calcCGT(capitalGain, taxableIncome) {
+  const discounted = capitalGain * 0.5;
+  if (cgtFloor) {
+    const marginal = marginalRate(taxableIncome + discounted);
+    return discounted * Math.max(0.30, marginal);
+  } else {
+    return calcIncomeTax(taxableIncome + discounted).total - calcIncomeTax(taxableIncome).total;
+  }
+}
+
+// ===================================================
+// HELPERS
+// ===================================================
+const fmt = (v, d=0) => {
+  if (v === null || v === undefined || isNaN(v)) return '-';
+  const n = Math.round(Math.abs(v));
+  const s = '$' + n.toLocaleString('en-AU');
+  return v < 0 ? '-' + s : s;
+};
+const fmtK = v => '$' + (Math.round(v / 1000)).toLocaleString('en-AU') + 'K';
+function gv(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+// ===================================================
+// VERIFY TAX
+// ===================================================
+function verifyAndShow() {
+  const income = gv('myIncome');
+  const t = calcIncomeTax(income);
+  const monthly = (income - t.total) / 12;
+  document.getElementById('vIncome').textContent = fmt(income);
+  document.getElementById('vTaxable').textContent = fmt(income);
+  document.getElementById('vTax').textContent = fmt(t.tax);
+  document.getElementById('vMedicare').textContent = fmt(t.medicare);
+  document.getElementById('vMonthly').textContent = '$' + monthly.toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2}) + '/月';
+  const el = document.getElementById('vResult');
+  if (Math.abs(monthly - 9432.67) < 50) el.innerHTML = '<span class="match">✅ 吻合 ATO 2024-25 税率表</span>';
+  else el.innerHTML = '<span class="warn">⚠️ 与参考值有差异（参数已被修改）</span>';
+  document.getElementById('verifyBox').style.display = 'block';
+}
+
+// ===================================================
+// MAIN PROJECTION
+// ===================================================
+function runProjection() {
+  verifyAndShow();
+
+  const p = {
+    homeValue: gv('homeValue'), homeGrowth: gv('homeGrowth') / 100,
+    loanBalance: gv('loanBalance'), loanRate: gv('loanRate') / 100,
+    mortgagePayment: gv('mortgagePayment'), offsetBalance: gv('offsetBalance'),
+    monthlyToShares: gv('monthlyToShares'), stockBalance: gv('stockBalance'), stockReturn: gv('stockReturn') / 100,
+    myIncome: gv('myIncome'), myIncomeGrowth: gv('myIncomeGrowth') / 100,
+    spouseIncome: gv('spouseIncome'), spouseIncomeGrowth: gv('spouseIncomeGrowth') / 100,
+    monthlyExpenses: gv('monthlyExpenses'), childExpenses: gv('childExpenses'),
+    child2StartYear: gv('child2StartYear'), child2Expenses: gv('child2Expenses'),
+    cpi: gv('cpiRate') / 100,
+    council: gv('council'), carToll: gv('carToll'), carInsurance: gv('carInsurance'), homeInsurance: gv('homeInsurance'), annualBig: gv('annualBig'),
+    car2Reg: car2 ? gv('car2Reg') : 0, car2Insurance: car2 ? gv('car2Insurance') : 0,
+    parentsCount: gv('parentsCount'), parentsMonths: gv('parentsMonths'), parentsCost: gv('parentsCost'),
+    // MODIFICATION 2: parents pension
+    parentsPension: gv('parentsPension'), parentsPensionGrowth: gv('parentsPensionGrowth') / 100,
+  };
+
+  // MODIFICATION 3: parse events by year
+  const events = getEvents();
+  const eventsByYear = {};
+  events.forEach(ev => {
+    if (!eventsByYear[ev.yr]) eventsByYear[ev.yr] = 0;
+    eventsByYear[ev.yr] += ev.amount;
+  });
+
+  const results = [];
+  let homeVal = p.homeValue;
+  let loanBal = p.loanBalance;
+  let offsetBal = p.offsetBalance;
+  let stockBal = p.stockBalance;
+  const mRate = p.loanRate / 12;
+
+  // Apply year-0 events first (opening adjustments)
+  if (eventsByYear[0]) {
+    const ev0 = eventsByYear[0];
+    if (ev0 > 0) {
+      offsetBal += ev0;
+    } else {
+      offsetBal += ev0; // negative = reduction
+      if (offsetBal < 0) offsetBal = 0;
+    }
+  }
+
+  const initNW = homeVal - loanBal + offsetBal + stockBal;
+  let prevNW = initNW;
+  let prevNonHome = offsetBal + stockBal;
+
+  for (let yr = 1; yr <= 20; yr++) {
+    const cpiMult = Math.pow(1 + p.cpi, yr - 1);
+    const myIncome = p.myIncome * Math.pow(1 + p.myIncomeGrowth, yr - 1);
+    const spouseIncome = p.spouseIncome * Math.pow(1 + p.spouseIncomeGrowth, yr - 1);
+    const myNetIncome = myIncome - calcIncomeTax(myIncome).total;
+
+    const stockGain = stockBal * p.stockReturn;
+    const cgtTax = calcCGT(stockGain, spouseIncome);
+    const spouseNet = spouseIncome - calcIncomeTax(spouseIncome).total - cgtTax;
+
+    const monthlyLiving = p.monthlyExpenses * cpiMult;
+    const monthlyChild1 = (yr >= 2) ? p.childExpenses * cpiMult : 0;
+
+    let monthlyChild2 = 0;
+    if (child2Active && yr >= p.child2StartYear) {
+      monthlyChild2 = p.child2Expenses * Math.pow(1 + p.cpi, yr - 1);
+    }
+
+    // MODIFICATION 2: parents pension (separate growth rate)
+    const monthlyParentsPension = p.parentsPension * Math.pow(1 + p.parentsPensionGrowth, yr - 1);
+    const annualParentsPension = monthlyParentsPension * 12;
+
+    const monthlyParentsVisit = p.parentsCount * p.parentsMonths * p.parentsCost * cpiMult / 12;
+    const annualOneOff = (p.council + p.carToll + p.carInsurance + p.homeInsurance + p.annualBig + p.car2Reg + p.car2Insurance) * cpiMult;
+    const parentsAnnual = p.parentsCount * p.parentsMonths * p.parentsCost * cpiMult;
+    const annualLiving = (monthlyLiving + monthlyChild1 + monthlyChild2) * 12;
+
+    let totalOffsetCashReturnThisYear = 0;
+    // netMortgageOutThisYear = actual cash leaving pocket for mortgage
+    // = mortgagePayment - offsetCashReturn (interest saved stays in offset, only capital truly leaves)
+    let netMortgageOutThisYear = 0;
+
+    for (let m = 0; m < 12; m++) {
+      if (loanBal > 0) {
+        // Step 1: How much interest would be charged with NO offset (used to fix capital reduction)
+        const theoreticalInterest = loanBal * mRate;
+        // Capital reduction is fixed regardless of offset (P&I schedule based on no-offset rate)
+        const capitalReduction = Math.min(loanBal, p.mortgagePayment - theoreticalInterest);
+
+        // Step 2: Actual interest charged = only on the unshielded portion
+        const actualInterestCharged = Math.max(0, loanBal - offsetBal) * mRate;
+        // Offset cash return = interest saved by offset — stays in offset, never left
+        const offsetCashReturn = theoreticalInterest - actualInterestCharged;
+
+        // Step 3: Reduce loan by capital component
+        loanBal = Math.max(0, loanBal - capitalReduction);
+
+        totalOffsetCashReturnThisYear += offsetCashReturn;
+
+        // Step 4: Net actual cash outflow for mortgage this month:
+        //   Full payment minus the interest that was saved (that money never moved)
+        const netMortgageOut = p.mortgagePayment - offsetCashReturn;
+        netMortgageOutThisYear += netMortgageOut;
+
+        // Step 5: Update offset
+        //   Income in - living expenses - net mortgage out
+        //   (offset return is NOT added back separately; it's already embedded by not deducting it above)
+        const monthlyLivingOut = (annualLiving + parentsAnnual + annualOneOff) / 12;
+        const monthlyEarned = (myNetIncome + spouseNet + annualParentsPension) / 12;
+        offsetBal += monthlyEarned - monthlyLivingOut - netMortgageOut;
+
+      } else {
+        // Loan paid off — no mortgage component
+        const monthlyLivingOut = (annualLiving + parentsAnnual + annualOneOff) / 12;
+        const monthlyEarned = (myNetIncome + spouseNet + annualParentsPension) / 12;
+        offsetBal += (monthlyEarned - monthlyLivingOut);
+      }
+
+      // Overflow: offset is capped at loan balance; surplus goes to stocks
+      if (offsetBal > loanBal) {
+        const surplus = offsetBal - loanBal;
+        offsetBal = loanBal;
+        stockBal += surplus;
+      }
+      if (offsetBal < 0) offsetBal = 0;
+    }
+
+    // Apply annual stock growth
+    stockBal += stockGain;
+
+    // Year-end events: income → offset first (overflow to stocks); expense → stocks first, then offset
+    let yearEventNet = 0;
+    if (eventsByYear[yr]) {
+      yearEventNet = eventsByYear[yr];
+      if (yearEventNet > 0) {
+        // Windfall: fill offset to cap, overflow to stocks
+        offsetBal += yearEventNet;
+        if (offsetBal > loanBal) {
+          const surplus = offsetBal - loanBal;
+          offsetBal = loanBal;
+          stockBal += surplus;
+        }
+      } else {
+        // Expense: deduct from stocks first, then offset
+        let remaining = Math.abs(yearEventNet);
+        const fromStocks = Math.min(stockBal, remaining);
+        stockBal -= fromStocks;
+        remaining -= fromStocks;
+        if (remaining > 0) {
+          offsetBal = Math.max(0, offsetBal - remaining);
+        }
+      }
+    }
+
+    homeVal = homeVal * (1 + p.homeGrowth);
+
+    // Total annual expense = actual living costs + net mortgage cash out (not gross payment)
+    const totalAnnualExp = annualLiving + parentsAnnual + annualOneOff + netMortgageOutThisYear;
+    const netWorth = homeVal - loanBal + offsetBal + stockBal;
+    const netWorthGrowth = netWorth - prevNW;
+    prevNW = netWorth;
+
+    // MODIFICATION 4: non-home assets
+    const nonHomeFunds = offsetBal + stockBal;
+    const nonHomeDelta = nonHomeFunds - prevNonHome;
+    prevNonHome = nonHomeFunds;
+
+    results.push({
+      yr, homeVal, loanBal, offsetBal, stockBal,
+      offsetCashReturn: totalOffsetCashReturnThisYear,
+      monthlyFixed: monthlyLiving + monthlyChild1 + monthlyChild2 + monthlyParentsVisit,
+      parentsAnnual, annualParentsPension, annualOneOff, totalAnnualExp,
+      netIncome: myNetIncome + spouseNet + annualParentsPension,
+      netWorth, netWorthGrowth,
+      nonHomeFunds, nonHomeDelta,
+      yearEventNet,
+      hasChild1: yr >= 2,
+      hasChild2: child2Active && yr >= p.child2StartYear
+    });
+  }
+
+  renderResults(results, p, initNW);
+}
+
+// ===================================================
+// RENDER
+// ===================================================
+function renderResults(results, p, initNW) {
+  document.getElementById('welcomeArea').style.display = 'none';
+  document.getElementById('resultsArea').style.display = 'block';
+
+  // MODIFICATION 5: mortgagePayment as param not hardcoded string
+  const monthlyPaymentDisplay = '$' + p.mortgagePayment.toLocaleString('en-AU');
+  document.getElementById('taxNote').innerHTML =
+    `<strong>💡 核心机制说明：</strong>每月名义还款 <strong>${monthlyPaymentDisplay}</strong>，Capital 还款量依无对冲利率表固定。` +
+    `Offset 对冲利息部分<strong>当月直接留在 Offset 账户</strong>（从未离开），实际月度净现金流出 = 名义还款 − 当月Offset省息额。` +
+    `年度总开销 = 各项生活开销 + 实际净房贷流出（已扣减省息返现），而非名义全额还款。` +
+    `<strong>👶 二孩通胀锚定：</strong>开销基准 $${p.child2Expenses}/月，出生年乘以 (1+CPI)^(N-1) 锚定届时购买力。` +
+    `（父母养老金为单位发放，不计入家庭支出）`;
+
+  const last = results[results.length - 1];
+  // MODIFICATION 4: add non-home summary card
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="sc"><div class="sc-label">20年后 总净值</div><div class="sc-val g">${fmtK(last.netWorth)}</div><div class="sc-sub">起始 ${fmtK(initNW)}</div></div>
+    <div class="sc"><div class="sc-label">20年后 房贷余额</div><div class="sc-val b">${last.loanBal > 0 ? fmtK(last.loanBal) : '✓ 已还清'}</div><div class="sc-sub">房价 ${fmtK(last.homeVal)}</div></div>
+    <div class="sc"><div class="sc-label">20年后 Offset余额</div><div class="sc-val a">${fmtK(last.offsetBal)}</div><div class="sc-sub">锁定上限等于房贷</div></div>
+    <div class="sc"><div class="sc-label">20年后 美股价值</div><div class="sc-val p">${fmtK(last.stockBal)}</div><div class="sc-sub">含自动溢出资金</div></div>
+    <div class="sc"><div class="sc-label">20年后 非房资金</div><div class="sc-val g">${fmtK(last.nonHomeFunds)}</div><div class="sc-sub">Offset + 美股合计</div></div>
+    <div class="sc"><div class="sc-label">累计净值增长</div><div class="sc-val g">+${fmtK(last.netWorth - initNW)}</div><div class="sc-sub">20年综合结果</div></div>
+  `;
+
+  const labels = results.map(r => `${2025 + r.yr}`);
+  const gc = 'rgba(255,255,255,0.06)', tc = '#8b949e';
+
+  if (chartNW) chartNW.destroy();
+  if (chartAssets) chartAssets.destroy();
+  if (chartExp) chartExp.destroy();
+  if (chartCF) chartCF.destroy();
+
+  // MODIFICATION 6: milestone annotations on net worth chart
+  // Find years where net worth crosses 100万 multiples
+  const nwData = results.map(r => Math.round(r.netWorth / 10000));
+  const milestones = []; // { x label index, value in 万 }
+  const crossedMilestones = new Set();
+  results.forEach((r, i) => {
+    const valW = r.netWorth / 10000; // in 万
+    const prevValW = i === 0 ? initNW / 10000 : results[i-1].netWorth / 10000;
+    // check each 100万 multiple
+    for (let m = 100; m <= 5000; m += 100) {
+      if (!crossedMilestones.has(m) && prevValW < m && valW >= m) {
+        crossedMilestones.add(m);
+        milestones.push({ datasetIndex: 0, dataIndex: i, label: `第${r.yr}年 突破${m}万` });
+      }
+    }
+  });
+
+  const milestoneAnnotations = {};
+  milestones.forEach((ms, idx) => {
+    milestoneAnnotations['ms_' + idx] = {
+      type: 'label',
+      xValue: ms.dataIndex,
+      yValue: nwData[ms.dataIndex],
+      content: ms.label,
+      color: '#3fb950',
+      font: { size: 9, weight: 'bold' },
+      backgroundColor: 'rgba(13,17,23,0.85)',
+      borderColor: 'rgba(63,185,80,0.5)',
+      borderWidth: 1,
+      borderRadius: 4,
+      padding: { x: 5, y: 3 },
+      yAdjust: -18,
+      callout: { enabled: true, borderColor: 'rgba(63,185,80,0.5)' }
+    };
+  });
+
+  // Load Chart.js annotation plugin inline if available, else fallback to custom drawing
+  chartNW = new Chart(document.getElementById('chartNW'), {
+    type: 'line',
+    data: { labels, datasets: [{ label:'总净值', data: nwData, borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,.1)', fill:true, tension:.4, pointRadius: 2 }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            afterBody: function(items) {
+              const idx = items[0].dataIndex;
+              const ms = milestones.filter(m => m.dataIndex === idx);
+              return ms.map(m => '🎯 ' + m.label);
+            }
+          }
+        }
+      },
+      scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc,callback:v=>'$'+v+'万'}}},
+    },
+    plugins: [{
+      id: 'milestoneLabels',
+      afterDraw(chart) {
+        const ctx = chart.ctx;
+        milestones.forEach(ms => {
+          const meta = chart.getDatasetMeta(0);
+          if (!meta.data[ms.dataIndex]) return;
+          const pt = meta.data[ms.dataIndex];
+          const x = pt.x, y = pt.y;
+          ctx.save();
+          // bubble background
+          const text = ms.label;
+          ctx.font = 'bold 9px sans-serif';
+          const tw = ctx.measureText(text).width;
+          const bx = x - tw/2 - 5, by = y - 32, bw = tw + 10, bh = 16;
+          ctx.fillStyle = 'rgba(13,17,23,0.9)';
+          ctx.strokeStyle = 'rgba(63,185,80,0.7)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(bx, by, bw, bh, 4);
+          ctx.fill();
+          ctx.stroke();
+          // connector line
+          ctx.beginPath();
+          ctx.moveTo(x, by + bh);
+          ctx.lineTo(x, y);
+          ctx.strokeStyle = 'rgba(63,185,80,0.5)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 2]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          // text
+          ctx.fillStyle = '#3fb950';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(text, x, by + bh/2);
+          // dot
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI*2);
+          ctx.fillStyle = '#3fb950';
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+    }]
+  });
+
+  chartAssets = new Chart(document.getElementById('chartAssets'), {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label:'房产净值', data: results.map(r=>Math.round((r.homeVal-r.loanBal)/10000)), backgroundColor:'rgba(88,166,255,.75)' },
+      { label:'Offset余额', data: results.map(r=>Math.round(r.offsetBal/10000)), backgroundColor:'rgba(210,153,34,.75)' },
+      { label:'美股资产', data: results.map(r=>Math.round(r.stockBal/10000)), backgroundColor:'rgba(188,140,255,.75)' },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:tc,boxWidth:8}}}, scales:{x:{stacked:true,grid:{color:gc},ticks:{color:tc}},y:{stacked:true,grid:{color:gc},ticks:{color:tc,callback:v=>'$'+v+'万'}}} }
+  });
+
+  chartExp = new Chart(document.getElementById('chartExp'), {
+    type: 'line',
+    data: { labels, datasets: [{ label:'实际支出', data: results.map(r=>Math.round(r.totalAnnualExp/1000)), borderColor:'#f85149', backgroundColor:'rgba(248,81,73,.05)', fill:true, tension:.4 }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc,callback:v=>'$'+v+'K'}}} }
+  });
+
+  chartCF = new Chart(document.getElementById('chartCF'), {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label:'年税后到手收入', data: results.map(r=>Math.round(r.netIncome/1000)), backgroundColor:'rgba(63,185,80,.7)' },
+      { label:'年生活总开销(不含月供)', data: results.map(r=>Math.round((r.totalAnnualExp - p.mortgagePayment*12)/1000)), backgroundColor:'rgba(248,81,73,.6)' },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:tc,boxWidth:8}}}, scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc,callback:v=>'$'+v+'K'}}} }
+  });
+
+  // TABLE
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  results.forEach(r => {
+    let childIcons = '';
+    if (r.hasChild1) childIcons += '<span style="color:var(--accent);font-size:10px"> 👶</span>';
+    if (r.hasChild2) childIcons += '<span style="color:var(--amber);font-size:10px"> 🍼</span>';
+    if (r.yearEventNet !== 0) childIcons += `<span style="color:${r.yearEventNet>0?'var(--green)':'var(--red)'};font-size:10px"> ⚡</span>`;
+
+    const eventCell = r.yearEventNet !== 0
+      ? `<td class="${r.yearEventNet > 0 ? 'pos' : 'neg'}">${r.yearEventNet > 0 ? '+' : ''}${fmt(r.yearEventNet)}</td>`
+      : `<td class="muted">—</td>`;
+
+    tbody.innerHTML += `<tr>
+      <td>${2025 + r.yr}年（第${r.yr}年）${childIcons}</td>
+      <td>${fmt(r.homeVal)}</td>
+      <td>${r.loanBal > 0 ? fmt(r.loanBal) : '<span class="pos">✓ 已结清</span>'}</td>
+      <td>${fmt(r.offsetBal)}</td>
+      <td class="pos" style="font-weight:500">${fmt(r.offsetCashReturn)}</td>
+      <td>${fmt(r.stockBal)}</td>
+      <td>${fmt(r.monthlyFixed)}<span class="muted">/月</span></td>
+      <td>${fmt(r.parentsAnnual)}</td>
+      <td>${fmt(r.annualOneOff)}</td>
+      ${eventCell}
+      <td>${fmt(r.totalAnnualExp)}</td>
+      <td class="pos">${fmt(r.netIncome)}</td>
+      <td class="b" style="font-weight:600">${fmt(r.nonHomeFunds)}</td>
+      <td class="${r.nonHomeDelta >= 0 ? 'pos' : 'neg'}">${r.nonHomeDelta >= 0 ? '+' : ''}${fmt(r.nonHomeDelta)}</td>
+      <td style="font-weight:600">${fmt(r.netWorth)}</td>
+      <td class="${r.netWorthGrowth >= 0 ? 'pos' : 'neg'}">${r.netWorthGrowth >= 0 ? '+' : ''}${fmt(r.netWorthGrowth)}</td>
+    </tr>`;
+  });
+}
+
+window.addEventListener('load', () => setTimeout(runProjection, 80));
+</script>
+</body>
+</html>
