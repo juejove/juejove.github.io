@@ -104,6 +104,36 @@ tbody tr:hover td{background:rgba(88,166,255,.04)}
 
 #welcomeArea{text-align:center;padding:80px 40px;color:var(--text2)}
 
+/* Expandable income column */
+.inc-toggle-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  background: rgba(63,185,80,.08) !important;
+}
+.inc-toggle-th:hover { background: rgba(63,185,80,.18) !important; }
+.inc-toggle-th .arrow { display:inline-block; transition: transform .2s; margin-left:4px; font-size:9px; }
+.inc-toggle-th.open .arrow { transform: rotate(90deg); }
+.inc-sub-th {
+  background: rgba(63,185,80,.04) !important;
+  font-size:9.5px !important;
+  color: #3fb950 !important;
+  border-left: 2px solid rgba(63,185,80,.2);
+}
+.inc-sub-td {
+  background: rgba(63,185,80,.03);
+  border-left: 2px solid rgba(63,185,80,.15);
+  font-size:11px;
+  color: var(--green);
+}
+.inc-main-td {
+  background: rgba(63,185,80,.08);
+  font-weight: 600;
+  cursor: pointer;
+}
+.inc-main-td:hover { background: rgba(63,185,80,.15); }
+.inc-col-hidden { display: none; }
+
 /* Milestone annotation style */
 .milestone-bubble{
   background:rgba(63,185,80,.15);
@@ -146,7 +176,7 @@ tbody tr:hover td{background:rgba(88,166,255,.04)}
 
   <div class="stitle">👤 我的收入</div>
   <div class="prow"><div class="plabel">年薪 ($)</div><input class="pinput" id="myIncome" type="number" value="155000"></div>
-  <div class="prow"><div class="plabel">年薪增长率 (%)</div><input class="pinput" id="myIncomeGrowth" type="number" value="3" step="0.1"></div>
+  <div class="prow"><div class="plabel">年薪增长率 (%)</div><input class="pinput" id="myIncomeGrowth" type="number" value="2.5" step="0.1"></div>
 
   <div class="stitle">👩 配偶收入</div>
   <div class="prow"><div class="plabel">配偶年薪 ($)</div><input class="pinput" id="spouseIncome" type="number" value="20000"></div>
@@ -321,7 +351,13 @@ tbody tr:hover td{background:rgba(88,166,255,.04)}
               <th>年度一次性</th>
               <th>空降事件净额</th>
               <th>年总开销(含月供)</th>
-              <th>年税后净收入</th>
+              <th class="inc-toggle-th" id="incHeader" onclick="toggleIncome()" title="点击展开收入明细">
+                年税后总收入 <span class="arrow">▶</span>
+              </th>
+              <th class="inc-sub-th inc-col-hidden" id="th-my">我的税后<br><span style="font-size:8px;font-weight:400">悬停看明细</span></th>
+              <th class="inc-sub-th inc-col-hidden" id="th-snet">配偶税后<br><span style="font-size:8px;font-weight:400">悬停看明细</span></th>
+              <th class="inc-sub-th inc-col-hidden" id="th-stock">炒股税前<br><span style="font-size:8px;font-weight:400">悬停看分配</span></th>
+              <th class="inc-sub-th inc-col-hidden" id="th-pension">父母补贴(免税)</th>
               <th>非房资金</th>
               <th>非房增量</th>
               <th>总净值</th>
@@ -566,11 +602,67 @@ function runProjection() {
     const cpiMult = Math.pow(1 + p.cpi, yr - 1);
     const myIncome = p.myIncome * Math.pow(1 + p.myIncomeGrowth, yr - 1);
     const spouseIncome = p.spouseIncome * Math.pow(1 + p.spouseIncomeGrowth, yr - 1);
-    const myNetIncome = myIncome - calcIncomeTax(myIncome).total;
+    // myNetIncome computed after stock split (needs myIncome for split calc)
+    // See myNetIncomeFull below after stock allocation
 
+    // Stock gain (short-term trader, no 50% CGT discount)
     const stockGain = stockBal * p.stockReturn;
-    const cgtTax = calcCGT(stockGain, spouseIncome);
-    const spouseNet = spouseIncome - calcIncomeTax(spouseIncome).total - cgtTax;
+    const tp = getTaxParams();
+
+    // ── Tax-optimal stock gain split (greedy by marginal rate) ──
+    // Build bracket segments for each person, then fill cheapest segments first.
+    // Brackets: [0, tb0, tb1, tb2, tb3, ∞] with rates [0, tr1, tr2, tr3, tr4]
+    const bracketTops = [tp.tb0, tp.tb1, tp.tb2, tp.tb3, Infinity];
+    const bracketRates = [0, tp.tr1, tp.tr2, tp.tr3, tp.tr4];
+
+    // Generate available segments for a person given their salary
+    function getSegments(salary, personId) {
+      const segs = [];
+      for (let i = 0; i < bracketTops.length; i++) {
+        const low = i === 0 ? 0 : bracketTops[i-1];
+        const high = bracketTops[i];
+        if (salary < high) {
+          const available = high === Infinity ? Infinity : Math.max(0, high - Math.max(salary, low));
+          if (available > 0) segs.push({ rate: bracketRates[i], capacity: available, person: personId });
+        }
+      }
+      return segs;
+    }
+
+    const mySegs = getSegments(myIncome, 'me');
+    const spouseSegs = getSegments(spouseIncome, 'spouse');
+
+    // Merge and sort all segments by rate ascending (greedy: cheapest tax first)
+    const allSegs = [...mySegs, ...spouseSegs].sort((a, b) => a.rate - b.rate || (a.person === 'spouse' ? -1 : 1));
+
+    let remaining = stockGain;
+    let stockUnderMe = 0;
+    let stockUnderSpouse = 0;
+
+    for (const seg of allSegs) {
+      if (remaining <= 0) break;
+      const fill = seg.capacity === Infinity ? remaining : Math.min(remaining, seg.capacity);
+      if (seg.person === 'me') stockUnderMe += fill;
+      else stockUnderSpouse += fill;
+      remaining -= fill;
+    }
+
+    // Tax calculations — each person: salary + allocated stock → one tax call
+    const myTaxableTotal = myIncome + stockUnderMe;
+    const myCombinedTax = calcIncomeTax(myTaxableTotal).total;
+    const mySalaryTax = calcIncomeTax(myIncome).total;
+    const myStockTax = myCombinedTax - mySalaryTax;
+    const myNetIncomeFull = myIncome + stockUnderMe - myCombinedTax;  // wage+stock after tax
+
+    const spouseTaxableTotal = spouseIncome + stockUnderSpouse;
+    const spouseCombinedTax = calcIncomeTax(spouseTaxableTotal).total;
+    const spouseSalaryTax = calcIncomeTax(spouseIncome).total;
+    const spouseStockTax = spouseCombinedTax - spouseSalaryTax;
+    const spouseNet = spouseIncome + stockUnderSpouse - spouseCombinedTax; // wage+stock after tax
+
+    const totalStockTax = myStockTax + spouseStockTax;
+    const stockGainNet = stockGain - totalStockTax;
+    const stockTax = totalStockTax;  // alias for stockBal deduction
 
     const monthlyLiving = p.monthlyExpenses * cpiMult;
     const monthlyChild1 = (yr >= 2) ? p.childExpenses * cpiMult : 0;
@@ -620,13 +712,18 @@ function runProjection() {
         //   Income in - living expenses - net mortgage out
         //   (offset return is NOT added back separately; it's already embedded by not deducting it above)
         const monthlyLivingOut = (annualLiving + parentsAnnual + annualOneOff) / 12;
-        const monthlyEarned = (myNetIncome + spouseNet + annualParentsPension) / 12;
+        // Cashflow = salary-only after-tax (stock gains stay in stockBal, settled at year-end)
+        const myWageNet = myIncome - mySalaryTax;
+        const spouseWageNet = spouseIncome - spouseSalaryTax;
+        const monthlyEarned = (myWageNet + spouseWageNet + annualParentsPension) / 12;
         offsetBal += monthlyEarned - monthlyLivingOut - netMortgageOut;
 
       } else {
         // Loan paid off — no mortgage component
         const monthlyLivingOut = (annualLiving + parentsAnnual + annualOneOff) / 12;
-        const monthlyEarned = (myNetIncome + spouseNet + annualParentsPension) / 12;
+        const myWageNet = myIncome - mySalaryTax;
+        const spouseWageNet = spouseIncome - spouseSalaryTax;
+        const monthlyEarned = (myWageNet + spouseWageNet + annualParentsPension) / 12;
         offsetBal += (monthlyEarned - monthlyLivingOut);
       }
 
@@ -636,11 +733,17 @@ function runProjection() {
         offsetBal = loanBal;
         stockBal += surplus;
       }
-      if (offsetBal < 0) offsetBal = 0;
+      // Deficit: if offset went negative, draw from stocks to cover
+      if (offsetBal < 0) {
+        const drawdown = Math.min(stockBal, -offsetBal);
+        stockBal -= drawdown;
+        offsetBal += drawdown;
+        if (offsetBal < 0) offsetBal = 0;
+      }
     }
 
-    // Apply annual stock growth
-    stockBal += stockGain;
+    // Apply annual stock growth net of tax (settled year-end against stockBal)
+    stockBal += stockGain - stockTax;
 
     // Year-end events: income → offset first (overflow to stocks); expense → stocks first, then offset
     let yearEventNet = 0;
@@ -684,7 +787,20 @@ function runProjection() {
       offsetCashReturn: totalOffsetCashReturnThisYear,
       monthlyFixed: monthlyLiving + monthlyChild1 + monthlyChild2 + monthlyParentsVisit,
       parentsAnnual, annualParentsPension, annualOneOff, totalAnnualExp,
-      netIncome: myNetIncome + spouseNet + annualParentsPension,
+      // netIncome = (my wage+stock after-tax) + (spouse wage+stock after-tax) + pension
+      netIncome: myNetIncomeFull + spouseNet + annualParentsPension,
+      // income breakdown for expandable column
+      incMyNet: myNetIncomeFull,           // me: (wage + allocated stock) after-tax
+      incMyWage: myIncome,                 // me: gross wage (for tooltip)
+      incMyStock: stockUnderMe,            // me: allocated stock pre-tax (for tooltip)
+      incMyTax: myCombinedTax,             // me: total tax (for tooltip)
+      incSpouseNet: spouseNet,             // spouse: (wage + allocated stock) after-tax
+      incSpouseWage: spouseIncome,         // spouse: gross wage (for tooltip)
+      incSpouseStock: stockUnderSpouse,    // spouse: allocated stock pre-tax (for tooltip)
+      incSpouseTax: spouseCombinedTax,     // spouse: total tax (for tooltip)
+      incStockGross: stockGain,            // total stock pre-tax
+      incStockNet: stockGainNet,           // total stock after-tax
+      incPension: annualParentsPension,    // parents subsidy (tax-free)
       netWorth, netWorthGrowth,
       nonHomeFunds, nonHomeDelta,
       yearEventNet,
@@ -884,13 +1000,48 @@ function renderResults(results, p, initNW) {
       <td>${fmt(r.annualOneOff)}</td>
       ${eventCell}
       <td>${fmt(r.totalAnnualExp)}</td>
-      <td class="pos">${fmt(r.netIncome)}</td>
+      <td class="pos inc-main-td" onclick="toggleIncome()">${fmt(r.netIncome)}</td>
+      <td class="inc-sub-td inc-col-hidden" style="cursor:help"
+        title="【我的收入明细】&#10;税前工资: ${fmt(r.incMyWage)}&#10;分配炒股: ${fmt(r.incMyStock)}&#10;合计税前: ${fmt(r.incMyWage + r.incMyStock)}&#10;交税额: ${fmt(r.incMyTax)}&#10;────────&#10;税后到手: ${fmt(r.incMyNet)}"
+      >${fmt(r.incMyNet)}</td>
+      <td class="inc-sub-td inc-col-hidden" style="cursor:help"
+        title="【配偶收入明细】&#10;税前工资: ${fmt(r.incSpouseWage)}&#10;分配炒股: ${fmt(r.incSpouseStock)}&#10;合计税前: ${fmt(r.incSpouseWage + r.incSpouseStock)}&#10;交税额: ${fmt(r.incSpouseTax)}&#10;────────&#10;税后到手: ${fmt(r.incSpouseNet)}"
+      >${fmt(r.incSpouseNet)}</td>
+      <td class="inc-sub-td inc-col-hidden" style="cursor:help"
+        title="【炒股税前总收益】&#10;税前: ${fmt(r.incStockGross)}&#10;税后净: ${fmt(r.incStockNet)}&#10;────────&#10;分配给我: ${fmt(r.incMyStock)}&#10;分配给配偶: ${fmt(r.incSpouseStock)}"
+      >${fmt(r.incStockGross)}</td>
+      <td class="inc-sub-td inc-col-hidden" style="color:var(--purple)">${fmt(r.incPension)}</td>
       <td class="b" style="font-weight:600">${fmt(r.nonHomeFunds)}</td>
       <td class="${r.nonHomeDelta >= 0 ? 'pos' : 'neg'}">${r.nonHomeDelta >= 0 ? '+' : ''}${fmt(r.nonHomeDelta)}</td>
       <td style="font-weight:600">${fmt(r.netWorth)}</td>
       <td class="${r.netWorthGrowth >= 0 ? 'pos' : 'neg'}">${r.netWorthGrowth >= 0 ? '+' : ''}${fmt(r.netWorthGrowth)}</td>
     </tr>`;
   });
+  // Reset expand state after every recalc
+  initIncomeToggle();
+}
+
+// Income column expand/collapse
+let incomeExpanded = false;
+function toggleIncome() {
+  incomeExpanded = !incomeExpanded;
+  document.querySelectorAll('.inc-sub-th, .inc-sub-td').forEach(el => {
+    if (incomeExpanded) {
+      el.classList.remove('inc-col-hidden');
+    } else {
+      el.classList.add('inc-col-hidden');
+    }
+  });
+  const hdr = document.getElementById('incHeader');
+  if (hdr) hdr.classList.toggle('open', incomeExpanded);
+}
+function initIncomeToggle() {
+  document.querySelectorAll('.inc-sub-th, .inc-sub-td').forEach(el => {
+    el.classList.add('inc-col-hidden');
+  });
+  incomeExpanded = false;
+  const hdr = document.getElementById('incHeader');
+  if (hdr) hdr.classList.remove('open');
 }
 
 window.addEventListener('load', () => setTimeout(runProjection, 80));
