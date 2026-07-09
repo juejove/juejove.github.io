@@ -39,9 +39,10 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
 .card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .card-left{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0}
 .card-meta{flex:1;min-width:0}
-.wk-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.wk-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
 .wk-pill{font-size:10px;font-weight:500;color:#C73B6B;background:#FFF0F5;border:1px solid #FFB3CE;padding:2px 8px;border-radius:20px;flex-shrink:0}
 .dt-lbl{font-size:11px;color:#B08090;font-weight:300}
+.wkday-lbl{font-size:10px;color:#E84E82;font-weight:500;background:#FFE4EE;border-radius:20px;padding:2px 7px;flex-shrink:0}
 .card-ttl{font-size:15px;font-weight:500;color:#2D1B25;line-height:1.45;word-break:break-all}
 .card-note{font-size:12px;color:#7A4E5E;margin-top:4px;line-height:1.5;font-style:italic;font-weight:300}
 .card-note-empty{font-size:11px;color:#FFB3CE;margin-top:4px;font-style:italic}
@@ -113,7 +114,9 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
 .cal-dot.pending{background:#E84E82}
 .cal-week-band{background:#FFF0F5;border-radius:0 0 8px 8px;margin-top:1px;font-size:9px;color:#E84E82;text-align:center;padding:1px 0;line-height:1.2}
 .cal-event-sheet{border-top:1px solid rgba(232,78,130,0.12);padding:12px 14px;background:#fff;min-height:60px}
-.cal-ev-ttl{font-size:12px;font-weight:500;color:#C73B6B;margin-bottom:8px}
+.cal-ev-sheet-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-ev-ttl{font-size:12px;font-weight:500;color:#C73B6B}
+.cal-add-btn{display:flex;align-items:center;gap:4px;font-size:11px;color:#fff;background:#E84E82;border:none;border-radius:20px;padding:5px 11px;cursor:pointer;font-family:'Noto Sans SC',sans-serif}
 .cal-ev-list{display:flex;flex-direction:column;gap:6px}
 .cal-ev-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7A4E5E}
 .cal-ev-dot{width:7px;height:7px;border-radius:50%;background:#E84E82;flex-shrink:0;margin-top:3px}
@@ -324,7 +327,7 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-ttl">⚙ 设置与导出</div>
-    <div class="cfg-note">配置 GitHub 同步后，数据存储在仓库 JSON 文件中，跨设备同步。</div>
+    <div class="cfg-note">配置 GitHub 同步后，数据存储在仓库 JSON 文件中，跨设备同步。Token 仅保存在本设备浏览器中，不会写入本文件源码。</div>
     <div class="form-row"><label class="form-lbl">GitHub 用户名</label><input class="form-inp" id="cfg-owner" placeholder="username"></div>
     <div class="form-row"><label class="form-lbl">仓库名</label><input class="form-inp" id="cfg-repo" placeholder="my-pregnancy-data"></div>
     <div class="form-row"><label class="form-lbl">文件路径</label><input class="form-inp" id="cfg-path" value="pregnancy.json"></div>
@@ -350,9 +353,12 @@ body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:linear-gradi
 const LMP = new Date('2026-04-30T00:00:00');
 const DUE = new Date('2027-02-04T00:00:00');
 const TOTAL_WKS = 40;
+const WEEKDAY_CN = ['周日','周一','周二','周三','周四','周五','周六'];
 
 let events = [];
-let ghCfg = {owner:'juejove', repo:'dataStorage', path:'pregnancy.json', token:'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'};
+// NOTE: no token is hardcoded here. Configure GitHub sync via the ⚙ settings sheet;
+// the token you enter is stored only in this browser's localStorage, never in this file.
+let ghCfg = {owner:'juejove', repo:'dataStorage', path:'pregnancy.json', token:'github_pat_'};
 let histOpen = false;
 let calYear, calMonth, calSelectedDate = null;
 let swipeStartX = 0;
@@ -407,20 +413,39 @@ function fmtMY(s) {
   const d = new Date(s + 'T00:00:00');
   return `${d.getFullYear()}年${d.getMonth()+1}月`;
 }
+function weekdayCN(s) {
+  const d = new Date(s + 'T00:00:00');
+  return WEEKDAY_CN[d.getDay()];
+}
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ─── Event classification ────────────────────────────────────────────────────
-// "Past" = date strictly before today AND not manually marked done
-// These are auto-archived into history.
-// "Active" = date >= today OR manually marked done (done ones show in main list with strikethrough)
-// Wait — rethink: done events that are in the future should remain in main list (strikethrough).
-// done events that are in the past → history.
-// undone events that are in the past → history (auto-archived).
-// undone/done events today or future → main list.
-function isPast(ev) { return ev.date < today(); }
-function isArchived(ev) { return isPast(ev); } // all past events go to history regardless of done state
+// "Past" = the event's *entire relevant span* has ended AND not manually marked done.
+// - For an exact-date event: past once that specific date is before today.
+// - For a week-based event (created via week number, not a specific date): past only
+//   once the WHOLE week has elapsed — i.e. archiving happens the day after the week's
+//   last day, not the moment the week's first day passes. This avoids archiving an
+//   event the instant you enter its week.
+// These auto-archived items are "Past" regardless of done state.
+// "Active" = date/week not yet fully elapsed OR manually marked done (done ones show
+// in main list with strikethrough until their time span fully elapses).
+function isWeekBased(ev) { return ev.date === wkToDate(ev.week); }
+
+function weekEndDate(ev) {
+  const d = new Date(ev.date + 'T00:00:00');
+  d.setDate(d.getDate() + 6);
+  return d.toISOString().slice(0, 10);
+}
+
+function isPast(ev) {
+  if (isWeekBased(ev)) {
+    return weekEndDate(ev) < today();
+  }
+  return ev.date < today();
+}
+function isArchived(ev) { return isPast(ev); } // all fully-elapsed events go to history regardless of done state
 
 // Strict chronological sort: by date asc, then by id asc
 function sorted() {
@@ -430,8 +455,6 @@ function sorted() {
     return a.id - b.id;
   });
 }
-
-function isWeekBased(ev) { return ev.date === wkToDate(ev.week); }
 
 function displayTime(ev) {
   if (isWeekBased(ev)) {
@@ -451,7 +474,7 @@ function switchTab(tab, btn) {
   btn.classList.add('active');
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(tab + '-view').classList.add('active');
-  document.getElementById('fab').classList.toggle('hidden', tab !== 'list');
+  document.getElementById('fab').classList.toggle('hidden', tab === 'conv');
   if (tab === 'cal') renderCal();
 }
 
@@ -471,7 +494,7 @@ function render() {
   const all = sorted();
   const t = today();
 
-  // Split: active (today/future) vs archived (past)
+  // Split: active (not fully elapsed) vs archived (fully elapsed)
   const active = all.filter(ev => !isArchived(ev));
 
   // Update history count badge
@@ -492,9 +515,11 @@ function render() {
       ? `<div class="card-note">${esc(ev.note)}</div>`
       : `<div class="card-note-empty">备注待填写…</div>`;
     const wkLabel = isWeekBased(ev) ? `孕${ev.week}周区间` : `孕${ev.week}周`;
+    // Only show a single weekday badge for exact-date events (a week range spans all 7 weekdays)
+    const wkdayHtml = isWeekBased(ev) ? '' : `<span class="wkday-lbl">${weekdayCN(ev.date)}</span>`;
 
     html += `
-<div class="ev-card${ev.done?' done':''}${isFocus?' focus-card':''}" data-id="${ev.id}"${isFocus?` id="fc${ev.id}"`:''}> 
+<div class="ev-card${ev.done?' done':''}${isFocus?' focus-card':''}" data-id="${ev.id}" data-edit-source="none"${isFocus?` id="fc${ev.id}"`:''}> 
   <div class="done-strip"></div>
   <div class="card-inner">
     <div class="card-hdr">
@@ -506,6 +531,7 @@ function render() {
           <div class="wk-row">
             <span class="wk-pill">${wkLabel}</span>
             <span class="dt-lbl">${displayTime(ev)}</span>
+            ${wkdayHtml}
           </div>
           <div class="card-ttl">${esc(ev.title)}</div>
           ${noteHtml}
@@ -524,15 +550,15 @@ function render() {
   <div id="ef${ev.id}" style="display:none">
     <div class="edit-form">
       <div class="form-row">
-        <label class="form-lbl">时间</label>
+        <label class="form-lbl">时间（只改其中一项即可，另一项留空表示不变）</label>
         <div class="time-row">
           <div class="week-input-wrap">
-            <input class="form-inp" type="number" id="ew${ev.id}" value="${ev.week}" min="1" max="42" placeholder="孕周">
-            <span class="form-hint">孕周（存为区间）</span>
+            <input class="form-inp" type="number" id="ew${ev.id}" value="${ev.week}" min="1" max="45" placeholder="孕周">
+            <span class="form-hint">孕周（存为周区间）</span>
           </div>
           <div class="time-or">或</div>
           <div class="date-input-wrap">
-            <input class="form-inp" type="date" id="ed${ev.id}" style="padding-right:36px">
+            <input class="form-inp" type="date" id="ed${ev.id}" value="${isWeekBased(ev) ? '' : ev.date}" style="padding-right:36px">
             <button class="date-cal-btn" onclick="document.getElementById('ed${ev.id}').showPicker()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -559,13 +585,15 @@ function render() {
   if (!html) html = '<div style="text-align:center;padding:48px;color:#B08090;font-size:13px">🌸<br>暂无待办事件</div>';
   document.getElementById('scroll-area').innerHTML = html;
 
-  // Wire up edit form mutual-exclusion inputs
+  // Wire up edit form mutual-exclusion inputs + track which field the user actually touched,
+  // so saving without touching either field never silently overwrites the other.
   active.forEach(ev => {
     const ew = document.getElementById(`ew${ev.id}`);
     const ed = document.getElementById(`ed${ev.id}`);
-    if (ew && ed) {
-      ew.addEventListener('input', () => { if (ew.value) ed.value = ''; });
-      ed.addEventListener('input', () => { if (ed.value) ew.value = ''; });
+    const card = document.querySelector(`.ev-card[data-id="${ev.id}"]`);
+    if (ew && ed && card) {
+      ew.addEventListener('input', () => { if (ew.value) { ed.value = ''; card.dataset.editSource = 'week'; } });
+      ed.addEventListener('input', () => { if (ed.value) { ew.value = ''; card.dataset.editSource = 'date'; } });
     }
   });
 
@@ -618,7 +646,8 @@ function openEdit(id) {
   const f = document.getElementById(`ef${id}`);
   if (!f) return;
   f.style.display = 'block';
-  document.getElementById(`ed${id}`).value = '';
+  const card = document.querySelector(`.ev-card[data-id="${id}"]`);
+  if (card) card.dataset.editSource = 'none';
   f.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
@@ -633,12 +662,25 @@ function saveEdit(id) {
   const ttl = document.getElementById(`et${id}`).value.trim();
   const note = document.getElementById(`en${id}`).value.trim();
   if (!ttl) { alert('内容不能为空'); return; }
-  let week, date;
-  if (dtEl.value) { week = dateToWk(dtEl.value); date = dtEl.value; }
-  else if (wkEl.value) { week = parseInt(wkEl.value); date = wkToDate(week); }
-  else { alert('请输入孕周或选择日期'); return; }
   const ev = events.find(e => e.id === id);
   if (!ev) return;
+
+  const card = document.querySelector(`.ev-card[data-id="${id}"]`);
+  const src = card ? card.dataset.editSource : 'none';
+
+  let week = ev.week, date = ev.date; // default: keep original time unless the user actually changed it
+  if (src === 'date' && dtEl.value) {
+    date = dtEl.value;
+    week = dateToWk(date);
+  } else if (src === 'week' && wkEl.value) {
+    const w = parseInt(wkEl.value);
+    if (isNaN(w) || w < 1 || w > 45) { alert('请输入1–45之间的孕周数'); return; }
+    week = w;
+    date = wkToDate(w);
+  }
+  // src === 'none' (user didn't touch either time field) → week/date stay unchanged,
+  // so editing just the title/note can never corrupt the stored date.
+
   ev.week = week; ev.date = date; ev.title = ttl; ev.note = note;
   render();
   saveGH();
@@ -671,10 +713,11 @@ function parseTime(p) {
   if (dv) return {week: dateToWk(dv), date: dv};
   alert('请输入孕周数或选择日期'); return null;
 }
-function openAdd() {
+function openAdd(prefillDate) {
   ['add-wk','add-dt','add-ttl','add-note'].forEach(id => document.getElementById(id).value = '');
+  if (prefillDate) document.getElementById('add-dt').value = prefillDate;
   document.getElementById('add-bg').classList.add('vis');
-  setTimeout(() => document.getElementById('add-wk').focus(), 420);
+  setTimeout(() => document.getElementById(prefillDate ? 'add-ttl' : 'add-wk').focus(), 420);
 }
 function closeAdd() { document.getElementById('add-bg').classList.remove('vis'); }
 function saveNew() {
@@ -684,7 +727,7 @@ function saveNew() {
   if (!ttl) { alert('请输入事件内容'); return; }
   const newId = events.length ? Math.max(...events.map(e => e.id)) + 1 : 1;
   events.push({id: newId, week: t.week, date: t.date, title: ttl, note, done: false});
-  closeAdd(); render(); saveGH();
+  closeAdd(); render(); renderCal(); saveGH();
 }
 function bgClick(e, id) {
   if (e.target === document.getElementById(id)) {
@@ -723,6 +766,7 @@ function renderCal() {
   }
   document.getElementById('cal-grid').innerHTML = html;
   if (calSelectedDate) renderCalEvents(calSelectedDate);
+  else document.getElementById('cal-event-sheet').innerHTML = '<div class="cal-empty">点击日期查看事件</div>';
 }
 
 function calDayHTML(ds, dn, other, evMap, t) {
@@ -755,9 +799,15 @@ function renderCalEvents(ds) {
   const evs = events.filter(e => e.date === ds);
   const {wk, day} = dateToWkDay(ds);
   const d = new Date(ds + 'T00:00:00');
-  const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
+  const dateStr = `${d.getMonth()+1}月${d.getDate()}日 ${weekdayCN(ds)}`;
   const wkStr = wk >= 1 && wk <= 42 ? ` · 孕${wk}周${day > 0 ? ' +'+day+'天' : ''}` : '';
-  let html = `<div class="cal-ev-ttl">${dateStr}${wkStr}</div>`;
+  let html = `<div class="cal-ev-sheet-hdr">
+    <div class="cal-ev-ttl">${dateStr}${wkStr}</div>
+    <button class="cal-add-btn" onclick="openAdd('${ds}')">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      添加
+    </button>
+  </div>`;
   html += evs.length
     ? '<div class="cal-ev-list">' + evs.map(ev =>
         `<div class="cal-ev-item">
