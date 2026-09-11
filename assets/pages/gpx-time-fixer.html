@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GPX Timestamp Fixer (for Strava)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --accent: #fc5200; /* Strava orange */
+    --text: #e8e8e8;
+    --muted: #9aa0a6;
+    --border: #2a2e37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  h1 span { color: var(--accent); }
+  p.sub {
+    color: var(--muted);
+    margin: 0 0 28px;
+    font-size: 14px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 18px 0 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  input[type="file"],
+  input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0d0f13;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  input[type="file"] { padding: 8px; }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  button {
+    margin-top: 26px;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button:not(:disabled):hover { opacity: 0.9; }
+  #status {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 18px;
+    white-space: pre-line;
+  }
+  #status.error { color: #ff6b6b; }
+  #status.ok { color: #4ade80; }
+  a.download {
+    display: none;
+    margin-top: 16px;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  a.download:hover { background: rgba(252,82,0,0.08); }
+  .meta {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>GPX <span>Timestamp</span> Fixer</h1>
+    <p class="sub">Upload a GPX track with no (or zero) elevations/timestamps, set a start and end time, and get back a GPX with evenly spaced timestamps on every point — the format Strava expects for a timed activity.</p>
+
+    <label for="file">GPX file</label>
+    <input type="file" id="file" accept=".gpx,application/gpx+xml,text/xml,application/xml">
+
+    <div class="row">
+      <div>
+        <label for="start">Start time</label>
+        <input type="datetime-local" id="start" step="1">
+      </div>
+      <div>
+        <label for="end">End time</label>
+        <input type="datetime-local" id="end" step="1">
+      </div>
+    </div>
+
+    <div class="meta" id="meta"></div>
+
+    <button id="go" disabled>Generate timestamped GPX</button>
+    <div id="status"></div>
+    <a class="download" id="downloadLink">Download fixed GPX</a>
+  </div>
+
+<script>
+(function () {
+  const fileInput = document.getElementById('file');
+  const startInput = document.getElementById('start');
+  const endInput = document.getElementById('end');
+  const goBtn = document.getElementById('go');
+  const statusEl = document.getElementById('status');
+  const metaEl = document.getElementById('meta');
+  const downloadLink = document.getElementById('downloadLink');
+
+  let rawText = null;
+  let parsedDoc = null;
+  let trkpts = [];
+  let originalFileName = 'track.gpx';
+
+  function setStatus(msg, cls) {
+    statusEl.textContent = msg || '';
+    statusEl.className = cls || '';
+  }
+
+  function resetOutput() {
+    downloadLink.style.display = 'none';
+    if (downloadLink.href) {
+      URL.revokeObjectURL(downloadLink.href);
+      downloadLink.removeAttribute('href');
+    }
+  }
+
+  function updateGoState() {
+    goBtn.disabled = !(trkpts.length > 0 && startInput.value && endInput.value);
+  }
+
+  fileInput.addEventListener('change', function () {
+    resetOutput();
+    setStatus('');
+    metaEl.style.display = 'none';
+    trkpts = [];
+    const file = fileInput.files[0];
+    if (!file) { updateGoState(); return; }
+    originalFileName = file.name.replace(/\.gpx$/i, '') + '-timed.gpx';
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      rawText = e.target.result;
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawText, 'application/xml');
+        const errorNode = doc.querySelector('parsererror');
+        if (errorNode) {
+          throw new Error('The file is not valid XML.');
+        }
+        parsedDoc = doc;
+        // Order matters: collect trkpts in document order across all trk/trkseg
+        trkpts = Array.from(doc.getElementsByTagName('trkpt'));
+        if (trkpts.length === 0) {
+          throw new Error('No <trkpt> elements found in this file.');
+        }
+        metaEl.style.display = 'block';
+        metaEl.textContent = `Loaded "${file.name}" — ${trkpts.length} track points found.`;
+        setStatus('');
+      } catch (err) {
+        parsedDoc = null;
+        trkpts = [];
+        setStatus('Could not read this GPX file: ' + err.message, 'error');
+      }
+      updateGoState();
+    };
+    reader.onerror = function () {
+      setStatus('Failed to read the file from disk.', 'error');
+    };
+    reader.readAsText(file);
+  });
+
+  startInput.addEventListener('change', updateGoState);
+  endInput.addEventListener('change', updateGoState);
+
+  goBtn.addEventListener('click', function () {
+    resetOutput();
+    setStatus('');
+
+    if (!parsedDoc || trkpts.length === 0) {
+      setStatus('Load a valid GPX file first.', 'error');
+      return;
+    }
+
+    const startVal = startInput.value;
+    const endVal = endInput.value;
+    if (!startVal || !endVal) {
+      setStatus('Pick both a start and end time.', 'error');
+      return;
+    }
+
+    const startDate = new Date(startVal);
+    const endDate = new Date(endVal);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      setStatus('One of the dates is invalid.', 'error');
+      return;
+    }
+    if (endDate <= startDate) {
+      setStatus('End time must be after start time.', 'error');
+      return;
+    }
+
+    const n = trkpts.length;
+    const totalMs = endDate.getTime() - startDate.getTime();
+    const stepMs = n > 1 ? totalMs / (n - 1) : 0;
+
+    // Namespace used by the document (GPX default namespace)
+    const gpxNS = parsedDoc.documentElement.namespaceURI || 'http://www.topografix.com/GPX/1/1';
+
+    trkpts.forEach(function (trkpt, i) {
+      // Remove any existing <time> child to avoid duplicates
+      const existingTimes = Array.from(trkpt.getElementsByTagName('time'));
+      existingTimes.forEach(function (t) { t.parentNode.removeChild(t); });
+
+      const ts = new Date(startDate.getTime() + stepMs * i);
+      const isoString = ts.toISOString().replace(/\.\d{3}Z$/, 'Z'); // strip milliseconds
+
+      const timeEl = parsedDoc.createElementNS(gpxNS, 'time');
+      timeEl.textContent = isoString;
+
+      // GPX schema order inside trkpt: ele, time, ... so insert after <ele> if present, else as first child
+      const eleEl = trkpt.getElementsByTagName('ele')[0];
+      if (eleEl && eleEl.nextSibling) {
+        trkpt.insertBefore(timeEl, eleEl.nextSibling);
+      } else if (eleEl) {
+        trkpt.appendChild(timeEl);
+      } else {
+        trkpt.insertBefore(timeEl, trkpt.firstChild);
+      }
+    });
+
+    const serializer = new XMLSerializer();
+    let outString = serializer.serializeToString(parsedDoc);
+
+    if (!outString.startsWith('<?xml')) {
+      outString = '<?xml version="1.0" encoding="UTF-8"?>\n' + outString;
+    }
+
+    const blob = new Blob([outString], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    downloadLink.href = url;
+    downloadLink.download = originalFileName;
+    downloadLink.style.display = 'block';
+    downloadLink.textContent = 'Download ' + originalFileName;
+
+    const durationMin = (totalMs / 60000).toFixed(1);
+    setStatus(`Done — ${n} points timestamped over ${durationMin} minutes (${(stepMs/1000).toFixed(2)}s between points).`, 'ok');
+  });
+})();
+</script>
+</body>
+</html>
