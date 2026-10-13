@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUD Trade Ledger</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#f6f4ef;
+    --paper-raised:#fffdf9;
+    --ink:#1e2a25;
+    --ink-soft:#5a6b63;
+    --line:#d8d2c2;
+    --ledger:#245e52;
+    --ledger-dim:#e4ede9;
+    --gain:#3d7a52;
+    --loss:#a0442f;
+    --gold:#a9822f;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+  @font-face{ font-family:"Source Serif 4"; src:local("Georgia"); }
+
+  header.top{
+    padding:36px 28px 22px;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-raised);
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px;}
+  header.top .wrap{padding:0;max-width:1600px;}
+  h1{
+    font-size:28px;
+    margin:0 0 4px;
+    letter-spacing:0.2px;
+    font-weight:600;
+  }
+  h1 .rule{
+    display:inline-block;width:36px;height:2px;background:var(--ledger);
+    vertical-align:middle;margin-right:10px;transform:translateY(-4px);
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    max-width:60ch;
+  }
+
+  main{max-width:1600px;margin:0 auto;padding:28px 24px 0;}
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:26px;
+    margin-bottom:22px;
+  }
+
+  .dropzone{
+    border:1.5px dashed var(--line);
+    border-radius:4px;
+    padding:34px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--ledger);
+    background:var(--ledger-dim);
+  }
+  .dropzone input{display:none;}
+  .dropzone .dz-title{font-size:16px;font-weight:600;margin-bottom:6px;}
+  .dropzone .dz-sub{color:var(--ink-soft);font-size:13.5px;}
+
+  .filerow{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;
+    font-size:14px;
+  }
+  .filerow .fname{font-weight:600;}
+  .filerow .fmeta{color:var(--ink-soft);font-size:13px;}
+  button{
+    font-family:var(--serif);
+    font-size:14px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper-raised);
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  button.ghost{
+    background:transparent;color:var(--ink);border:1px solid var(--line);
+  }
+  button.ghost:hover{border-color:var(--ink);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  button.small{padding:6px 12px;font-size:13px;}
+
+  .status{
+    display:none;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .status.show{display:block;}
+  .status b{color:var(--ink);}
+  .status .warn{color:var(--loss);}
+
+  .file-controls{display:flex;align-items:center;gap:10px;}
+  .file-toggle{display:inline-flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;user-select:none;}
+  .file-toggle input{accent-color:var(--ledger);width:15px;height:15px;}
+  #fileList .frow.disabled{opacity:.48;}
+  #fileList .fstatus{display:flex;align-items:center;gap:12px;}
+  #fileList{margin-top:14px;font-size:13px;}
+  #fileList .frow{
+    display:flex;justify-content:space-between;gap:10px;
+    padding:6px 0;border-bottom:1px solid var(--line);
+  }
+  #fileList .frow:last-child{border-bottom:none;}
+  #fileList .fname{font-weight:600;}
+  #fileList .fstatus{color:var(--ink-soft);}
+  #fileList .fstatus.err{color:var(--loss);}
+
+  .tabs{
+    display:flex;gap:2px;margin-bottom:0;
+    border-bottom:1px solid var(--line);
+  }
+  .tabs button{
+    background:transparent;color:var(--ink-soft);border:none;
+    border-bottom:2px solid transparent;
+    border-radius:0;
+    padding:10px 4px;margin-right:22px;
+    font-size:14.5px;
+  }
+  .tabs button.active{color:var(--ledger);border-bottom-color:var(--ledger);font-weight:600;}
+  .tabs button:hover{color:var(--ink);}
+
+  .view{display:none;padding-top:18px;}
+  .view.active{display:block;}
+
+  .subtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .subtabs button{
+    background:transparent;color:var(--ink-soft);
+    border:1px solid var(--line);
+    padding:7px 14px;font-size:13px;border-radius:16px;
+  }
+  .subtabs button.active{
+    background:var(--ledger);color:#fff;border-color:var(--ledger);
+  }
+
+  table{
+    width:100%;border-collapse:collapse;font-size:13.5px;
+  }
+  thead th{
+    text-align:right;
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:1px solid var(--ink);
+    white-space:nowrap;
+  }
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{
+    padding:7px 10px;
+    text-align:right;
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:12.8px;
+    white-space:nowrap;
+  }
+  tbody tr:hover{background:var(--ledger-dim);}
+  tbody td:first-child{font-family:var(--serif);font-size:13.5px;text-align:left;}
+  .neg{color:var(--loss);}
+  .pos{color:var(--gain);}
+  tfoot td{
+    padding:9px 10px;
+    font-family:var(--mono);
+    font-weight:600;
+    border-top:2px solid var(--ink);
+    text-align:right;
+  }
+  tfoot td:first-child{font-family:var(--serif);text-align:left;}
+
+  .table-scroll{overflow-x:auto;overflow-y:visible;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+  .table-scroll table{min-width:0;}
+
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;flex-wrap:wrap;gap:10px;
+  }
+  .toolbar .hint{font-size:13px;color:var(--ink-soft);}
+  .summary-scroll{overflow:auto;max-height:68vh;overscroll-behavior:contain;}
+  .summary-scroll table{table-layout:fixed;width:100%;font-size:12.5px;border-collapse:separate;border-spacing:0;}
+  .summary-scroll th,.summary-scroll td{white-space:normal;word-break:break-word;padding:6px 6px;}
+  .summary-scroll thead th{position:sticky;top:0;z-index:10;background:var(--paper-raised);box-shadow:0 1px 0 var(--ink);}
+  .summary-scroll th:nth-child(1){width:16%;}
+  .summary-scroll th:nth-child(2),.summary-scroll th:nth-child(3){width:6%;}
+  .summary-scroll th:nth-child(4){width:11%;}
+  .summary-scroll th:nth-child(5),.summary-scroll th:nth-child(6){width:10%;}
+  .summary-scroll th:nth-child(7),.summary-scroll th:nth-child(8){width:9%;}
+  .summary-scroll th:nth-child(9){width:11%;}
+  .summary-scroll th:nth-child(10){width:6%;}
+  .sort-button{
+    display:flex;align-items:center;justify-content:flex-end;gap:5px;width:100%;
+    padding:0;border:0;background:transparent;color:inherit;font:inherit;
+    cursor:pointer;text-align:right;
+  }
+  .sort-button:hover{color:var(--ledger);}
+  .sort-indicator{font-family:var(--mono);font-size:11px;min-width:12px;color:var(--ledger);}
+  .summary-total-label{font-weight:600;}
+  .type-filter{
+    display:flex;align-items:center;flex-wrap:wrap;gap:16px;
+    padding:10px 0 14px;border-bottom:1px solid var(--line);margin-bottom:14px;
+  }
+  .type-filter-label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .type-filter-note{font-size:12px;flex-basis:100%;}
+  .summary-scroll th:first-child,.summary-scroll td:first-child{width:16%;}
+  .summary-scroll th{font-size:11.5px;}
+  .summary-scroll td{font-size:11.8px;}
+
+  .empty{
+    text-align:center;color:var(--ink-soft);
+    padding:40px 10px;font-size:14px;
+  }
+
+  footer{
+    max-width:1600px;margin:30px auto 0;padding:16px 24px;
+    color:var(--ink-soft);font-size:12px;border-top:1px solid var(--line);
+  }
+
+  @media (max-width: 900px){
+    .summary-scroll{max-height:62vh;}
+    .summary-scroll table{table-layout:auto;min-width:900px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1><span class="rule"></span>AUD Trade Ledger</h1>
+    <div class="sub">Upload a brokerage trade export. Realized gains are calculated in AUD only when a position closes: the opening lot is valued at its opening-date AUD/USD rate and the closing cash flow at its closing-date rate. Unrealized positions contribute no gain.</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="panel" id="uploadPanel">
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm,.csv" multiple>
+      <div class="dz-title">Drop one or more statements here, or click to choose files</div>
+      <div class="dz-sub">.xlsx / .xls / .xlsm / .csv — IBKR Trades exports, eToro account statements, or Moomoo statements. Upload several at once (e.g. different brokers, or several periods) and they'll be combined into one ledger.</div>
+    </div>
+    <div class="status" id="status"></div>
+    <div id="fileList" style="display:none;"></div>
+  </div>
+
+  <div id="resultsPanel" style="display:none;">
+
+    <div class="panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="transactions">Transactions</button>
+        <button class="tab-btn" data-tab="summary">Summary</button>
+        <button class="tab-btn" data-tab="dividends">Dividends</button>
+      </div>
+
+      <div class="view active" id="view-transactions">
+        <div class="toolbar">
+          <span class="hint" id="txCount"></span>
+          <button class="ghost small" id="exportTxCsv">Export transactions CSV</button>
+        </div>
+        <div class="table-scroll">
+          <table id="txTable">
+            <thead>
+              <tr>
+                <th>Symbol</th><th>Asset</th><th>Date</th><th>Type</th><th>Code</th><th>Qty</th>
+                <th>Price (USD)</th><th>AUD/USD</th>
+                <th>Proceeds (AUD)</th><th>Commission (AUD)</th>
+                <th>Basis Matched (AUD)</th><th>Realized P/L (AUD)</th><th>Source</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-summary">
+        <div class="subtabs">
+          <button class="sub-btn active" data-sub="stock">By Stock</button>
+          <button class="sub-btn" data-sub="month">By Month</button>
+          <button class="sub-btn" data-sub="q3">Last 3 Months</button>
+          <button class="sub-btn" data-sub="all">All Time</button>
+        </div>
+        <div class="type-filter" id="typeFilter">
+          <span class="type-filter-label">Include:</span>
+          <label class="file-toggle"><input type="checkbox" data-type="option" checked> Options</label>
+          <label class="file-toggle"><input type="checkbox" data-type="etf" checked> ETFs</label>
+          <label class="file-toggle"><input type="checkbox" data-type="stock" checked> Stocks</label>
+          <span class="hint type-filter-note">ETF detection is best-effort (brokers rarely flag it); check the Asset/Symbol columns in Transactions if something looks miscategorised.</span>
+        </div>
+        <div class="toolbar">
+          <span class="hint" id="summaryHint"></span>
+          <button class="ghost small" id="exportSummaryCsv">Export this summary CSV</button>
+        </div>
+        <div class="table-scroll summary-scroll" id="summaryTableWrap"></div>
+      </div>
+
+      <div class="view" id="view-dividends">
+        <div class="toolbar">
+          <span class="hint">Dividend income is kept separate from capital gains — it's assessable income, not a capital gain, and each payment is converted at its own payment-date rate.</span>
+          <button class="ghost small" id="exportDividendsCsv">Export dividends CSV</button>
+        </div>
+        <div class="table-scroll" id="dividendsTableWrap"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+
+<footer>
+  Exchange rates are a fixed reference table baked into this page (daily AUD/USD, Jul 2025 – Jul 2026); AUD = USD amount ÷ rate for that date, using the most recent available rate on or before the trade date.
+  <br><br>
+  Realized P/L is <em>not</em> the broker's USD P/L simply re-priced at one rate. Each closing trade is FIFO-matched against the specific lot(s) it opened — a purchase for a long position, or the original short sale for a short position. Each leg is converted at its own transaction date's rate, then netted in AUD. This correctly handles both directions: for a long position, "Basis Matched" is the cost paid (a debit); for a short position it's the credit received when the position was opened (shown as a negative figure, not a cost) and is subtracted the same way in the formula. This captures FX movement between the two dates — a trade flat or negative in USD can still show an AUD gain or loss, and vice versa, purely from the exchange rate moving between them.
+</footer>
+
+<script>
+/* ---------------- Hardcoded AUD/USD daily rate table ---------------- */
+/* rate = value of 1 AUD in USD. AUD amount = USD amount / rate. */
+const RATES_RAW = [["2025-07-25", 0.6567], ["2025-07-28", 0.6523], ["2025-07-29", 0.6513], ["2025-07-30", 0.6441], ["2025-07-31", 0.6423], ["2025-08-01", 0.6435], ["2025-08-05", 0.6459], ["2025-08-06", 0.6487], ["2025-08-07", 0.6517], ["2025-08-08", 0.6519], ["2025-08-11", 0.6526], ["2025-08-12", 0.6498], ["2025-08-13", 0.6532], ["2025-08-14", 0.6549], ["2025-08-15", 0.6505], ["2025-08-18", 0.652], ["2025-08-19", 0.6479], ["2025-08-20", 0.645], ["2025-08-21", 0.6426], ["2025-08-22", 0.6417], ["2025-08-25", 0.6494], ["2025-08-26", 0.6482], ["2025-08-27", 0.6487], ["2025-08-28", 0.651], ["2025-08-29", 0.6538], ["2025-09-01", 0.6544], ["2025-09-02", 0.6538], ["2025-09-03", 0.6514], ["2025-09-04", 0.6525], ["2025-09-05", 0.6537], ["2025-09-08", 0.6566], ["2025-09-09", 0.6614], ["2025-09-10", 0.661], ["2025-09-11", 0.6604], ["2025-09-12", 0.6658], ["2025-09-15", 0.6661], ["2025-09-16", 0.6667], ["2025-09-17", 0.6678], ["2025-09-18", 0.6624], ["2025-09-19", 0.6596], ["2025-09-22", 0.6593], ["2025-09-23", 0.6589], ["2025-09-24", 0.6625], ["2025-09-25", 0.6595], ["2025-09-26", 0.654], ["2025-09-29", 0.6571], ["2025-09-30", 0.6602], ["2025-10-01", 0.6601], ["2025-10-02", 0.6619], ["2025-10-03", 0.6591], ["2025-10-07", 0.6612], ["2025-10-08", 0.6564], ["2025-10-09", 0.6608], ["2025-10-10", 0.6568], ["2025-10-13", 0.6524], ["2025-10-14", 0.648], ["2025-10-15", 0.6516], ["2025-10-16", 0.6492], ["2025-10-17", 0.6475], ["2025-10-20", 0.6503], ["2025-10-21", 0.6504], ["2025-10-22", 0.6501], ["2025-10-23", 0.6486], ["2025-10-24", 0.6502], ["2025-10-27", 0.6533], ["2025-10-28", 0.6564], ["2025-10-29", 0.6596], ["2025-10-30", 0.6595], ["2025-10-31", 0.6551], ["2025-11-03", 0.6554], ["2025-11-04", 0.6532], ["2025-11-05", 0.6492], ["2025-11-06", 0.6514], ["2025-11-07", 0.6476], ["2025-11-10", 0.6525], ["2025-11-11", 0.6524], ["2025-11-12", 0.6521], ["2025-11-13", 0.6557], ["2025-11-14", 0.6533], ["2025-11-17", 0.6523], ["2025-11-18", 0.6481], ["2025-11-19", 0.6484], ["2025-11-20", 0.6487], ["2025-11-21", 0.6446], ["2025-11-24", 0.6461], ["2025-11-25", 0.6454], ["2025-11-26", 0.6503], ["2025-11-27", 0.6536], ["2025-11-28", 0.6533], ["2025-12-01", 0.6545], ["2025-12-02", 0.655], ["2025-12-03", 0.658], ["2025-12-04", 0.6614], ["2025-12-05", 0.662], ["2025-12-08", 0.6645], ["2025-12-09", 0.6647], ["2025-12-10", 0.6641], ["2025-12-11", 0.6639], ["2025-12-12", 0.6661], ["2025-12-15", 0.6646], ["2025-12-16", 0.6637], ["2025-12-17", 0.6616], ["2025-12-18", 0.6602], ["2025-12-19", 0.6609], ["2025-12-22", 0.6628], ["2025-12-23", 0.6669], ["2025-12-24", 0.6709], ["2025-12-29", 0.6722], ["2025-12-30", 0.6711], ["2025-12-31", 0.6693], ["2026-01-02", 0.6699], ["2026-01-05", 0.6673], ["2026-01-06", 0.6726], ["2026-01-07", 0.6761], ["2026-01-08", 0.6707], ["2026-01-09", 0.6698], ["2026-01-12", 0.6696], ["2026-01-13", 0.6711], ["2026-01-14", 0.6697], ["2026-01-15", 0.6675], ["2026-01-16", 0.6707], ["2026-01-19", 0.6692], ["2026-01-20", 0.6738], ["2026-01-21", 0.6733], ["2026-01-22", 0.6805], ["2026-01-23", 0.685], ["2026-01-27", 0.6912], ["2026-01-28", 0.6993], ["2026-01-29", 0.7091], ["2026-01-30", 0.7004], ["2026-02-02", 0.6942], ["2026-02-03", 0.701], ["2026-02-04", 0.7024], ["2026-02-05", 0.6972], ["2026-02-06", 0.6944], ["2026-02-09", 0.7025], ["2026-02-10", 0.7075], ["2026-02-11", 0.7112], ["2026-02-12", 0.7116], ["2026-02-13", 0.7086], ["2026-02-16", 0.7087], ["2026-02-17", 0.7069], ["2026-02-18", 0.707], ["2026-02-19", 0.7051], ["2026-02-20", 0.7033], ["2026-02-23", 0.7071], ["2026-02-24", 0.706], ["2026-02-25", 0.7107], ["2026-02-26", 0.7127], ["2026-02-27", 0.7126], ["2026-03-02", 0.7094], ["2026-03-03", 0.7104], ["2026-03-04", 0.6996], ["2026-03-05", 0.7053], ["2026-03-06", 0.7029], ["2026-03-09", 0.6993], ["2026-03-10", 0.7063], ["2026-03-11", 0.7183], ["2026-03-12", 0.7125], ["2026-03-13", 0.7063], ["2026-03-16", 0.7007], ["2026-03-17", 0.7074], ["2026-03-18", 0.7115], ["2026-03-19", 0.7038], ["2026-03-20", 0.7088], ["2026-03-23", 0.698], ["2026-03-24", 0.6966], ["2026-03-25", 0.6974], ["2026-03-26", 0.6955], ["2026-03-27", 0.6911], ["2026-03-30", 0.6869], ["2026-03-31", 0.6845], ["2026-04-01", 0.6904], ["2026-04-02", 0.6879], ["2026-04-07", 0.6916], ["2026-04-08", 0.7072], ["2026-04-09", 0.7036], ["2026-04-10", 0.7071], ["2026-04-13", 0.704], ["2026-04-14", 0.7083], ["2026-04-15", 0.7138], ["2026-04-16", 0.7189], ["2026-04-17", 0.717], ["2026-04-20", 0.7149], ["2026-04-21", 0.7166], ["2026-04-22", 0.717], ["2026-04-23", 0.7155], ["2026-04-24", 0.7128], ["2026-04-28", 0.7172], ["2026-04-29", 0.7162], ["2026-04-30", 0.7113], ["2026-05-01", 0.7191], ["2026-05-04", 0.7208], ["2026-05-05", 0.7141], ["2026-05-06", 0.7248], ["2026-05-07", 0.7247], ["2026-05-08", 0.7225], ["2026-05-11", 0.7231], ["2026-05-12", 0.7231], ["2026-05-13", 0.724], ["2026-05-14", 0.7258], ["2026-05-15", 0.716], ["2026-05-18", 0.7132], ["2026-05-19", 0.7132], ["2026-05-20", 0.7103], ["2026-05-21", 0.7125], ["2026-05-22", 0.7139], ["2026-05-25", 0.7166], ["2026-05-26", 0.716], ["2026-05-27", 0.7156], ["2026-05-28", 0.7117], ["2026-05-29", 0.7164], ["2026-06-01", 0.7188], ["2026-06-02", 0.7163], ["2026-06-03", 0.7164], ["2026-06-04", 0.7131], ["2026-06-05", 0.7121], ["2026-06-09", 0.7058], ["2026-06-10", 0.702], ["2026-06-11", 0.7008], ["2026-06-12", 0.7029], ["2026-06-15", 0.7081], ["2026-06-16", 0.7048], ["2026-06-17", 0.7059], ["2026-06-18", 0.7031], ["2026-06-19", 0.7005], ["2026-06-22", 0.7004], ["2026-06-23", 0.6964], ["2026-06-24", 0.6913], ["2026-06-25", 0.6892], ["2026-06-26", 0.6894], ["2026-06-29", 0.6896], ["2026-06-30", 0.6869], ["2026-07-01", 0.6895]];
+const RATES = RATES_RAW.map(r => ({ date: r[0], t: new Date(r[0]+'T00:00:00Z').getTime(), rate: r[1] }))
+                        .sort((a,b) => a.t - b.t);
+
+function rateForDate(dateStr){
+  // dateStr: 'YYYY-MM-DD'
+  const t = new Date(dateStr+'T00:00:00Z').getTime();
+  let lo = 0, hi = RATES.length - 1, ans = 0;
+  if (t < RATES[0].t) return RATES[0];
+  while(lo <= hi){
+    const mid = (lo+hi)>>1;
+    if (RATES[mid].t <= t){ ans = mid; lo = mid+1; } else { hi = mid-1; }
+  }
+  return RATES[ans];
+}
+
+/* ---------------- Header synonym map (Chinese IBKR / English IBKR) ---------------- */
+const HEADER_SYNONYMS = {
+  discriminator: ['DataDiscriminator'],
+  assetClass: ['资产分类','Asset Category','Asset Class'],
+  currency: ['货币','Currency'],
+  symbol: ['代码','Symbol'],
+  datetime: ['日期/时间','Date/Time','Date-Time'],
+  quantity: ['数量','Quantity'],
+  price: ['交易价格','T. Price','Trade Price'],
+  proceeds: ['收益','Proceeds'],
+  commission: ['佣金/税','Comm/Fee','Comm in USD'],
+  basis: ['基础','Basis'],
+  realizedPL: ['已实现的损益','Realized P/L','Realized P&L'],
+  code: ['代码','Code'] // NOTE: same label as symbol in Chinese export; resolved by position fallback
+};
+
+// Fixed positional fallback matching the standard IBKR "Trades" block layout:
+// [0 section][1 Header/Data/SubTotal][2 DataDiscriminator][3 AssetClass][4 Currency]
+// [5 Symbol][6 DateTime][7 Quantity][8 Price][9 Proceeds][10 Comm][11 Basis][12 RealizedPL][13 Code]
+const POSITIONAL_FALLBACK = {
+  assetClass:3, currency:4, symbol:5, datetime:6, quantity:7,
+  price:8, proceeds:9, commission:10, basis:11, realizedPL:12, code:13
+};
+
+let PARSED = []; // array of transaction objects, accumulated across all uploaded files
+let DIVIDENDS = []; // array of dividend income records (kept separate from capital gains)
+let SOURCE_FILENAME = '';
+let ALL_FILE_RESULTS = []; // persistent list of every file successfully/unsuccessfully processed in this session
+
+/* ---------------- File handling ---------------- */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const statusEl = document.getElementById('status');
+const resultsPanel = document.getElementById('resultsPanel');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFiles(Array.from(e.dataTransfer.files));
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFiles(Array.from(e.target.files));
+});
+
+function findSheet(wb, nameRegex){
+  const name = wb.SheetNames.find(n => nameRegex.test(n));
+  return name ? { name, rows: XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: null }) } : null;
+}
+
+function readFileAsArrayBuffer(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = evt => resolve(evt.target.result);
+    reader.onerror = () => reject(reader.error || new Error('read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Detects which broker format a workbook is and parses it accordingly.
+// Order matters: check the more distinctive markers (dedicated sheet
+// names, a unique section label) before falling back to the generic
+// IBKR-style single-sheet "Trades" blotter.
+function parseWorkbookForFile(wb){
+  const closedPosSheet = findSheet(wb, /closed\s*positions/i);
+  if (closedPosSheet){
+    const parsed = parseEtoroClosedPositions(closedPosSheet.rows);
+    const divSheet = findSheet(wb, /dividends/i);
+    const dividends = divSheet ? parseEtoroDividends(divSheet.rows) : [];
+    return { format: 'etoro', parsed, dividends };
+  }
+
+  const txnOverviewSheet = findSheet(wb, /transaction\s*overview/i);
+  if (txnOverviewSheet){
+    const parsed = parseMoomooTransactions(txnOverviewSheet.rows);
+    const divSheet = findSheet(wb, /dividend\s*overview/i);
+    const dividends = divSheet ? parseMoomooDividends(divSheet.rows) : [];
+    return { format: 'moomoo', parsed, dividends };
+  }
+
+  // Tiger Brokers' CSV activity statement: everything in one sheet, with a
+  // distinctive 'Account Information' section label as its fingerprint.
+  const firstSheetRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: null });
+  const isTigerCsv = firstSheetRows.some(r => r && r[0] === 'Account Information');
+  if (isTigerCsv){
+    const parsed = parseTigerCsv(firstSheetRows);
+    const dividends = parseTigerDividends(firstSheetRows);
+    return { format: 'tiger', parsed, dividends };
+  }
+
+  const parsed = parseTrades(firstSheetRows);
+  return { format: 'ibkr', parsed, dividends: [] };
+}
+
+const FORMAT_LABELS = {
+  etoro: 'eToro statement (Closed Positions)',
+  moomoo: 'Moomoo statement (Transaction Overview)',
+  tiger: 'Tiger Brokers activity statement (CSV)',
+  ibkr: 'IBKR-style Trades export'
+};
+
+async function handleFiles(files){
+  const fileResults = [];
+  for (const file of files){
+    try {
+      const buf = await readFileAsArrayBuffer(file);
+      const data = new Uint8Array(buf);
+      const wb = XLSX.read(data, { type: 'array', cellDates: false });
+      const { format, parsed, dividends } = parseWorkbookForFile(wb);
+      parsed.transactions.forEach(t => t.source = file.name);
+      dividends.forEach(d => d.source = file.name);
+      fileResults.push({ filename: file.name, format, parsed, dividends, error: null, enabled: true });
+    } catch (err) {
+      fileResults.push({ filename: file.name, format: null, parsed: { transactions: [], skippedNoRateExact: 0 }, dividends: [], error: err.message });
+    }
+  }
+
+  // Keep upload history; each successfully parsed file can be toggled independently.
+  ALL_FILE_RESULTS = ALL_FILE_RESULTS.concat(fileResults);
+  const newTransactions = fileResults.flatMap(r => r.parsed.transactions);
+  const newDividends = fileResults.flatMap(r => r.dividends);
+
+  if (newTransactions.length === 0 && newDividends.length === 0 && fileResults.every(r => !r.error)){
+    showStatus('Read ' + (files.length===1?'the file':'these files') + ' but found no trade or dividend rows to convert. Checked for IBKR, eToro, Moomoo and Tiger Brokers formats — this file\u2019s schema may not match any of them.', true);
+    renderFileList(ALL_FILE_RESULTS);
+    return;
+  }
+
+  rebuildActiveData();
+}
+
+function renderFileList(fileResults){
+  const el = document.getElementById('fileList');
+  el.style.display = fileResults.length ? 'block' : 'none';
+  el.innerHTML = fileResults.map((r,i) => {
+    if (r.error){
+      return `<div class="frow"><span class="fname">${r.filename}</span><span class="fstatus err">Could not read: ${r.error}</span></div>`;
+    }
+    const active = r.enabled !== false;
+    const n = r.parsed.transactions.length;
+    const d = r.dividends.length;
+    const label = FORMAT_LABELS[r.format] || r.format;
+    let detail = `${label} — ${n} transaction${n===1?'':'s'}`;
+    if (d) detail += `, ${d} dividend${d===1?'':'s'}`;
+    if (r.format === 'tiger' && r.parsed.validation){
+      const v = r.parsed.validation;
+      const ok = Math.abs(v.diffUsd) <= 0.02;
+      detail += ` — ${v.stockRows} stock + ${v.optionRows} option rows; broker USD P/L check ${ok ? 'OK' : 'DIFF ' + fmt(v.diffUsd)}`;
+    }
+    return `<div class="frow ${active?'':'disabled'}">
+      <span class="fname">${r.filename}</span>
+      <span class="fstatus">${detail}
+        <label class="file-toggle"><input type="checkbox" data-file-index="${i}" ${active?'checked':''}> Include</label>
+      </span>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('input[data-file-index]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const i = Number(cb.dataset.fileIndex);
+      ALL_FILE_RESULTS[i].enabled = cb.checked;
+      rebuildActiveData();
+    });
+  });
+}
+
+function rebuildActiveData(){
+  const active = ALL_FILE_RESULTS.filter(r => r.enabled !== false && !r.error);
+  PARSED = active.flatMap(r => r.parsed.transactions);
+  DIVIDENDS = active.flatMap(r => r.dividends);
+  recomputeFifoAll();
+  showStatus(buildMultiFileStatusMessage(active, PARSED, DIVIDENDS), false);
+  renderFileList(ALL_FILE_RESULTS);
+  if (PARSED.length || DIVIDENDS.length){
+    renderAll();
+    resultsPanel.style.display = 'block';
+  } else {
+    resultsPanel.style.display = 'none';
+  }
+}
+
+function showStatus(html, isWarn){
+  statusEl.innerHTML = (isWarn ? '<span class="warn">' + html + '</span>' : html);
+  statusEl.classList.add('show');
+}
+
+function buildMultiFileStatusMessage(fileResults, allTransactions, allDividends){
+  const n = allTransactions.length;
+  const okFiles = fileResults.filter(r => !r.error).length;
+  let msg = `Loaded <b>${okFiles}</b> file${okFiles===1?'':'s'}`;
+  if (n > 0){
+    const dates = allTransactions.map(t => t.date).sort();
+    const symbols = new Set(allTransactions.map(t => t.symbol)).size;
+    msg += ` — <b>${n}</b> transaction${n===1?'':'s'} across <b>${symbols}</b> symbol${symbols===1?'':'s'}, ${dates[0]} to ${dates[dates.length-1]}`;
+  }
+  if (allDividends.length){
+    msg += `, plus <b>${allDividends.length}</b> dividend payment${allDividends.length===1?'':'s'} (see the Dividends tab)`;
+  }
+  const tigerChecks = fileResults.filter(r => r.format === 'tiger' && r.parsed.validation).map(r => r.parsed.validation);
+  if (tigerChecks.length){
+    const v = tigerChecks.reduce((a,x) => ({ data:a.data+x.dataRealizedUsd, reported:a.reported+x.reportedRealizedUsd }), {data:0,reported:0});
+    const diff = v.data - v.reported;
+    msg += ` <br>Tiger broker USD realized-P/L checkpoint: <b>${Math.abs(diff) <= 0.02 ? 'matched' : 'difference ' + diff.toFixed(2)}</b>.`;
+  }
+  msg += '.';
+  const totalSkipped = fileResults.reduce((s,r) => s + (r.parsed.skippedNoRateExact||0), 0);
+  if (totalSkipped > 0){
+    msg += ` <br>Note: ${totalSkipped} date${totalSkipped===1?'':'s'} used the nearest earlier available rate (no exact-date rate on file).`;
+  }
+  if (fileResults.some(r => r.error)){
+    msg += ' <br><span class="warn">One or more files could not be read — see the list below.</span>';
+  }
+  return msg;
+}
+
+/* ---------------- Parsing ---------------- */
+function findCol(headerRow, key){
+  const names = HEADER_SYNONYMS[key] || [];
+  for (let i = 0; i < headerRow.length; i++){
+    const cell = (headerRow[i] || '').toString().trim();
+    if (names.includes(cell)) {
+      // guard against the symbol/code ambiguity in the Chinese export:
+      // if this is the "code" key and i equals the resolved symbol index, skip (handled by fallback instead)
+      return i;
+    }
+  }
+  return -1;
+}
+
+function parseTrades(rows){
+  // locate header row: discriminator column value === 'Header'
+  let headerRowIdx = -1, discCol = -1;
+  for (let r = 0; r < Math.min(rows.length, 10); r++){
+    const row = rows[r];
+    if (!row) continue;
+    for (let c = 0; c < row.length; c++){
+      if ((row[c] || '').toString().trim() === 'Header'){
+        headerRowIdx = r; discCol = c; break;
+      }
+    }
+    if (headerRowIdx >= 0) break;
+  }
+
+  let cols;
+  if (headerRowIdx >= 0){
+    const headerRow = rows[headerRowIdx];
+    cols = {
+      assetClass: findCol(headerRow,'assetClass'),
+      currency: findCol(headerRow,'currency'),
+      symbol: findCol(headerRow,'symbol'),
+      datetime: findCol(headerRow,'datetime'),
+      quantity: findCol(headerRow,'quantity'),
+      price: findCol(headerRow,'price'),
+      proceeds: findCol(headerRow,'proceeds'),
+      commission: findCol(headerRow,'commission'),
+      basis: findCol(headerRow,'basis'),
+      realizedPL: findCol(headerRow,'realizedPL'),
+      code: -1 // resolved below
+    };
+    // resolve 'code' as the LAST column with a header matching the code synonyms,
+    // distinct from symbol's column
+    for (let i = headerRow.length - 1; i >= 0; i--){
+      const cell = (headerRow[i] || '').toString().trim();
+      if (HEADER_SYNONYMS.code.includes(cell) && i !== cols.symbol){ cols.code = i; break; }
+    }
+    // fill any unresolved column with positional fallback
+    Object.keys(POSITIONAL_FALLBACK).forEach(k => {
+      if (cols[k] === -1 || cols[k] === undefined) cols[k] = POSITIONAL_FALLBACK[k];
+    });
+  } else {
+    discCol = 1;
+    cols = Object.assign({}, POSITIONAL_FALLBACK);
+  }
+
+  const transactions = [];
+  let skippedNoRateExact = 0;
+
+  const dataStart = headerRowIdx >= 0 ? headerRowIdx + 1 : 0;
+  for (let r = dataStart; r < rows.length; r++){
+    const row = rows[r];
+    if (!row || row.length === 0) continue;
+    const disc = (row[discCol] || '').toString().trim();
+    if (disc !== 'Data') continue;
+
+    const symbol = row[cols.symbol];
+    const rawDt = row[cols.datetime];
+    if (!symbol || !rawDt) continue;
+
+    const dateStr = normalizeDate(rawDt);
+    if (!dateStr) continue;
+
+    const qty = toNum(row[cols.quantity]);
+    const price = toNum(row[cols.price]);
+    const proceedsUsd = toNum(row[cols.proceeds]);
+    const commissionUsd = toNum(row[cols.commission]);
+    const basisUsd = toNum(row[cols.basis]);
+    const realizedUsd = toNum(row[cols.realizedPL]);
+    const code = cols.code >= 0 ? (row[cols.code] || '') : '';
+    const assetClass = cols.assetClass >= 0 ? (row[cols.assetClass] || '') : '';
+    const currency = cols.currency >= 0 ? (row[cols.currency] || '') : '';
+
+    const rateInfo = rateForDate(dateStr);
+    if (rateInfo.date !== dateStr) skippedNoRateExact++;
+    const ts = parseTimestamp(rawDt, dateStr);
+
+    transactions.push({
+      symbol: symbol.toString(),
+      assetClass: assetClass.toString(),
+      currency: currency.toString(),
+      date: dateStr,
+      ts,
+      month: dateStr.slice(0,7),
+      qty, price,
+      proceedsUsd, commissionUsd, basisUsd, realizedUsd,
+      sourceRealizedUsd: realizedUsd,
+      rate: rateInfo.rate,
+      rateDateUsed: rateInfo.date,
+      proceedsAud: proceedsUsd / rateInfo.rate,
+      commissionAud: commissionUsd / rateInfo.rate,
+      code: code.toString(),
+      fifoGroup: 'ibkr'
+    });
+  }
+
+  transactions.sort((a,b) => a.ts - b.ts);
+  return { transactions, skippedNoRateExact };
+}
+
+/* ----------------------------------------------------------------------
+   FIFO cost-basis matching for correct FX-adjusted capital gains.
+
+   Why this matters: a trade's USD "Realized P/L" nets a sale price against
+   a purchase price that happened on a DIFFERENT date, at a DIFFERENT AUD/USD
+   rate. Converting that already-netted USD figure with a single (sale-date)
+   rate silently assumes the purchase happened on the sale date too, which
+   is wrong whenever the rate moved between the two — it can overstate,
+   understate, or even flip the sign of the real AUD gain.
+
+   The correct approach: track each purchased lot's AUD cost at the rate on
+   ITS OWN acquisition date. When shares are sold (possibly drawing on
+   several lots bought at different times/rates — FIFO order), convert the
+   net sale proceeds at the sale date's rate, then subtract the matched
+   lots' AUD cost (each already anchored to its own historical rate).
+------------------------------------------------------------------------- */
+function applyFifoAudPnl(transactions){
+  const bySymbol = new Map();
+  transactions.forEach(t => {
+    const groupKey = `${t.fifoGroup || 'default'}::${t.symbol}`;
+    if (!bySymbol.has(groupKey)) bySymbol.set(groupKey, []);
+    bySymbol.get(groupKey).push(t);
+  });
+
+  bySymbol.forEach(list => {
+    const queue = []; // { qtyRemaining, unitBasisUsdSigned, unitBasisAudSigned, sign }
+    list.forEach(t => {
+      t.costBasisAud = 0;
+      t.realizedAud = 0;
+      t.realizedUsdFifo = 0;
+      t.type = 'open';
+
+      const sign = t.qty > 0 ? 1 : -1;
+      const qtyAbs = Math.abs(t.qty);
+      if (qtyAbs === 0) return;
+
+      const frontSign = queue.length ? queue[0].sign : sign;
+      const isOpening = queue.length === 0 || sign === frontSign;
+
+      if (isOpening){
+        // basisUsd already carries the correct sign from the source data:
+        // positive for a long buy (cost/debit), negative for a short sale
+        // (credit received). Keep that sign — do NOT take an absolute value,
+        // or short positions come out with the wrong-signed P/L later.
+        const unitBasisUsdSigned = t.basisUsd / qtyAbs;
+        const unitBasisAudSigned = unitBasisUsdSigned / t.rate; // t.rate = this trade's own date's rate
+        queue.push({ qtyRemaining: qtyAbs, unitBasisUsdSigned, unitBasisAudSigned, sign });
+        t.type = 'open';
+        t.costBasisAud = qtyAbs * unitBasisAudSigned; // informational: signed — negative means a short-sale credit, not a cost
+      } else {
+        t.type = 'close';
+        let remaining = qtyAbs;
+        let matchedBasisAudSigned = 0;
+        let matchedBasisUsdSigned = 0;
+        while (remaining > 1e-9 && queue.length && queue[0].sign !== sign){
+          const lot = queue[0];
+          const matchQty = Math.min(remaining, lot.qtyRemaining);
+          matchedBasisAudSigned += matchQty * lot.unitBasisAudSigned;
+          matchedBasisUsdSigned += matchQty * lot.unitBasisUsdSigned;
+          lot.qtyRemaining -= matchQty;
+          remaining -= matchQty;
+          if (lot.qtyRemaining <= 1e-9) queue.shift();
+        }
+        const matchedQty = qtyAbs - remaining;
+        const netCashFlowUsdTotal = t.proceedsUsd + t.commissionUsd;
+        const netCashFlowUsdMatched = matchedQty > 0
+          ? netCashFlowUsdTotal * (matchedQty / qtyAbs)
+          : 0;
+        const netCashFlowAudMatched = matchedQty > 0
+          ? netCashFlowUsdMatched / t.rate
+          : 0;
+        t.costBasisAud = matchedBasisAudSigned;
+        // General closing formula (works for both closing a long and covering
+        // a short): this transaction's own net cash flow, minus the matched
+        // opening lots' basis — each leg converted at its own date's rate.
+        t.realizedUsdFifo = netCashFlowUsdMatched - matchedBasisUsdSigned;
+        t.realizedAud = netCashFlowAudMatched - matchedBasisAudSigned;
+
+        if (remaining > 1e-9){
+          // Sold/bought more than was on hand — the surplus flips into a new
+          // opening lot (e.g. going short beyond a full cover). Approximate
+          // its unit basis from this trade's own price/rate, signed to match
+          // the new position's direction, since there's no prior matching lot.
+          const unitBasisUsdSignedExtra = t.basisUsd / qtyAbs;
+          const unitBasisAudSignedExtra = unitBasisUsdSignedExtra / t.rate;
+          queue.push({ qtyRemaining: remaining, unitBasisUsdSigned: unitBasisUsdSignedExtra, unitBasisAudSigned: unitBasisAudSignedExtra, sign });
+        }
+      }
+    });
+  });
+}
+
+function recomputeFifoAll(){
+  // IBKR, Moomoo and Tiger are per-leg blotters whose lots can span multiple
+  // uploaded files. Re-run their FIFO matching after every upload. eToro is
+  // intentionally excluded because each closed-position row is already a
+  // self-contained open/close round trip with its own stake and result.
+  // IMPORTANT: keep broker ledgers separate so the same symbol cannot
+  // accidentally match a Tiger lot to an IBKR/Moomoo lot.
+  const groups = new Map();
+  PARSED.filter(t => t.fifoGroup).forEach(t => {
+    const key = `${t.fifoGroup}\u001f${t.symbol}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(t);
+  });
+  groups.forEach(list => applyFifoAudPnl(list));
+}
+
+function toNum(v){
+  if (v === null || v === undefined || v === '') return 0;
+  const n = typeof v === 'number' ? v : parseFloat(v.toString().replace(/,/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+function normalizeDate(v){
+  // Handles 'YYYY-MM-DD, HH:MM:SS' strings, plain 'YYYY-MM-DD', or Excel serial numbers
+  if (typeof v === 'number'){
+    const d = XLSX.SSF.parse_date_code(v);
+    if (!d) return null;
+    return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  }
+  const s = v.toString().trim();
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  const m2 = s.match(/(\d{4})\/(\d{2})\/(\d{2})/);
+  if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+  return null;
+}
+
+function parseTimestamp(rawDt, dateStr){
+  // Prefer full date+time precision so same-day trades keep their true
+  // order for FIFO lot matching; fall back to date-only (midnight) if
+  // no time component is present.
+  if (typeof rawDt === 'number'){
+    const d = XLSX.SSF.parse_date_code(rawDt);
+    if (d) return new Date(Date.UTC(d.y, d.m-1, d.d, d.H||0, d.M||0, Math.floor(d.S||0))).getTime();
+  }
+  const s = rawDt.toString().trim();
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})[,T ]*\s*(\d{2}):(\d{2}):(\d{2})/);
+  if (m) return Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  return new Date(dateStr + 'T00:00:00Z').getTime();
+}
+
+/* ----------------------------------------------------------------------
+   eToro statement parsing.
+
+   eToro's "Closed Positions" sheet is structured completely differently
+   from an IBKR Trades blotter: instead of separate buy/sell legs that need
+   matching, each row is already a complete, self-contained round trip —
+   it gives both the Open Date and Close Date, the stake ("Amount") that
+   was committed, and the net trading result ("Profit(USD)") for that one
+   position. There is no FIFO lot-matching to do across rows.
+
+   This holds for long AND short positions, and regardless of leverage:
+   "Amount" is always the cash/margin committed at open, and you get back
+   Amount + Profit at close — eToro's own accounting already nets out the
+   direction and leverage into that one Profit figure (cross-checked here
+   against this file's own Account Summary: the sum of every row's
+   Profit(USD) ties out exactly to "Profit or Loss (Closed positions
+   only)"). So the only FX-correctness fix needed is the same one as
+   before: convert the stake at the OPEN date's rate, convert the amount
+   returned at the CLOSE date's rate, and take the difference in AUD —
+   never convert the already-netted USD profit with a single rate.
+
+   Dividends live on their own "Dividends" sheet and are kept completely
+   separate from this capital-gains pipeline, since dividend income and
+   capital gains are different things for tax purposes.
+------------------------------------------------------------------------- */
+function parseEtoroDate(v){
+  // eToro dates are 'DD/MM/YYYY' or 'DD/MM/YYYY HH:MM:SS'
+  if (typeof v === 'number'){
+    const d = XLSX.SSF.parse_date_code(v);
+    if (d){
+      const dateStr = `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+      const ts = Date.UTC(d.y, d.m-1, d.d, d.H||0, d.M||0, Math.floor(d.S||0));
+      return { dateStr, ts };
+    }
+  }
+  const s = (v || '').toString().trim();
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}):(\d{2}))?/);
+  if (!m) return null;
+  const [, dd, mm, yyyy, HH, MM, SS] = m;
+  const dateStr = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+  const ts = Date.UTC(+yyyy, +mm-1, +dd, +(HH||0), +(MM||0), +(SS||0));
+  return { dateStr, ts };
+}
+
+function etoroSymbolFromAction(action){
+  const s = (action || '').toString().trim();
+  const m = s.match(/\(([^)]+)\)\s*$/);
+  return m ? m[1].trim() : s;
+}
+
+function etoroCol(headerRow, names){
+  for (let i = 0; i < headerRow.length; i++){
+    const cell = (headerRow[i] || '').toString().trim();
+    if (names.some(n => cell.toLowerCase() === n.toLowerCase())) return i;
+  }
+  return -1;
+}
+
+function parseEtoroClosedPositions(rows){
+  if (!rows.length) return { transactions: [], skippedNoRateExact: 0 };
+  const header = rows[0];
+  const col = {
+    posId: etoroCol(header, ['Position ID']),
+    action: etoroCol(header, ['Action']),
+    direction: etoroCol(header, ['Long / Short']),
+    amount: etoroCol(header, ['Amount']),
+    units: etoroCol(header, ['Units / Contracts']),
+    openDate: etoroCol(header, ['Open Date']),
+    closeDate: etoroCol(header, ['Close Date']),
+    leverage: etoroCol(header, ['Leverage']),
+    spreadFees: etoroCol(header, ['Spread Fees (USD)']),
+    profit: etoroCol(header, ['Profit(USD)', 'Profit (USD)']),
+    openRate: etoroCol(header, ['Open Rate']),
+    closeRate: etoroCol(header, ['Close Rate']),
+    type: etoroCol(header, ['Type']),
+    isin: etoroCol(header, ['ISIN'])
+  };
+
+  const transactions = [];
+  let skippedNoRateExact = 0;
+
+  for (let r = 1; r < rows.length; r++){
+    const row = rows[r];
+    if (!row || row[col.posId] === null || row[col.posId] === undefined || row[col.posId] === '') continue;
+
+    const symbol = etoroSymbolFromAction(row[col.action]);
+    const openInfo = parseEtoroDate(row[col.openDate]);
+    const closeInfo = parseEtoroDate(row[col.closeDate]);
+    if (!openInfo || !closeInfo) continue;
+
+    const amountUsd = toNum(row[col.amount]);           // stake committed at open
+    const profitUsd = toNum(row[col.profit]);            // eToro's own net trading result
+    const spreadFeesUsd = col.spreadFees >= 0 ? toNum(row[col.spreadFees]) : 0;
+    const units = col.units >= 0 ? toNum(row[col.units]) : 0;
+    const direction = col.direction >= 0 ? (row[col.direction] || '').toString() : '';
+    const isShort = /short/i.test(direction);
+    const assetType = col.type >= 0 ? (row[col.type] || '').toString() : '';
+
+    const openRateInfo = rateForDate(openInfo.dateStr);
+    const closeRateInfo = rateForDate(closeInfo.dateStr);
+    if (openRateInfo.date !== openInfo.dateStr) skippedNoRateExact++;
+    if (closeRateInfo.date !== closeInfo.dateStr) skippedNoRateExact++;
+
+    const costUsd = amountUsd + Math.abs(spreadFeesUsd);
+    const proceedsUsd = amountUsd + profitUsd; // what you get back at close
+    const costAud = costUsd / openRateInfo.rate;
+    const proceedsAud = proceedsUsd / closeRateInfo.rate;
+    const realizedAud = proceedsAud - costAud;
+
+    const qtySigned = isShort ? -Math.abs(units) : Math.abs(units);
+
+    // Synthetic "open" leg — reuses the same shape as the IBKR transaction
+    // objects so the rest of the app (tables, summaries, CSV export) needs
+    // no changes to display either format.
+    transactions.push({
+      symbol, name: (row[col.action] || '').toString(), assetClass: assetType, currency: 'USD',
+      date: openInfo.dateStr, ts: openInfo.ts, month: openInfo.dateStr.slice(0,7),
+      qty: qtySigned, price: col.openRate >= 0 ? toNum(row[col.openRate]) : 0,
+      proceedsUsd: -amountUsd, commissionUsd: -Math.abs(spreadFeesUsd), basisUsd: costUsd, realizedUsd: 0,
+      rate: openRateInfo.rate, rateDateUsed: openRateInfo.date,
+      proceedsAud: -amountUsd / openRateInfo.rate, commissionAud: -Math.abs(spreadFeesUsd) / openRateInfo.rate,
+      type: 'open', costBasisAud: costAud, realizedAud: 0,
+      code: isShort ? 'O (short)' : 'O'
+    });
+
+    // Synthetic "close" leg
+    transactions.push({
+      symbol, name: (row[col.action] || '').toString(), assetClass: assetType, currency: 'USD',
+      date: closeInfo.dateStr, ts: closeInfo.ts, month: closeInfo.dateStr.slice(0,7),
+      qty: -qtySigned, price: col.closeRate >= 0 ? toNum(row[col.closeRate]) : 0,
+      proceedsUsd: proceedsUsd, commissionUsd: 0, basisUsd: -costUsd, realizedUsd: profitUsd,
+      sourceRealizedUsd: profitUsd,
+      rate: closeRateInfo.rate, rateDateUsed: closeRateInfo.date,
+      proceedsAud: proceedsUsd / closeRateInfo.rate, commissionAud: 0,
+      type: 'close', costBasisAud: costAud, realizedAud,
+      code: isShort ? 'C (cover)' : 'C'
+    });
+  }
+
+  transactions.sort((a,b) => a.ts - b.ts);
+  return { transactions, skippedNoRateExact };
+}
+
+function parseEtoroDividends(rows){
+  if (!rows.length) return [];
+  const header = rows[0];
+  const col = {
+    date: etoroCol(header, ['Date of Payment']),
+    instrument: etoroCol(header, ['Instrument Name']),
+    netUsd: etoroCol(header, ['Net Dividend Received (USD)']),
+    withholdingUsd: etoroCol(header, ['Withholding Tax Amount (USD)']),
+    frankingAud: etoroCol(header, ['Franking Credits (AUD)']),
+    posId: etoroCol(header, ['Position ID']),
+    isin: etoroCol(header, ['ISIN'])
+  };
+
+  const out = [];
+  for (let r = 1; r < rows.length; r++){
+    const row = rows[r];
+    if (!row || !row[col.date]) continue;
+    const info = parseEtoroDate(row[col.date]);
+    if (!info) continue;
+    const netUsd = toNum(row[col.netUsd]);
+    const withholdingUsd = col.withholdingUsd >= 0 ? toNum(row[col.withholdingUsd]) : 0;
+    const rateInfo = rateForDate(info.dateStr);
+    const frankingRaw = col.frankingAud >= 0 ? row[col.frankingAud] : null;
+    const frankingAud = (frankingRaw && frankingRaw !== '-') ? toNum(frankingRaw) : 0;
+    out.push({
+      date: info.dateStr, ts: info.ts,
+      instrument: col.instrument >= 0 ? (row[col.instrument] || '').toString() : '',
+      netUsd, withholdingUsd,
+      rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+      netAud: netUsd / rateInfo.rate,
+      withholdingAud: withholdingUsd / rateInfo.rate,
+      frankingAud
+    });
+  }
+  out.sort((a,b) => a.ts - b.ts);
+  return out;
+}
+
+/* ----------------------------------------------------------------------
+   Moomoo statement parsing.
+
+   Moomoo's "Transaction Overview" sheet is a plain per-leg trade blotter,
+   closer in spirit to IBKR than to eToro: it does NOT give a realized P/L
+   column, so the FIFO cost-basis engine has to do all the work here,
+   exactly like it does for IBKR data.
+
+   The key difference from IBKR is that Moomoo labels each leg's direction
+   explicitly instead of leaving it to be inferred from the sign of the
+   quantity: "Buy" and "Sell Short" both OPEN or extend a position (long
+   and short respectively); "Sell" and "Buy Back" both CLOSE one. That
+   maps directly onto the signed-quantity convention applyFifoAudPnl()
+   already expects — Buy/Buy Back get a positive signed quantity, Sell/
+   Sell Short get a negative one — so the exact same FIFO engine built for
+   IBKR is reused unchanged.
+------------------------------------------------------------------------- */
+function parseMoomooDate(v, tiebreak){
+  // Moomoo dates are 'DD/MM/YYYY', date only (no time). tiebreak preserves
+  // the sheet's own row order for same-day trades, since there's no finer
+  // timestamp to sort by.
+  const s = (v || '').toString().trim();
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const [, dd, mm, yyyy] = m;
+  const dateStr = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+  const ts = Date.UTC(+yyyy, +mm-1, +dd) + tiebreak;
+  return { dateStr, ts };
+}
+
+function parseMoomooTransactions(rows){
+  if (!rows.length) return { transactions: [], skippedNoRateExact: 0 };
+  const header = rows[0];
+  const col = {
+    market: etoroCol(header, ['Market']),
+    txnDate: etoroCol(header, ['Transaction Date']),
+    secType: etoroCol(header, ['Security Type']),
+    direction: etoroCol(header, ['Direction']),
+    code: etoroCol(header, ['Security Code']),
+    name: etoroCol(header, ['Security Name']),
+    qty: etoroCol(header, ['Quantity']),
+    currency: etoroCol(header, ['Currency']),
+    avgPrice: etoroCol(header, ['Avg Price']),
+    amount: etoroCol(header, ['Transaction Amount']),
+    fee: etoroCol(header, ['Transaction Fee(Inc.GST)', 'Transaction Fee (Inc.GST)']),
+    gst: etoroCol(header, ['GST']),
+    net: etoroCol(header, ['Net Amount'])
+  };
+
+  const transactions = [];
+  let skippedNoRateExact = 0;
+
+  for (let r = 1; r < rows.length; r++){
+    const row = rows[r];
+    if (!row || !row[col.code]) continue;
+    const direction = (row[col.direction] || '').toString().trim();
+    const dateInfo = parseMoomooDate(row[col.txnDate], r);
+    if (!dateInfo) continue;
+
+    const qtyAbs = Math.abs(toNum(row[col.qty]));
+    const isPositive = direction === 'Buy' || direction === 'Buy Back';
+    const signedQty = isPositive ? qtyAbs : -qtyAbs;
+
+    const amountUsd = toNum(row[col.amount]);
+    const feeUsd = col.fee >= 0 ? toNum(row[col.fee]) : 0;
+    const gstUsd = col.gst >= 0 ? toNum(row[col.gst]) : 0;
+    const netUsd = col.net >= 0 ? toNum(row[col.net]) : (amountUsd - feeUsd - gstUsd);
+    const commissionUsd = -(feeUsd + gstUsd);
+    // Only meaningful if this leg turns out to be an opening trade (see
+    // applyFifoAudPnl): the total cost (positive, long) or credit
+    // (negative, short) of the lot, sign matching signedQty's direction.
+    const basisUsd = -netUsd;
+
+    const rateInfo = rateForDate(dateInfo.dateStr);
+    if (rateInfo.date !== dateInfo.dateStr) skippedNoRateExact++;
+
+    transactions.push({
+      symbol: (row[col.code] || '').toString(),
+      name: col.name >= 0 ? (row[col.name] || '').toString() : '',
+      assetClass: col.secType >= 0 ? (row[col.secType] || '').toString() : '',
+      currency: col.currency >= 0 ? (row[col.currency] || '').toString() : 'USD',
+      date: dateInfo.dateStr, ts: dateInfo.ts, month: dateInfo.dateStr.slice(0,7),
+      qty: signedQty, price: col.avgPrice >= 0 ? toNum(row[col.avgPrice]) : 0,
+      proceedsUsd: amountUsd, commissionUsd, basisUsd, realizedUsd: 0,
+      sourceRealizedUsd: null,
+      rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+      proceedsAud: amountUsd / rateInfo.rate, commissionAud: commissionUsd / rateInfo.rate,
+      code: direction,
+      fifoGroup: 'moomoo'
+    });
+  }
+
+  transactions.sort((a,b) => a.ts - b.ts);
+  return { transactions, skippedNoRateExact };
+}
+
+function parseMoomooDividends(rows){
+  if (!rows || !rows.length) return [];
+  const header = rows[0];
+  const col = {
+    code: etoroCol(header, ['Security Code']),
+    name: etoroCol(header, ['Security Name']),
+    paymentDate: etoroCol(header, ['Payment Date']),
+    netAmount: etoroCol(header, ['Net Amount']),
+    withholding: etoroCol(header, ['Withholding Tax']),
+    franking: etoroCol(header, ['Franking Credit']),
+    currency: etoroCol(header, ['Currency'])
+  };
+  const out = [];
+  for (let r = 1; r < rows.length; r++){
+    const row = rows[r];
+    if (!row || !row[col.code] || !row[col.paymentDate]) continue;
+    const info = parseMoomooDate(row[col.paymentDate], r);
+    if (!info) continue;
+    const netUsd = toNum(row[col.netAmount]);
+    const withholdingUsd = Math.abs(toNum(row[col.withholding]));
+    const frankingRaw = col.franking >= 0 ? toNum(row[col.franking]) : 0;
+    const rateInfo = rateForDate(info.dateStr);
+    out.push({
+      date: info.dateStr, ts: info.ts,
+      instrument: `${(row[col.name]||'').toString()} (${(row[col.code]||'').toString()})`,
+      netUsd, withholdingUsd,
+      rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+      netAud: netUsd / rateInfo.rate,
+      withholdingAud: withholdingUsd / rateInfo.rate,
+      frankingAud: frankingRaw / rateInfo.rate
+    });
+  }
+  out.sort((a,b) => a.ts - b.ts);
+  return out;
+}
+
+/* ----------------------------------------------------------------------
+   Tiger Brokers CSV statement parsing (the "Activity Statement" export).
+
+   This is a single CSV with every statement section stacked in one sheet,
+   each row tagged by its section name in column 0 ("Trades", "Exercise
+   and Expiration", "Dividends", "Account Information", ...) and a row-type
+   marker ("DATA" / "TOTAL") a few columns later. Two quirks specific to
+   this export:
+   - Every trade row is duplicated immediately below itself with the
+     Symbol cell blank on the copy. Filtering to rows with a non-empty
+     Symbol removes the duplicate cleanly.
+   - "Amount" follows a quantity-times-price sign convention (positive on
+     an opening buy, negative on a closing sell) rather than a cash-flow
+     sign convention — confirmed against this file's own per-symbol
+     "Total" checkpoint rows: realized P/L = -(open Amount) - (close
+     Amount) + total fees. proceedsUsd/basisUsd below are derived to match
+     that identity exactly, so the existing applyFifoAudPnl() FIFO engine
+     — unchanged — reproduces it precisely while still converting each
+     leg's cost and proceeds at that leg's own date's AUD rate.
+
+   Option expiries live in a separate "Exercise and Expiration" section
+   and are merged into the same per-symbol timeline as ordinary closing
+   legs with zero cash flow, exactly like eToro's option-expiry handling.
+------------------------------------------------------------------------- */
+function parseTigerDateTime(raw){
+  // Handles 'YYYY-MM-DD\nHH:MM:SS, TZ', 'YYYY-MM-DD, HH:MM:SS, TZ', and plain 'YYYY-MM-DD'.
+  // Also handles a plain date-only cell (e.g. the Dividends sheet's "Date"
+  // column) that SheetJS has silently converted to a numeric Excel serial
+  // date, since nothing else in that cell stops it recognizing the pattern.
+  if (typeof raw === 'number'){
+    const d = XLSX.SSF.parse_date_code(raw);
+    if (!d) return null;
+    const dateStr = `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+    const ts = Date.UTC(d.y, d.m-1, d.d, d.H||0, d.M||0, Math.floor(d.S||0));
+    return { dateStr, ts };
+  }
+  const s = (raw === null || raw === undefined) ? '' : raw.toString().replace(/\n/g, ' ');
+  const dm = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!dm) return null;
+  const tm = s.match(/(\d{2}):(\d{2}):(\d{2})/);
+  const dateStr = `${dm[1]}-${dm[2]}-${dm[3]}`;
+  const ts = Date.UTC(+dm[1], +dm[2]-1, +dm[3], tm?+tm[1]:0, tm?+tm[2]:0, tm?+tm[3]:0);
+  return { dateStr, ts };
+}
+
+function tigerSymbolFromName(name){
+  const s = (name || '').toString().trim();
+  const m = s.match(/\(([^)]+)\)\s*$/);
+  return m ? m[1].trim() : s;
+}
+
+function findTigerHeader(rows, section, markerColIdx, markerValue){
+  return rows.find(r => r && r[0] === section && r[markerColIdx] === markerValue);
+}
+
+function parseTigerCsv(rows){
+  // Tiger stacks several "Trades" blocks into one CSV. In this report there
+  // is a US option block, a separate forex block, and another US stock block with
+  // one extra column (Accrued Interest in Trade). Do NOT reuse the first
+  // block's indexes globally: the later stock block shifts the fee, P/L and
+  // timestamp columns.
+  const headerIndexes = [];
+  const isBlank = v => v === null || v === undefined || String(v).trim() === '';
+  for (let i = 0; i < rows.length; i++){
+    const r = rows[i];
+    // SheetJS commonly materializes empty CSV fields as null when defval:null is used.
+    // Therefore never require the row-type marker cell to be the literal empty string.
+    if (r && r[0] === 'Trades' && isBlank(r[3]) &&
+        (r[4] === 'Symbol' || r[4] === 'Symbol(Base.Quote)')){
+      headerIndexes.push(i);
+    }
+  }
+
+  const transactions = [];
+  let skippedNoRateExact = 0;
+  let reportedRealizedUsd = 0;
+  let dataRealizedUsd = 0;
+  let parsedTradeRows = 0;
+  let parsedAssetRows = { Stock: 0, Option: 0 };
+
+  const sumFeeColumns = (header, row, amountCol, realizedCol) => {
+    let sum = 0;
+    for (let c = amountCol + 1; c < realizedCol; c++){
+      const label = (header[c] || '').toString().trim();
+      // Accrued interest is not a trading fee. For this stock/options report
+      // it is normally zero, but excluding it keeps the accounting explicit.
+      if (label === 'Accrued Interest in Trade') continue;
+      sum += toNum(row[c]);
+    }
+    return sum;
+  };
+
+  for (let hpos = 0; hpos < headerIndexes.length; hpos++){
+    const hi = headerIndexes[hpos];
+    const end = hpos + 1 < headerIndexes.length ? headerIndexes[hpos + 1] : rows.length;
+    const header = rows[hi];
+    if (header[4] !== 'Symbol') continue; // ignore the Forex Base.Quote block for capital gains
+
+    const idx = {
+      assetType: 1,
+      symbol: 4,
+      activityType: header.indexOf('Activity Type'),
+      qty: header.indexOf('Quantity'),
+      price: header.indexOf('Trade Price'),
+      amount: header.indexOf('Amount'),
+      realized: header.indexOf('Realized P/L'),
+      tradeTime: header.indexOf('Trade Time'),
+      currency: header.indexOf('Currency')
+    };
+
+    const required = ['activityType','qty','price','amount','realized','tradeTime','currency'];
+    if (required.some(k => idx[k] < 0)) continue;
+
+    for (let rIdx = hi + 1; rIdx < end; rIdx++){
+      const row = rows[rIdx];
+      if (!row || row[0] !== 'Trades' || row[3] !== 'DATA') continue;
+      const assetType = (row[idx.assetType] || '').toString().trim();
+      if (assetType !== 'Option' && assetType !== 'Stock') continue;
+
+      // Tiger duplicates each DATA row with the Symbol cell blank. Keep only
+      // the populated copy so each execution is counted exactly once.
+      const rawSymbol = row[idx.symbol];
+      if (!rawSymbol || rawSymbol.toString().trim() === '') continue;
+
+      const info = parseTigerDateTime(row[idx.tradeTime]);
+      if (!info) continue;
+
+      const amount = toNum(row[idx.amount]);
+      const feesSum = sumFeeColumns(header, row, idx.amount, idx.realized);
+      const proceedsUsd = -amount;
+      const commissionUsd = feesSum;
+      // For Tiger's Amount sign convention, the opening lot's signed basis is
+      // Amount - fees. For a long buy this is positive; for a short opening
+      // sale it is negative. This is exactly what the FIFO engine expects.
+      const basisUsd = amount - feesSum;
+      const brokerRealizedUsd = toNum(row[idx.realized]);
+
+      const rateInfo = rateForDate(info.dateStr);
+      if (rateInfo.date !== info.dateStr) skippedNoRateExact++;
+
+      transactions.push({
+        symbol: tigerSymbolFromName(rawSymbol),
+        name: (rawSymbol || '').toString(),
+        assetClass: assetType,
+        currency: (row[idx.currency] || 'USD').toString(),
+        date: info.dateStr, ts: info.ts, month: info.dateStr.slice(0,7),
+        qty: toNum(row[idx.qty]), price: toNum(row[idx.price]),
+        proceedsUsd, commissionUsd, basisUsd, realizedUsd: brokerRealizedUsd,
+        sourceRealizedUsd: brokerRealizedUsd,
+        rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+        proceedsAud: proceedsUsd / rateInfo.rate,
+        commissionAud: commissionUsd / rateInfo.rate,
+        code: (row[idx.activityType] || '').toString(),
+        fifoGroup: 'tiger'
+      });
+      parsedTradeRows++;
+      parsedAssetRows[assetType]++;
+      dataRealizedUsd += brokerRealizedUsd;
+    }
+
+    // Tiger's per-symbol TOTAL rows are a very useful parser checkpoint. Sum
+    // only "Total <symbol>" rows in this Trades block, not the later base-
+    // currency roll-up. The report rounds these totals to cents.
+    for (let rIdx = hi + 1; rIdx < end; rIdx++){
+      const row = rows[rIdx];
+      if (!row || row[0] !== 'Trades' || row[3] !== 'TOTAL') continue;
+      const label = (row[4] || '').toString().trim();
+      if (!/^Total\s+/.test(label) || /^Total\(In Base\)/i.test(label)) continue;
+      reportedRealizedUsd += toNum(row[idx.realized]);
+    }
+  }
+
+  // Option expiry is separate from Trades. Treat it as a closing event on the
+  // same option contract. Zero cash settlement means the historical lot basis
+  // itself becomes the realized loss; non-zero cash settlement is converted at
+  // the expiry date's rate.
+  const expHeaderIndex = rows.findIndex(r => r && r[0] === 'Exercise and Expiration' && r[4] === 'Symbol');
+  if (expHeaderIndex >= 0){
+    const expHeader = rows[expHeaderIndex];
+    const eidx = {
+      symbol: 4,
+      txnType: expHeader.indexOf('Transaction Type'),
+      qty: expHeader.indexOf('Quantity'),
+      cashSettle: expHeader.indexOf('Cash Settlement'),
+      realized: expHeader.indexOf('Realized P/L'),
+      datetime: expHeader.indexOf('Date/Time'),
+      currency: expHeader.indexOf('Currency')
+    };
+    const expEnd = rows.findIndex((r,i) => i > expHeaderIndex && r && r[0] === 'Exercise and Expiration' && r[3] === '');
+    const end = expEnd > expHeaderIndex ? expEnd : rows.length;
+    if ([eidx.qty,eidx.cashSettle,eidx.realized,eidx.datetime].every(v => v >= 0)){
+      for (let i = expHeaderIndex + 1; i < end; i++){
+        const row = rows[i];
+        if (!row || row[0] !== 'Exercise and Expiration' || row[3] !== 'DATA' || !row[eidx.symbol]) continue;
+        const info = parseTigerDateTime(row[eidx.datetime]);
+        if (!info) continue;
+        const rateInfo = rateForDate(info.dateStr);
+        if (rateInfo.date !== info.dateStr) skippedNoRateExact++;
+        const cash = toNum(row[eidx.cashSettle]);
+        transactions.push({
+          symbol: tigerSymbolFromName(row[eidx.symbol]),
+          assetClass: 'Option',
+          currency: eidx.currency >= 0 ? (row[eidx.currency] || 'USD').toString() : 'USD',
+          date: info.dateStr, ts: info.ts, month: info.dateStr.slice(0,7),
+          qty: toNum(row[eidx.qty]), price: 0,
+          proceedsUsd: cash, commissionUsd: 0, basisUsd: 0,
+          realizedUsd: toNum(row[eidx.realized]),
+          sourceRealizedUsd: toNum(row[eidx.realized]),
+          rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+          proceedsAud: cash / rateInfo.rate, commissionAud: 0,
+          code: (row[eidx.txnType] || 'Expire').toString(),
+          fifoGroup: 'tiger'
+        });
+      }
+    }
+  }
+
+  transactions.sort((a,b) => a.ts - b.ts);
+  return {
+    transactions,
+    skippedNoRateExact,
+    validation: {
+      parsedTradeRows,
+      stockRows: parsedAssetRows.Stock,
+      optionRows: parsedAssetRows.Option,
+      dataRealizedUsd,
+      reportedRealizedUsd,
+      diffUsd: dataRealizedUsd - reportedRealizedUsd
+    }
+  };
+}
+function parseTigerDividends(rows){
+  const header = findTigerHeader(rows, 'Dividends', 4, 'Date');
+  if (!header) return [];
+  const idx = {
+    date: 4, symbol: header.indexOf('Symbol'), cashDividend: header.indexOf('Cash Dividends'),
+    feesTax: header.indexOf('Fees & Tax'), netCash: header.indexOf('Net Cash Value'),
+    currency: header.indexOf('Currency')
+  };
+  const divRows = rows.filter(r => r && r[0] === 'Dividends' && r[3] === 'DATA' && r[idx.date]);
+  const out = [];
+  for (const row of divRows){
+    const info = parseTigerDateTime(row[idx.date]);
+    if (!info) continue;
+    const netUsd = toNum(row[idx.netCash]);
+    const feesTaxText = (row[idx.feesTax] || '').toString();
+    const taxMatch = feesTaxText.match(/(-?[\d.]+)/);
+    const withholdingUsd = taxMatch ? Math.abs(parseFloat(taxMatch[1])) : 0;
+    const rateInfo = rateForDate(info.dateStr);
+    out.push({
+      date: info.dateStr, ts: info.ts,
+      instrument: (row[idx.symbol] || '').toString(),
+      netUsd, withholdingUsd,
+      rate: rateInfo.rate, rateDateUsed: rateInfo.date,
+      netAud: netUsd / rateInfo.rate,
+      withholdingAud: withholdingUsd / rateInfo.rate,
+      frankingAud: 0
+    });
+  }
+  out.sort((a,b) => a.ts - b.ts);
+  return out;
+}
+
+/* ---------------- Formatting ---------------- */
+function assetLabel(t){
+  const cat = classifyAssetType(t);
+  return cat === 'option' ? 'Option' : cat === 'etf' ? 'ETF' : 'Stock';
+}
+
+function fmt(n, dp){
+  dp = dp === undefined ? 2 : dp;
+  const neg = n < -0.0000001;
+  const s = Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  return (neg ? '-' : '') + s;
+}
+function moneyCell(n, prefix){
+  const cls = n < -0.0000001 ? 'neg' : (n > 0.0000001 ? 'pos' : '');
+  return `<span class="${cls}">${prefix||''}${fmt(n)}</span>`;
+}
+
+/* ---------------- Rendering: tabs ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+let currentSub = 'stock';
+document.querySelectorAll('.summary-scroll').forEach(el => {
+  el.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault(); }, {passive:false});
+});
+
+
+document.querySelectorAll('.sub-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSub = btn.dataset.sub;
+    summarySort = { ...DEFAULT_SUMMARY_SORT };
+    renderSummary();
+  });
+});
+
+document.querySelectorAll('#typeFilter input[data-type]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    TYPE_FILTER[cb.dataset.type] = cb.checked;
+    renderSummary();
+  });
+});
+
+function renderAll(){
+  renderTransactions();
+  renderSummary();
+  renderDividends();
+}
+
+function renderTransactions(){
+  const tbody = document.querySelector('#txTable tbody');
+  tbody.innerHTML = '';
+  PARSED.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${t.symbol}</td>
+      <td>${assetLabel(t)}</td>
+      <td>${t.date}</td>
+      <td>${t.type === 'close' ? 'Close' : 'Open'}</td>
+      <td>${t.code}</td>
+      <td>${fmt(t.qty,0)}</td>
+      <td>${fmt(t.price,4)}</td>
+      <td>${t.rate.toFixed(4)}${t.rateDateUsed!==t.date?'*':''}</td>
+      <td>${moneyCell(t.proceedsAud,'A$')}</td>
+      <td>${moneyCell(t.commissionAud,'A$')}</td>
+      <td>${moneyCell(t.costBasisAud,'A$')}</td>
+      <td>${t.type==='close' ? moneyCell(t.realizedAud,'A$') : '<span class="hint">—</span>'}</td>
+      <td>${t.source || ''}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('txCount').textContent = `${PARSED.length} transactions`;
+}
+
+function renderDividends(){
+  const wrap = document.getElementById('dividendsTableWrap');
+  if (!DIVIDENDS.length){
+    wrap.innerHTML = '<div class="empty">No dividend data in this file.</div>';
+    return;
+  }
+  const bodyHtml = DIVIDENDS.map(d => `
+    <tr>
+      <td>${d.instrument}</td>
+      <td>${d.date}</td>
+      <td>${fmt(d.netUsd)}</td>
+      <td>${d.rate.toFixed(4)}${d.rateDateUsed!==d.date?'*':''}</td>
+      <td>${moneyCell(d.netAud,'A$')}</td>
+      <td>${moneyCell(d.withholdingAud,'A$')}</td>
+      <td>${d.frankingAud ? moneyCell(d.frankingAud,'A$') : '<span class="hint">—</span>'}</td>
+    </tr>`).join('');
+  const totals = DIVIDENDS.reduce((a,d) => {
+    a.netAud += d.netAud; a.withholdingAud += d.withholdingAud; a.frankingAud += d.frankingAud;
+    return a;
+  }, { netAud:0, withholdingAud:0, frankingAud:0 });
+  wrap.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Instrument</th><th>Date</th><th>Net Dividend (USD)</th><th>AUD/USD</th>
+        <th>Net Dividend (AUD)</th><th>Withholding Tax (AUD)</th><th>Franking Credits (AUD)</th>
+      </tr></thead>
+      <tbody>${bodyHtml}</tbody>
+      <tfoot><tr>
+        <td>Total</td><td></td><td></td><td></td>
+        <td>${moneyCell(totals.netAud,'A$')}</td>
+        <td>${moneyCell(totals.withholdingAud,'A$')}</td>
+        <td>${totals.frankingAud ? moneyCell(totals.frankingAud,'A$') : ''}</td>
+      </tr></tfoot>
+    </table>`;
+}
+
+// Best-effort classification into exactly the three buckets the ATO cares
+// about distinguishing for capital gains: Option, ETF, or (plain) Stock.
+// Options are reliably flagged by every format's own assetClass field.
+// ETFs are NOT reliably flagged by most brokers — Tiger/IBKR/Moomoo all
+// lump them in under the same "Stock" asset class as ordinary shares, with
+// no dedicated field — so this falls back to matching known ETF-issuer
+// names/keywords against the fund's full name (when available) or ticker.
+// eToro is the exception: it gives an explicit 'ETF' type, used directly.
+const ETF_KEYWORD_RE = /\b(ETF|ETN|Direxion|ProShares|GraniteShares|Defiance|Tradr|T-Rex|iShares|SPDR|Invesco|VanEck|WisdomTree|Global\s*X|ARK|Vanguard|Xtrackers)\b/i;
+
+// Direct ticker fallback: keyword/name matching only works when a broker
+// actually supplies a descriptive fund name, and several formats here
+// (plain IBKR exports, some Tiger/Moomoo rows) only ever give the bare
+// ticker. This list covers the ETFs/ETPs most likely to show up in a
+// retail trading statement, so GLD, QQQ, SGOV, SOXQ etc. still classify
+// correctly even with zero name text to go on. It is necessarily
+// incomplete — anything not on it and not caught by the keyword match
+// above still falls through to "Stock".
+const KNOWN_ETF_TICKERS = new Set([
+  // broad market / index
+  'SPY','VOO','IVV','VTI','QQQ','QQQM','DIA','IWM','IWB','IWF','IWD','MDY','RSP','SCHB','SCHX',
+  // sector SPDRs & similar
+  'XLF','XLE','XLK','XLV','XLY','XLP','XLI','XLB','XLU','XLRE','XLC','XME','XOP','XRT','XHB','XBI','IBB','KRE','KBE','SMH','SOXX','SOXQ','ITB',
+  // commodities / metals
+  'GLD','IAU','SGOL','SLV','SIVR','USO','UNG','DBC','PDBC','PPLT','PALL',
+  // bonds / cash-like
+  'AGG','BND','TLT','IEF','SHY','SHV','BIL','SGOV','MINT','LQD','HYG','JNK','TIP','MUB','VCIT','VCSH',
+  // international / regional
+  'EFA','EEM','VEA','VWO','FXI','MCHI','EWJ','EWZ','EWW','EWY','EWT','INDA','IEMG','ACWI','VXUS','VT',
+  // thematic / growth
+  'ARKK','ARKG','ARKW','ARKF','ARKQ','ARKX','ICLN','TAN','JETS','MJ','HACK','SKYY','ROBO','KWEB','FINX',
+  // crypto-adjacent
+  'BITO','IBIT','FBTC','ARKB','GBTC','ETHE','BITB',
+  // dividend / factor / covered-call
+  'SCHD','VYM','VIG','DGRO','HDV','JEPI','JEPQ','QYLD','XYLD','RYLD','DVY','SPYD','SPHD',
+  // volatility / leveraged & inverse (beyond the issuer-keyword matches above)
+  'VXX','UVXY','SVXY','VIXY','TQQQ','SQQQ','SPXL','SPXS','UPRO','SDOW','SSO','SDS','TNA','TZA','FAS','FAZ','SOXL','SOXS','LABU','LABD',
+  'TSLL','TSLQ','MSTU','MSTX','AMZU','AMZD','NVDU','NVDD','GOOGU','METU','METD','AAPU','AAPD','PTIR','QUBX','UPSX','SOFX','ORCX',
+  // real estate / specialty
+  'VNQ','IYR','REET','GDX','GDXJ'
+]);
+
+function classifyAssetType(t){
+  const assetClass = (t.assetClass || '').toString();
+  if (/option|期权/i.test(assetClass)) return 'option';
+  if (/\betf\b/i.test(assetClass)) return 'etf';
+  const symUpper = (t.symbol || '').toString().toUpperCase().trim();
+  if (KNOWN_ETF_TICKERS.has(symUpper)) return 'etf';
+  if (ETF_KEYWORD_RE.test(t.name || '') || ETF_KEYWORD_RE.test(t.symbol || '')) return 'etf';
+  return 'stock';
+}
+
+const TYPE_FILTER = { option: true, etf: true, stock: true };
+
+function groupBy(arr, keyFn){
+  const map = new Map();
+  arr.forEach(item => {
+    const k = keyFn(item);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(item);
+  });
+  return map;
+}
+
+// The USD figure to treat as "the trade's own currency result" for a leg:
+// eToro's synthetic legs carry the broker's own profitUsd directly
+// (realizedUsd); IBKR/Moomoo/Tiger legs go through the shared FIFO engine,
+// which derives the equivalent matched-lot USD result as realizedUsdFifo
+// (useful for Moomoo, which has no broker-given P/L at all, and as a
+// cross-check for IBKR/Tiger, which do).
+function usdRealized(t){
+  if (t.type === 'close' && typeof t.sourceRealizedUsd === 'number'){
+    return t.sourceRealizedUsd;
+  }
+  return t.realizedUsdFifo || 0;
+}
+
+function pnlRatio(usd, aud){
+  // Ratio magnitude is always |USD P/L| / |AUD P/L|.
+  // The sign belongs exclusively to the AUD result: positive for an AUD gain,
+  // negative for an AUD loss. This makes ranking intuitive: among gains,
+  // smaller is better; among losses, higher (less negative) is better.
+  if (Math.abs(aud) <= 1e-9) return null;
+  return (aud > 0 ? 1 : -1) * (Math.abs(usd) / Math.abs(aud));
+}
+
+function aggregate(items){
+  return items.reduce((acc, t) => {
+    acc.trades++;
+    if (t.type === 'close') acc.closed++;
+    acc.proceedsAud += t.proceedsAud;
+    acc.commissionAud += t.commissionAud;
+    acc.costBasisAud += t.costBasisAud;
+    acc.realizedAud += t.realizedAud;
+    if (t.type === 'close'){
+      const usd = usdRealized(t);
+      acc.realizedUsd += usd;
+      // FX impact, isolated per closing leg: the AUD result actually booked,
+      // minus what that same USD result would be worth converted at just
+      // this leg's own (closing-date) rate — i.e. what it would have been
+      // with no rate movement between opening and closing. The difference
+      // is purely attributable to the exchange rate having moved.
+      acc.fxImpactAud += t.realizedAud - (usd / t.rate);
+      // Profit and loss summed separately (each closing leg is wholly a
+      // gain or wholly a loss): Profit is the sum of every winning close,
+      // Loss is the sum of every losing close (kept negative). Profit +
+      // Loss always reconciles back to the net Realized P/L (AUD) total.
+      if (t.realizedAud > 0) acc.profitAud += t.realizedAud;
+      else if (t.realizedAud < 0) acc.lossAud += t.realizedAud;
+    }
+    return acc;
+  }, { trades:0, closed:0, proceedsAud:0, commissionAud:0, costBasisAud:0, realizedAud:0, realizedUsd:0, fxImpactAud:0, profitAud:0, lossAud:0 });
+}
+
+let LAST_SUMMARY_ROWS = []; // for CSV export
+let LAST_SUMMARY_HEADERS = [];
+const DEFAULT_SUMMARY_SORT = { col: 8, dir: -1 }; // Realized P/L (AUD), descending
+let summarySort = { ...DEFAULT_SUMMARY_SORT };
+
+function renderSummary(){
+  const wrap = document.getElementById('summaryTableWrap');
+  const hint = document.getElementById('summaryHint');
+
+  if (PARSED.length === 0){
+    wrap.innerHTML = '<div class="empty">No data loaded yet.</div>';
+    return;
+  }
+
+  const FILTERED = PARSED.filter(t => TYPE_FILTER[classifyAssetType(t)]);
+  if (FILTERED.length === 0){
+    wrap.innerHTML = '<div class="empty">No transactions match the selected Option/ETF/Stock filters.</div>';
+    return;
+  }
+
+  const maxDate = FILTERED.reduce((m,t) => t.date > m ? t.date : m, FILTERED[0].date);
+
+  const SUMMARY_HEADERS = [
+    '', 'Trades', 'Closed',
+    'Realized P/L (USD)',
+    'Basis Matched (AUD)',
+    'Net Cash Flow (AUD)',
+    'Profit (AUD)',
+    'Loss (AUD)',
+    'Realized P/L (AUD)',
+    'USD / AUD P/L'
+  ];
+  const rowFrom = (label, a) => [
+    label, a.trades, a.closed,
+    a.realizedUsd,
+    a.costBasisAud,
+    a.proceedsAud + a.commissionAud,
+    a.profitAud,
+    a.lossAud,
+    a.realizedAud,
+    pnlRatio(a.realizedUsd, a.realizedAud)
+  ];
+
+  const summaryNote =
+    'USD P/L uses the broker/source USD result when the input provides one; ' +
+    'Moomoo has no realized-P/L field, so its USD result is derived by FIFO. ' +
+    'Profit sums every winning close, Loss sums every losing close (kept negative) — Profit + Loss = Realized P/L (AUD). ' +
+    'USD / AUD P/L = sign(AUD P/L) × |USD P/L| ÷ |AUD P/L|. ' +
+    'Positive means an AUD gain, negative means an AUD loss; the magnitude is the USD/AUD P/L size ratio.';
+
+  if (currentSub === 'stock'){
+    hint.textContent = 'Realized gains for every symbol, across the full date range in the file. Cost is converted at each lot\u2019s purchase-date rate; proceeds at the sale-date rate (FIFO-matched). ' + summaryNote;
+    const groups = groupBy(FILTERED, t => t.symbol);
+    const rows = [...groups.entries()].map(([symbol, items]) => rowFrom(symbol, aggregate(items)));
+    renderGroupedTable(wrap, ['Symbol', ...SUMMARY_HEADERS.slice(1)], rows);
+
+  } else if (currentSub === 'month'){
+    hint.textContent = 'Realized gains across all symbols, grouped by the calendar month a trade occurred in. ' + summaryNote;
+    const groups = groupBy(FILTERED, t => t.month);
+    const rows = [...groups.entries()].map(([month, items]) => rowFrom(month, aggregate(items)));
+    renderGroupedTable(wrap, ['Month', ...SUMMARY_HEADERS.slice(1)], rows);
+
+  } else if (currentSub === 'q3'){
+    const cutoff = shiftMonths(maxDate, -3);
+    hint.textContent = `Per-symbol realized gains for trades from ${cutoff} to ${maxDate} (trailing 3 months). ${summaryNote}`;
+    const windowed = FILTERED.filter(t => t.date >= cutoff);
+    const groups = groupBy(windowed, t => t.symbol);
+    const rows = [...groups.entries()].map(([symbol, items]) => rowFrom(symbol, aggregate(items)));
+    renderGroupedTable(wrap, ['Symbol', ...SUMMARY_HEADERS.slice(1)], rows);
+
+  } else if (currentSub === 'all'){
+    hint.textContent = 'A single grand total across every symbol and date in the file. ' + summaryNote;
+    const rows = [rowFrom('All symbols, all dates', aggregate(FILTERED))];
+    renderGroupedTable(wrap, ['Scope', ...SUMMARY_HEADERS.slice(1)], rows, false);
+  }
+}
+
+function shiftMonths(dateStr, delta){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m-1+delta, d));
+  return dt.toISOString().slice(0,10);
+}
+
+function compareSummaryValues(a, b, col){
+  const av = a[col];
+  const bv = b[col];
+  const aNull = av === null || av === undefined || av === '' || (typeof av === 'number' && Number.isNaN(av));
+  const bNull = bv === null || bv === undefined || bv === '' || (typeof bv === 'number' && Number.isNaN(bv));
+  if (aNull && bNull) return 0;
+  if (aNull) return 1;
+  if (bNull) return -1;
+  if (col === 0) return String(av).localeCompare(String(bv));
+  return av - bv;
+}
+
+function applySummarySort(rows){
+  const indexed = rows.map((row, index) => ({ row, index }));
+  indexed.sort((a,b) => {
+    const cmp = compareSummaryValues(a.row, b.row, summarySort.col);
+    return cmp !== 0 ? cmp * summarySort.dir : a.index - b.index;
+  });
+  return indexed.map(x => x.row);
+}
+
+function cycleSummarySort(col){
+  // Any new column: ascending first. Same column: ascending -> descending -> cancel/default.
+  if (summarySort.col !== col){
+    summarySort = { col, dir: 1 };
+  } else if (summarySort.dir === 1){
+    summarySort = { col, dir: -1 };
+  } else {
+    summarySort = { ...DEFAULT_SUMMARY_SORT };
+  }
+  renderSummary();
+}
+
+function sortIndicatorFor(col){
+  if (summarySort.col !== col) return '';
+  return summarySort.dir === 1 ? '▲' : '▼';
+}
+
+function renderGroupedTable(wrap, headers, rows, withTotal){
+  withTotal = withTotal === undefined ? true : withTotal;
+  const sortedRows = applySummarySort(rows);
+  LAST_SUMMARY_HEADERS = headers;
+  LAST_SUMMARY_ROWS = sortedRows;
+  const numCols = headers.length;
+
+  let totalRow = null;
+  if (withTotal && sortedRows.length){
+    totalRow = sortedRows.reduce((acc, r) => {
+      for (let i = 1; i < numCols; i++) {
+        // The ratio is derived from total USD and total AUD below; never sum row ratios.
+        if (i === numCols - 1) continue;
+        acc[i] += Number(r[i]) || 0;
+      }
+      return acc;
+    }, ['Total', ...Array(numCols-1).fill(0)]);
+    totalRow[numCols - 1] = pnlRatio(totalRow[3], totalRow[8]);
+  }
+
+  const cellHtml = (r) => {
+    let html = `<td>${r[0]}</td>`;
+    html += `<td>${fmt(r[1],0)}</td>`;
+    html += `<td>${fmt(r[2],0)}</td>`;
+    html += `<td>${moneyCell(r[3],'US$')}</td>`;
+    html += `<td>${moneyCell(r[4],'A$')}</td>`;
+    html += `<td>${moneyCell(r[5],'A$')}</td>`;
+    html += `<td>${r[6] ? moneyCell(r[6],'A$') : '<span class="hint">—</span>'}</td>`;
+    html += `<td>${r[7] ? moneyCell(r[7],'A$') : '<span class="hint">—</span>'}</td>`;
+    html += `<td>${moneyCell(r[8],'A$')}</td>`;
+    html += `<td>${r[9] === null ? '<span class="hint">—</span>' : fmt(r[9],2) + 'x'}</td>`;
+    return html;
+  };
+
+  const headerHtml = headers.map((h,i) => {
+    const text = h || '';
+    return `<th><button type="button" class="sort-button" data-sort-col="${i}" title="Sort ascending, descending, then cancel">${text}<span class="sort-indicator">${sortIndicatorFor(i)}</span></button></th>`;
+  }).join('');
+
+  const bodyHtml = sortedRows.map(r => `<tr>${cellHtml(r)}</tr>`).join('');
+  const footHtml = totalRow ? `<tfoot><tr>${cellHtml(totalRow)}</tr></tfoot>` : '';
+
+  wrap.innerHTML = sortedRows.length ? `
+    <table>
+      <thead><tr>${headerHtml}</tr></thead>
+      <tbody>${bodyHtml}</tbody>
+      ${footHtml}
+    </table>` : '<div class="empty">No trades in this window.</div>';
+
+  // Bind sorting after each render because the table/header is regenerated.
+  wrap.querySelectorAll('.sort-button').forEach(btn => {
+    btn.addEventListener('click', () => cycleSummarySort(Number(btn.dataset.sortCol)));
+  });
+
+  if (totalRow) LAST_SUMMARY_ROWS = sortedRows.concat([totalRow]);
+}
+
+
+/* ---------------- CSV export ---------------- */
+function toCsv(headers, rows){
+  const esc = v => {
+    const s = (v===null||v===undefined) ? '' : v.toString();
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
+  const lines = [headers.map(esc).join(',')];
+  rows.forEach(r => lines.push(r.map(v => typeof v === 'number' ? v.toFixed(2) : esc(v)).join(',')));
+  return lines.join('\n');
+}
+
+function downloadCsv(filename, csv){
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportTxCsv').addEventListener('click', () => {
+  const headers = ['Symbol','Date','Type','Code','Asset Class','Currency','Qty','Price (USD)',
+                   'Proceeds (USD)','Commission (USD)',
+                   'AUD/USD Rate','Rate Date Used',
+                   'Proceeds (AUD)','Commission (AUD)',
+                   'Basis Matched (AUD)','Realized P/L (AUD)','Source File'];
+  const rows = PARSED.map(t => [
+    t.symbol, t.date, t.type, t.code, t.assetClass, t.currency, t.qty, t.price,
+    t.proceedsUsd, t.commissionUsd,
+    t.rate, t.rateDateUsed,
+    t.proceedsAud, t.commissionAud,
+    t.costBasisAud, t.type==='close' ? t.realizedAud : '', t.source || ''
+  ]);
+  downloadCsv('transactions_aud.csv', toCsv(headers, rows));
+});
+
+document.getElementById('exportSummaryCsv').addEventListener('click', () => {
+  downloadCsv(`summary_${currentSub}.csv`, toCsv(LAST_SUMMARY_HEADERS, LAST_SUMMARY_ROWS));
+});
+
+document.getElementById('exportDividendsCsv').addEventListener('click', () => {
+  const headers = ['Instrument','Date','Net Dividend (USD)','AUD/USD Rate','Rate Date Used','Net Dividend (AUD)','Withholding Tax (AUD)','Franking Credits (AUD)'];
+  const rows = DIVIDENDS.map(d => [d.instrument, d.date, d.netUsd, d.rate, d.rateDateUsed, d.netAud, d.withholdingAud, d.frankingAud]);
+  downloadCsv('dividends_aud.csv', toCsv(headers, rows));
+});
+</script>
+</body>
+</html>
