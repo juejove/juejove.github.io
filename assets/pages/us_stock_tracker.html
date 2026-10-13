@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>美股账户业绩记录</title>
+<style>
+body{font:14px system-ui,sans-serif;margin:0;padding:16px;max-width:1100px;margin:auto;color:#222;background:#fafafa}
+h1{font-size:20px}h2{font-size:16px;margin:22px 0 6px}
+table{border-collapse:collapse;width:100%;background:#fff;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:5px 8px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{background:#f0f0f0}
+.pos{color:#0a7a2f}.neg{color:#c0262d}tr.tot td{font-weight:700;background:#f7f7f7}
+.box{background:#fff;border:1px solid #ddd;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+label{display:flex;flex-direction:column;font-size:12px;gap:2px}input,select,button{padding:5px;font-size:14px}
+button{cursor:pointer}small{color:#666}
+</style></head><body>
+<h1>美股账户业绩记录</h1>
+<div id="app"></div>
+<script id="data" type="application/json">
+{"rate":0.71,"hurdle":6,"ts":1791341909557,
+"bal":{"eToro":3053,"IBKR-A":87300,"IBKR-B":68300,"MOOMOO":7500},
+"ev":[
+{"d":"2025-08-05","t":"in","a":"IBKR-A","aud":94800,"r":0.65},
+{"d":"2025-10-07","t":"in","a":"eToro","aud":4000,"r":0.65},
+{"d":"2025-10-07","t":"in","a":"IBKR-B","aud":78800,"r":0.67},
+{"d":"2025-10-07","t":"in","a":"MOOMOO","aud":20000,"r":0.67},
+{"d":"2026-04-07","t":"in","a":"IBKR-A","aud":10000,"r":0.69},
+{"d":"2026-04-07","t":"in","a":"IBKR-B","aud":10000,"r":0.69},
+{"d":"2026-07-07","t":"in","a":"IBKR-A","aud":6000,"r":0.70},
+{"d":"2026-07-07","t":"in","a":"IBKR-B","aud":4000,"r":0.70},
+{"d":"2026-05-26","t":"xfer","a":"IBKR-B","b":"IBKR-A","usd":1400,"r":0.70}
+]}
+</script>
+<script>
+const ACC=["eToro","IBKR-A","IBKR-B","MOOMOO"];
+let S=JSON.parse(document.getElementById('data').textContent),fh=null;
+try{const l=JSON.parse(localStorage.getItem('ust'));if(l&&l.ts>S.ts)S=l}catch(e){}
+S.other=S.other??20000;S.disc=S.disc??50;let TX={},TE=0;
+function T(x){const b=x<=18200?0:x<=45000?(x-18200)*.15:x<=135000?4020+(x-45000)*.3:x<=190000?31020+(x-135000)*.37:51370+(x-190000)*.45;
+ return b+(x<=29207?0:Math.min((x-29207)*.1,x*.02))}
+function taxAlloc(){const F=flows(),g={};let G=0;
+ ACC.forEach(a=>{let n=0;F[a].forEach(x=>n+=x.m);g[a]=S.bal[a]/S.rate-n;G+=g[a]});
+ const k=1-S.disc/100;let tot=0;if(G>0)tot=T(S.other+G*k)-T(S.other);
+ TE=G>0?tot/G:(T(S.other+1000)-T(S.other))/1000*k;
+ ACC.forEach(a=>TX[a]=G>0?tot*g[a]/G:0)}
+const f=(x,d=0)=>(x<0?'-':'')+Math.abs(x).toLocaleString('en',{minimumFractionDigits:d,maximumFractionDigits:d});
+const c=x=>x>=0?'pos':'neg',pc=x=>(x>=0?'+':'')+(x*100).toFixed(1)+'%';
+const yrs=d=>(Date.now()-new Date(d+'T00:00:00'))/31557600000;
+function norm(e){const o={...e};if(o.t==='xfer')o.aud=o.usd/o.r;else o.usd=o.aud*o.r;return o}
+function flows(){const F={};ACC.forEach(a=>F[a]=[]);
+ S.ev.map(norm).forEach(e=>{
+  if(e.t==='in')F[e.a].push({d:e.d,u:e.usd,m:e.aud});
+  else if(e.t==='out')F[e.a].push({d:e.d,u:-e.usd,m:-e.aud});
+  else{F[e.a].push({d:e.d,u:-e.usd,m:-e.aud});F[e.b].push({d:e.d,u:e.usd,m:e.aud})}});return F}
+function calc(fl,V,k,a){let net=0,inn=0,H=0;const h=1+S.hurdle/100;
+ fl.forEach(x=>{const v=x[k];net+=v;if(v>0)inn+=v;H+=v*Math.pow(h,yrs(x.d))});
+ const t=TE,g=V-net,tx=a?TX[a]*(k==='u'?S.rate:1):0;
+ return{V,net,inn,H,g,tx,ex:V-tx-H,Heq:H>net?(H-t*net)/(1-t):H}}
+function row(n,r,extra=''){return `<tr class="${n.includes('合计')?'tot':''}"><td>${n}</td>${extra}<td>${f(r.net)}</td><td class="${c(r.g)}">${f(r.g)}</td><td class="${c(r.g)}">${r.inn?pc(r.g/r.inn):'-'}</td><td>${f(r.tx)}</td><td class="${c(r.g-r.tx)}">${f(r.g-r.tx)}</td><td class="${c(r.g-r.tx)}">${r.inn?pc((r.g-r.tx)/r.inn):'-'}</td><td>${f(r.H)}</td><td>${f(r.Heq)}</td><td class="${c(r.ex)}">${f(r.ex)}</td><td class="${c(r.ex)}">${r.inn?pc(r.ex/r.inn):'-'}</td></tr>`}
+function table(k){const F=flows(),T={V:0,net:0,inn:0,H:0,g:0,ex:0,tx:0,Heq:0},I={...T};let rows='';
+ ACC.forEach(a=>{const V=k==='u'?S.bal[a]:S.bal[a]/S.rate;let r=calc(F[a],V,k==='x'?'m':k,a);if(k==='x')for(const q in r)r[q]*=S.rate;
+  for(const q in T)T[q]+=r[q];
+  if(a.startsWith('IBKR'))for(const q in I)I[q]+=r[q];
+  rows+=row(a,r,`<td>${f(r.V)}</td>`);
+  if(a==='IBKR-B')rows+=row('IBKR 合计(A+B)',I,`<td>${f(I.V)}</td>`)});
+ return `<table><tr><th>账户</th><th>现值</th><th>净投入</th><th>税前收益</th><th>税前收益%</th><th>预估税</th><th>税后收益</th><th>税后收益%</th><th>${S.hurdle}%银行门槛值</th><th>税前等效门槛</th><th>超额收益(税后)</th><th>超额%</th></tr>${rows}${row('合计',T,`<td>${f(T.V)}</td>`)}</table>`}
+function evTable(){return `<table><tr><th>日期</th><th>类型</th><th>账户</th><th>USD</th><th>AUD</th><th>汇率</th><th></th></tr>`+
+ S.ev.map((e,i)=>[e,norm(e),i]).sort((a,b)=>a[0].d<b[0].d?-1:1).map(([e,n,i])=>
+ `<tr><td>${e.d}</td><td>${{in:'充值',out:'提现',xfer:'转账'}[e.t]}</td><td>${e.t==='xfer'?e.a+' → '+e.b:e.a}</td><td>${f(n.usd,2)}</td><td>${f(n.aud,2)}</td><td>${e.r}</td><td><button onclick="del(${i})">删</button></td></tr>`).join('')+'</table>'}
+function render(){taxAlloc();
+ const opt=ACC.map(a=>`<option>${a}</option>`).join('');
+ document.getElementById('app').innerHTML=`
+ <div class="box"><label>当前 AUD/USD<input id="rt" type="number" step="0.0001" value="${S.rate}" onchange="S.rate=+this.value;upd()"></label>
+ <label>时间成本 %/年<input id="hu" type="number" step="0.1" value="${S.hurdle}" onchange="S.hurdle=+this.value;upd()"></label>
+ <label>其他年收入 AUD<input type="number" step="1000" value="${S.other}" onchange="S.other=+this.value;upd()"></label>
+ <label>CGT折扣 %(长持50,短线0)<input type="number" step="1" value="${S.disc}" onchange="S.disc=+this.value;upd()"></label>
+ <small>收益有效税率 ${(TE*100).toFixed(1)}%</small>
+ ${ACC.map(a=>`<label>${a} 现值USD<input type="number" step="0.01" value="${S.bal[a]}" onchange="S.bal['${a}']=+this.value;upd()"></label>`).join('')}</div>
+ <h2>USD 计</h2>${table('u')}<h2>AUD 计</h2>${table('m')}<h2>AUD 口径折回 USD(AUD本金按AUD的6%滚动,再×当前汇率)</h2>${table('x')}
+ <small>净投入=累计转入−转出/提现;百分比分母=累计转入本金;预估税=按澳洲2026-27居民税率(含2%Medicare,不含LITO等抵免)计算:各账户收益合计(亏损互抵)×(1−CGT折扣)叠加在其他收入之上的增量税,按各账户收益占比分摊(亏损账户为负税,代表抵扣),USD口径×当前汇率;假设未实现收益全部在本财年兑现;银行门槛=无税无风险6%复利,各笔资金按持有天数滚到今天;超额=税后现值−门槛值;税前等效门槛=税前现值要达到多少,税后才刚好追平银行;AUD现值=USD现值÷当前汇率。</small>
+ <h2>添加事件</h2><div class="box">
+ <label>类型<select id="t" onchange="tg()"><option value="in">充值(AUD+汇率)</option><option value="out">提现(AUD+汇率)</option><option value="xfer">账户转账(USD+汇率)</option></select></label>
+ <label>日期<input id="d" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
+ <label id="la">账户<select id="a">${opt}</select></label><label id="lb" style="display:none">转入账户<select id="b">${opt}</select></label>
+ <label><span id="am">金额 AUD</span><input id="v" type="number" step="0.01"></label>
+ <label>汇率 AUD/USD<input id="r" type="number" step="0.0001" value="${S.rate}"></label>
+ <button onclick="add()">添加</button></div>
+ <h2>事件记录</h2>${evTable()}
+ <h2>保存到本地文件</h2><div class="box"><button onclick="save()">保存到 HTML 文件</button>
+ <small id="msg">首次保存请选择本文件覆盖;不支持时会下载新文件替换旧文件。修改会先自动暂存在浏览器中。</small></div>`}
+function tg(){const t=document.getElementById('t').value;lb.style.display=t==='xfer'?'':'none';la.firstChild.nodeValue=t==='xfer'?'转出账户':'账户';am.textContent=t==='xfer'?'转账金额 USD(内部转账一律填USD)':'金额 AUD'}
+function upd(){S.ts=Date.now();localStorage.setItem('ust',JSON.stringify(S));render()}
+function add(){const t=document.getElementById('t').value,v=+document.getElementById('v').value,r=+document.getElementById('r').value;
+ if(!v||!r||!d.value)return alert('请填写金额、汇率和日期');
+ const e={d:d.value,t,a:a.value,r};if(t==='xfer'){if(a.value===b.value)return alert('账户相同');e.b=b.value;e.usd=v}else e.aud=v;
+ S.ev.push(e);upd()}
+function del(i){if(confirm('删除这条记录?')){S.ev.splice(i,1);upd()}}
+async function save(){S.ts=Date.now();localStorage.setItem('ust',JSON.stringify(S));
+ const cl=document.documentElement.cloneNode(true);cl.querySelector('#app').innerHTML='';
+ cl.querySelector('#data').textContent=JSON.stringify(S,null,1);
+ const html='<!DOCTYPE html>\n'+cl.outerHTML;
+ try{if(window.showSaveFilePicker){if(!fh)fh=await showSaveFilePicker({suggestedName:'us_stock_tracker.html',types:[{accept:{'text/html':['.html']}}]});
+  const w=await fh.createWritable();await w.write(html);await w.close();msg.textContent='已写入文件 '+new Date().toLocaleTimeString();return}}catch(e){if(e.name==='AbortError')return}
+ const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));l.download='us_stock_tracker.html';l.click();msg.textContent='已下载,请用它替换旧文件'}
+render();
+</script></body></html>
