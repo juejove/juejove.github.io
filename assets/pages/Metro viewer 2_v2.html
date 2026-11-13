@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom MetroMap Basemap with Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #search-input {
+      width: 250px;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  <input id="search-input" type="text" placeholder="Enter address..." />
+  <button onclick="searchAddress()">Search</button>
+  <button onclick="toggleStreetLayer()">Toggle Street Layer</button>
+</div>
+<div id="map"></div>
+
+<script>
+  const map = L.map('map').setView([-25.2744, 133.7751], 5); // Australia
+
+  // Custom MetroMap tile layer
+  const MetroMapTileLayer = L.TileLayer.extend({
+    getTileUrl: function (coords) {
+      const level = coords.z;
+      const col = coords.x;
+      const row = coords.y;
+      return `https://api-v3.metromap.com.au/tiles/xyz/Australia_latest/${level}/${row}/${col}.webp?key=itrj2fb65ehw7fkx1uw3u3jdhlxajohs9vupkzdhulho0ntwzwp6ne5p1vlji6tb`;
+    }
+  });
+
+  const metroLayer = new MetroMapTileLayer('', {
+    tileSize: 256,
+    minZoom: 5,
+    maxZoom: 23,
+    attribution: '&copy; <a href="https://metromap.com.au">MetroMap</a>'
+  });
+
+  map.addLayer(metroLayer);
+
+  // Optional OpenStreetMap overlay for streets and labels
+  const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/">OSM</a> contributors',
+    opacity: 0.5
+  });
+
+  let streetLayerOn = false;
+
+  function toggleStreetLayer() {
+    if (streetLayerOn) {
+      map.removeLayer(streetLayer);
+    } else {
+      map.addLayer(streetLayer);
+    }
+    streetLayerOn = !streetLayerOn;
+  }
+
+  // Address search function using Nominatim
+  function searchAddress() {
+    const query = document.getElementById('search-input').value;
+    if (!query) return;
+
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=au&limit=1`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0) {
+          const lat = data[0].lat;
+          const lon = data[0].lon;
+          map.setView([lat, lon], 17);
+          L.marker([lat, lon]).addTo(map)
+            .bindPopup(data[0].display_name)
+            .openPopup();
+        } else {
+          alert('Address not found.');
+        }
+      })
+      .catch(() => alert('Error contacting geocoding service.'));
+  }
+
+  // Add Esri Feature Layer
+  const esriFeatureLayer = L.esri.featureLayer({
+    url: "https://services-ap1.arcgis.com/083YfhdecOaLn4Y7/ArcGIS/rest/services/EBTA_FES_2025042411_Propeller360/FeatureServer/2",
+    token: "3NKHt6i2urmWtqOuugvr9TwXeePNsnDIWJtZV5nM0InGtlE1QCrN4Dav2qT0-99UL-NWaFjOfyaUXwgWKPQ71PP6IX-JK8aTUnbcHWjmCeOWXhb48ERHe8LWPVrOi_-qL6nRiwK8B8duZviq4HctwtJQ6elvcwtYsIk5gAPnV57AXuc42iLg7Qz79fKYL0KTXNZweAXrV2FtQ0nqfqhfS4L_7qiWJ-18JW7gINwH2CMQb-yYONLGli3garclrVp2njuTRrnlyrEGchF29UFww4C_utrvjWdAw1D8HQ_75Hs"
+  }).addTo(map);
+</script>
+</body>
+</html>
